@@ -1,5 +1,7 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 interface TimeSlot {
   id: string;
@@ -21,17 +23,67 @@ const TutorAvailabilityPage: React.FC = () => {
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   
   const [schedule, setSchedule] = useState<WeeklySchedule>({
-    Monday: { day: 'Monday', isEnabled: true, slots: [{ id: '1', startTime: '09:00', endTime: '12:00' }] },
-    Tuesday: { day: 'Tuesday', isEnabled: true, slots: [{ id: '2', startTime: '09:00', endTime: '12:00' }] },
+    Monday: { day: 'Monday', isEnabled: false, slots: [] },
+    Tuesday: { day: 'Tuesday', isEnabled: false, slots: [] },
     Wednesday: { day: 'Wednesday', isEnabled: false, slots: [] },
-    Thursday: { day: 'Thursday', isEnabled: true, slots: [{ id: '3', startTime: '14:00', endTime: '17:00' }] },
-    Friday: { day: 'Friday', isEnabled: true, slots: [{ id: '4', startTime: '09:00', endTime: '12:00' }] },
+    Thursday: { day: 'Thursday', isEnabled: false, slots: [] },
+    Friday: { day: 'Friday', isEnabled: false, slots: [] },
     Saturday: { day: 'Saturday', isEnabled: false, slots: [] },
     Sunday: { day: 'Sunday', isEnabled: false, slots: [] },
   });
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAvailability();
+  }, []);
+
+  const fetchAvailability = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/availability-slots`, {
+        withCredentials: true
+      });
+      
+      if (response.data.success) {
+        const slots = response.data.data;
+        const newSchedule = { ...schedule };
+        
+        // Reset all days first
+        daysOfWeek.forEach(day => {
+          newSchedule[day] = { day, isEnabled: false, slots: [] };
+        });
+
+        // Group slots by day
+        slots.forEach((slot: any) => {
+          const dayName = slot.dayOfWeek.charAt(0) + slot.dayOfWeek.slice(1).toLowerCase();
+          if (newSchedule[dayName]) {
+            newSchedule[dayName].isEnabled = true;
+            newSchedule[dayName].slots.push({
+              id: slot.id,
+              startTime: slot.startTime,
+              endTime: slot.endTime
+            });
+          }
+        });
+
+        // Loop to check if enabled days have no slots (should ideally not happen from backend but handling for UI)
+        daysOfWeek.forEach(day => {
+           if (newSchedule[day].slots.length > 0) {
+             newSchedule[day].isEnabled = true;
+           }
+        });
+
+        setSchedule(newSchedule);
+      }
+    } catch (error) {
+      console.error('Error fetching availability:', error);
+      toast.error('Failed to load availability');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleDay = (day: string) => {
     setSchedule(prev => ({
@@ -90,27 +142,38 @@ const TutorAvailabilityPage: React.FC = () => {
 
   const handleSaveSchedule = async () => {
     setIsSaving(true);
-    setSaveSuccess(false);
 
     try {
-      // Dummy API call - replace with actual endpoint
-      const response = await fetch('/api/tutor/availability', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ schedule }),
+      // Prepare data for backend
+      const slotsToSave: any[] = [];
+      Object.values(schedule).forEach(day => {
+        if (day.isEnabled) {
+          day.slots.forEach(slot => {
+            slotsToSave.push({
+              dayOfWeek: day.day.toUpperCase(),
+              startTime: slot.startTime,
+              endTime: slot.endTime
+            });
+          });
+        }
       });
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/availability-slots`,
+        { slots: slotsToSave },
+        { withCredentials: true }
+      );
 
-      if (response.ok) {
+      if (response.data.success) {
+        toast.success('Availability saved successfully');
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
+        // Refresh to get new IDs etc
+        fetchAvailability();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving schedule:', error);
+      toast.error(error.response?.data?.message || 'Failed to save availability');
     } finally {
       setIsSaving(false);
     }

@@ -1,5 +1,7 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 interface Student {
   id: string;
@@ -15,7 +17,7 @@ interface Session {
   date: string;
   startTime: string;
   endTime: string;
-  status: 'upcoming' | 'in-progress' | 'completed' | 'cancelled';
+  status: 'upcoming' | 'in-progress' | 'completed' | 'cancelled' | 'confirmed' | 'pending';
   duration: number; // in minutes
   meetingLink?: string;
   notes?: string;
@@ -31,122 +33,72 @@ const TutorSessionsPage: React.FC = () => {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 
-  // Mock data - replace with actual API data
-  const mockSessions: Session[] = [
-    {
-      id: '1',
-      student: {
-        id: 's1',
-        name: 'Emma Wilson',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma',
-        email: 'emma.wilson@email.com',
-      },
-      subject: 'Mathematics - Calculus',
-      date: '2026-01-29',
-      startTime: '14:00',
-      endTime: '15:00',
-      status: 'in-progress',
-      duration: 60,
-      meetingLink: 'https://meet.skillbridge.com/session-1',
-      price: 45,
-    },
-    {
-      id: '2',
-      student: {
-        id: 's2',
-        name: 'Michael Chen',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Michael',
-        email: 'michael.chen@email.com',
-      },
-      subject: 'Physics - Quantum Mechanics',
-      date: '2026-01-30',
-      startTime: '10:00',
-      endTime: '11:30',
-      status: 'upcoming',
-      duration: 90,
-      meetingLink: 'https://meet.skillbridge.com/session-2',
-      price: 50,
-    },
-    {
-      id: '3',
-      student: {
-        id: 's3',
-        name: 'Sarah Johnson',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-        email: 'sarah.j@email.com',
-      },
-      subject: 'Computer Science - Data Structures',
-      date: '2026-01-30',
-      startTime: '16:00',
-      endTime: '17:00',
-      status: 'upcoming',
-      duration: 60,
-      meetingLink: 'https://meet.skillbridge.com/session-3',
-      price: 65,
-    },
-    {
-      id: '4',
-      student: {
-        id: 's4',
-        name: 'David Kim',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David',
-        email: 'david.kim@email.com',
-      },
-      subject: 'Mathematics - Linear Algebra',
-      date: '2026-01-28',
-      startTime: '09:00',
-      endTime: '10:00',
-      status: 'completed',
-      duration: 60,
-      rating: 5,
-      studentFeedback: 'Excellent explanation! Really helped me understand eigenvectors.',
-      price: 45,
-      notes: 'Covered eigenvalues and eigenvectors. Student needs more practice with transformations.',
-    },
-    {
-      id: '5',
-      student: {
-        id: 's5',
-        name: 'Lisa Thompson',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa',
-        email: 'lisa.t@email.com',
-      },
-      subject: 'Chemistry - Organic Chemistry',
-      date: '2026-01-27',
-      startTime: '14:00',
-      endTime: '15:30',
-      status: 'completed',
-      duration: 90,
-      rating: 4,
-      studentFeedback: 'Very thorough session. Would appreciate more practice problems.',
-      price: 48,
-      notes: 'Discussed reaction mechanisms. Assigned practice problems for next session.',
-    },
-    {
-      id: '6',
-      student: {
-        id: 's6',
-        name: 'James Wilson',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=James',
-        email: 'james.w@email.com',
-      },
-      subject: 'Physics - Thermodynamics',
-      date: '2026-01-26',
-      startTime: '11:00',
-      endTime: '12:00',
-      status: 'completed',
-      duration: 60,
-      rating: 5,
-      studentFeedback: 'Great session! The real-world examples really helped.',
-      price: 50,
-      notes: 'Covered first and second laws. Student grasped concepts well.',
-    },
-  ];
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredSessions = mockSessions.filter(session => {
-    if (activeTab === 'upcoming') return session.status === 'upcoming';
-    if (activeTab === 'in-progress') return session.status === 'in-progress';
-    if (activeTab === 'past') return session.status === 'completed' || session.status === 'cancelled';
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+
+  const fetchSessions = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/sessions`, {
+        withCredentials: true
+      });
+      
+      if (response.data.success) {
+        // Map backend data to frontend model
+        const mappedSessions: Session[] = response.data.data.map((booking: any) => ({
+          id: booking.id,
+          student: {
+            id: booking.user.id,
+            name: booking.user.name,
+            avatar: booking.user.image || `https://ui-avatars.com/api/?name=${booking.user.name}&background=random`,
+            email: booking.user.email
+          },
+          subject: booking.subject || 'General Session',
+          date: booking.scheduledAt, 
+          // Extract time from scheduledAt date object
+          startTime: new Date(booking.scheduledAt).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+          // Calculate end time based on duration
+          endTime: new Date(new Date(booking.scheduledAt).getTime() + booking.duration * 60000).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+          status: booking.status.toLowerCase(),
+          duration: booking.duration,
+          meetingLink: booking.meetingLink,
+          notes: booking.notes,
+          rating: booking.review?.rating,
+          studentFeedback: booking.review?.comment,
+          price: booking.price
+        }));
+        setSessions(mappedSessions);
+      }
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      toast.error('Failed to load sessions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredSessions = sessions.filter(session => {
+    // Map backend status to tab logic
+    // Backend statuses: PENDING, CONFIRMED, CANCELLED, COMPLETED, IN_PROGRESS (if added)
+    // Assuming 'CONFIRMED' implies upcoming. 'PENDING' might also be upcoming or separate.
+    
+    if (activeTab === 'upcoming') {
+        const isUpcoming = new Date(session.date) > new Date();
+        return (session.status === 'confirmed' || session.status === 'pending') && isUpcoming;
+    }
+    if (activeTab === 'in-progress') {
+        // Backend might not strictly have 'in-progress', usually determined by time
+        const now = new Date();
+        const start = new Date(session.date);
+        const end = new Date(start.getTime() + session.duration * 60000);
+        return session.status === 'confirmed' && now >= start && now <= end;
+    }
+    if (activeTab === 'past') {
+        return session.status === 'completed' || session.status === 'cancelled' || (session.status === 'confirmed' && new Date(session.date) < new Date());
+    }
     return false;
   });
 
@@ -154,24 +106,20 @@ const TutorSessionsPage: React.FC = () => {
     setIsMarkingComplete(true);
     
     try {
-      // Dummy API call - replace with actual endpoint
-      await fetch(`/api/tutor/sessions/${sessionId}/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          notes: 'Session completed successfully',
-        }),
-      });
+      const response = await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/sessions/${sessionId}/status`,
+        { status: 'COMPLETED' },
+        { withCredentials: true }
+      );
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // In real implementation, refetch sessions or update state
-      console.log('Session marked as complete:', sessionId);
+      if (response.data.success) {
+        toast.success('Session marked as complete');
+        // Refresh sessions to show update
+        fetchSessions();
+      }
     } catch (error) {
       console.error('Error marking session as complete:', error);
+      toast.error('Failed to update session status');
     } finally {
       setIsMarkingComplete(false);
       setSelectedSession(null);
@@ -179,15 +127,14 @@ const TutorSessionsPage: React.FC = () => {
   };
 
   const stats = {
-    totalSessions: mockSessions.filter(s => s.status === 'completed').length,
-    upcomingSessions: mockSessions.filter(s => s.status === 'upcoming').length,
-    totalEarnings: mockSessions
+    totalSessions: sessions.filter(s => s.status === 'completed').length,
+    upcomingSessions: sessions.filter(s => (s.status === 'confirmed' || s.status === 'pending') && new Date(s.date) > new Date()).length,
+    totalEarnings: sessions
       .filter(s => s.status === 'completed')
       .reduce((sum, s) => sum + s.price, 0),
-    avgRating: mockSessions
-      .filter(s => s.rating)
-      .reduce((sum, s) => sum + (s.rating || 0), 0) / 
-      mockSessions.filter(s => s.rating).length,
+    avgRating: sessions.filter(s => s.rating).length > 0 
+      ? sessions.reduce((sum, s) => sum + (s.rating || 0), 0) / sessions.filter(s => s.rating).length
+      : 0,
   };
 
   return (
@@ -279,7 +226,12 @@ const TutorSessionsPage: React.FC = () => {
               active={activeTab === 'in-progress'}
               onClick={() => setActiveTab('in-progress')}
               label="In Progress"
-              count={mockSessions.filter(s => s.status === 'in-progress').length}
+              count={sessions.filter(s => {
+                  const now = new Date();
+                  const start = new Date(s.date);
+                  const end = new Date(start.getTime() + s.duration * 60000);
+                  return s.status === 'confirmed' && now >= start && now <= end;
+              }).length}
               icon={
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -291,7 +243,7 @@ const TutorSessionsPage: React.FC = () => {
               active={activeTab === 'upcoming'}
               onClick={() => setActiveTab('upcoming')}
               label="Upcoming"
-              count={mockSessions.filter(s => s.status === 'upcoming').length}
+              count={sessions.filter(s => (s.status === 'confirmed' || s.status === 'pending') && new Date(s.date) > new Date()).length}
               icon={
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -302,7 +254,7 @@ const TutorSessionsPage: React.FC = () => {
               active={activeTab === 'past'}
               onClick={() => setActiveTab('past')}
               label="Past Sessions"
-              count={mockSessions.filter(s => s.status === 'completed' || s.status === 'cancelled').length}
+              count={sessions.filter(s => s.status === 'completed' || s.status === 'cancelled' || (s.status === 'confirmed' && new Date(s.date) < new Date())).length}
               icon={
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

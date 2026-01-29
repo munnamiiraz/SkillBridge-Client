@@ -1,5 +1,7 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 interface Tutor {
   id: string;
@@ -34,92 +36,17 @@ const TutorDiscoveryPage: React.FC = () => {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState('recommended');
 
-  // Mock data - replace with actual API data
-  const mockTutors: Tutor[] = [
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      avatar: 'SJ',
-      subject: 'Mathematics',
-      rating: 4.9,
-      reviewCount: 127,
-      pricePerSession: 45,
-      isOnline: true,
-      verified: true,
-      bgGradient: 'from-indigo-600 to-purple-600',
-      totalStudents: 156,
-      bio: 'PhD in Mathematics with 10+ years of teaching experience. I specialize in making complex concepts simple.',
-    },
-    {
-      id: '2',
-      name: 'Michael Chen',
-      avatar: 'MC',
-      subject: 'Physics',
-      rating: 4.8,
-      reviewCount: 89,
-      pricePerSession: 50,
-      isOnline: true,
-      verified: true,
-      bgGradient: 'from-blue-600 to-cyan-600',
-      totalStudents: 92,
-      bio: 'Former NASA engineer, passionate about making physics accessible and fun for everyone.',
-    },
-    {
-      id: '3',
-      name: 'Emily Rodriguez',
-      avatar: 'ER',
-      subject: 'English Literature',
-      rating: 5.0,
-      reviewCount: 203,
-      pricePerSession: 40,
-      isOnline: true,
-      verified: true,
-      bgGradient: 'from-rose-600 to-orange-600',
-      totalStudents: 245,
-      bio: 'Published author and literature professor. Let\'s explore the beauty of language together.',
-    },
-    {
-      id: '4',
-      name: 'David Kim',
-      avatar: 'DK',
-      subject: 'Computer Science',
-      rating: 4.7,
-      reviewCount: 156,
-      pricePerSession: 65,
-      isOnline: false,
-      verified: true,
-      bgGradient: 'from-emerald-600 to-teal-600',
-      totalStudents: 112,
-      bio: 'Senior software engineer at a top tech company. I teach practical coding and architecture.',
-    },
-    {
-      id: '5',
-      name: 'Lisa Thompson',
-      avatar: 'LT',
-      subject: 'Chemistry',
-      rating: 4.9,
-      reviewCount: 94,
-      pricePerSession: 48,
-      isOnline: true,
-      verified: true,
-      bgGradient: 'from-amber-500 to-orange-600',
-      totalStudents: 88,
-      bio: 'Biochemist with expertise in organic chemistry. I help students master the periodic table.',
-    },
-    {
-      id: '6',
-      name: 'James Wilson',
-      avatar: 'JW',
-      subject: 'History',
-      rating: 4.6,
-      reviewCount: 71,
-      pricePerSession: 38,
-      isOnline: true,
-      verified: false,
-      bgGradient: 'from-slate-600 to-zinc-700',
-      totalStudents: 64,
-      bio: 'History professor specializing in World War era. Uncovering the stories that shaped our world.',
-    },
+  const [tutors, setTutors] = useState<Tutor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalTutors, setTotalTutors] = useState(0);
+
+  const gradients = [
+    'from-indigo-600 to-purple-600',
+    'from-blue-600 to-cyan-600',
+    'from-rose-600 to-orange-600',
+    'from-emerald-600 to-teal-600',
+    'from-amber-500 to-orange-600',
+    'from-slate-600 to-zinc-700',
   ];
 
   const subjects = [
@@ -127,13 +54,75 @@ const TutorDiscoveryPage: React.FC = () => {
     'Physics',
     'Chemistry',
     'Biology',
-    'English Literature',
+    'English',
     'History',
     'Computer Science',
     'Economics',
     'Psychology',
     'Languages',
   ];
+
+  useEffect(() => {
+    const fetchTutors = async () => {
+      setLoading(true);
+      try {
+        const params: any = {
+          limit: 100, // Fetch more for browsing
+          sortBy: sortBy === 'recommended' ? 'averageRating' : 
+                  sortBy === 'price-low' ? 'hourlyRate' : 
+                  sortBy === 'price-high' ? 'hourlyRate' : 
+                  sortBy === 'rating' ? 'averageRating' : 'createdAt',
+          sortOrder: sortBy === 'price-low' ? 'asc' : 'desc',
+        };
+
+        if (filters.searchQuery) {
+          params.searchTerm = filters.searchQuery;
+        }
+
+        if (filters.selectedSubjects.length > 0) {
+          // Backend filter takes single subject string usually, or we need to loop. 
+          // Let's send the first selected subject for now or join them if backend supported 'IN' query.
+          // The backend `searchTutors` takes `subject` string (contains). 
+          params.subject = filters.selectedSubjects[0]; 
+        }
+
+        if (filters.minRating) params.minRating = filters.minRating;
+        if (filters.priceRange[0] > 0) params.minPrice = filters.priceRange[0];
+        if (filters.priceRange[1] < 200) params.maxPrice = filters.priceRange[1];
+
+        // Construct query string
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/search`, { params });
+        
+        if (response.data.success) {
+          const mappedTutors = response.data.data.map((t: any, index: number) => ({
+            id: t.id,
+            name: t.user.name,
+            avatar: t.user.image || (t.user.name?.[0]?.toUpperCase() || 'T'),
+            subject: t.tutor_subject?.[0]?.subject?.name || 'General',
+            rating: t.averageRating || 0,
+            reviewCount: t.totalReviews || 0,
+            pricePerSession: t.hourlyRate,
+            isOnline: t.isAvailable, // map available to online for now
+            verified: t.user.emailVerified,
+            bgGradient: gradients[index % gradients.length],
+            totalStudents: t.totalSessions || 0,
+            bio: t.bio || 'No bio available',
+          }));
+          
+          setTutors(mappedTutors);
+          setTotalTutors(mappedTutors.length); // Assuming backend filtering is working
+          console.log(mappedTutors);
+        }
+      } catch (error) {
+        console.error('Error fetching tutors:', error);
+        toast.error('Failed to load tutors');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTutors();
+  }, [filters, sortBy]);
 
   const activeFilterCount = 
     (filters.searchQuery ? 1 : 0) +
@@ -211,7 +200,7 @@ const TutorDiscoveryPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
               <div>
                 <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Found {mockTutors.length} tutors
+                  Found {totalTutors} tutors
                 </p>
                 {activeFilterCount > 0 && (
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -240,9 +229,13 @@ const TutorDiscoveryPage: React.FC = () => {
             </div>
 
             {/* Tutor Grid */}
-            {mockTutors.length > 0 ? (
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+              </div>
+            ) : tutors.length > 0 ? (
               <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
-                {mockTutors.map((tutor) => (
+                {tutors.map((tutor) => (
                   <TutorCard key={tutor.id} tutor={tutor} />
                 ))}
               </div>
