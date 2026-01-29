@@ -1,10 +1,12 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 interface Review {
   id: string;
   studentName: string;
-  studentAvatar?: string;
+  studentAvatar: string | React.ReactNode;
   rating: number;
   date: string;
   courseName: string;
@@ -28,81 +30,95 @@ const TutorReviewsSection: React.FC = () => {
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'highest' | 'lowest'>('recent');
 
-  // Mock data - replace with real data from your backend
-  const ratingStats: RatingStats = {
-    average: 4.8,
-    total: 247,
-    distribution: {
-      5: 189,
-      4: 42,
-      3: 12,
-      2: 3,
-      1: 1,
-    },
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [ratingStats, setRatingStats] = useState<RatingStats>({
+    average: 0,
+    total: 0,
+    distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  });
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    fetchRatingStats();
+    fetchReviews();
+  }, [sortBy]);
+
+  // Fetch more reviews when 'Load More' is clicked - implement pagination logic if needed
+  // For now simple load
+  const loadMore = () => {
+    if (hasMore) {
+        fetchReviews(page + 1);
+    }
   };
 
-  const reviews: Review[] = [
-    {
-      id: '1',
-      studentName: 'Sarah Mitchell',
-      studentAvatar: 'SM',
-      rating: 5,
-      date: '2026-01-25',
-      courseName: 'Advanced React Patterns',
-      comment: 'Absolutely outstanding instructor! The way concepts were explained made everything click. Patient, knowledgeable, and genuinely invested in my success. Worth every penny.',
-      helpful: 24,
-    },
-    {
-      id: '2',
-      studentName: 'James Chen',
-      studentAvatar: 'JC',
-      rating: 5,
-      date: '2026-01-22',
-      courseName: 'TypeScript Fundamentals',
-      comment: 'Best learning experience I\'ve had online. Clear explanations, practical examples, and always available for questions. Highly recommended!',
-      helpful: 18,
-    },
-    {
-      id: '3',
-      studentName: 'Emily Rodriguez',
-      studentAvatar: 'ER',
-      rating: 4,
-      date: '2026-01-20',
-      courseName: 'Next.js Full Stack',
-      comment: 'Great teacher with deep knowledge. Sometimes moved a bit fast, but always willing to slow down and re-explain. Very helpful overall.',
-      helpful: 12,
-    },
-    {
-      id: '4',
-      studentName: 'Michael Thompson',
-      studentAvatar: 'MT',
-      rating: 5,
-      date: '2026-01-18',
-      courseName: 'Advanced React Patterns',
-      comment: 'Exceptional teaching style. Made complex topics accessible and engaging. The real-world examples really helped solidify my understanding.',
-      helpful: 31,
-    },
-    {
-      id: '5',
-      studentName: 'Priya Sharma',
-      studentAvatar: 'PS',
-      rating: 5,
-      date: '2026-01-15',
-      courseName: 'System Design Basics',
-      comment: 'Transformed my understanding of system architecture. Patient, thorough, and incredibly skilled at breaking down complex concepts.',
-      helpful: 27,
-    },
-    {
-      id: '6',
-      studentName: 'David Kim',
-      studentAvatar: 'DK',
-      rating: 4,
-      date: '2026-01-12',
-      courseName: 'TypeScript Fundamentals',
-      comment: 'Solid instruction with good pacing. Would have loved more hands-on exercises, but overall very satisfied with the learning experience.',
-      helpful: 9,
-    },
-  ];
+  const fetchRatingStats = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/rating-stats`, {
+        withCredentials: true
+      });
+      if (response.data.success) {
+        const data = response.data.data;
+        // Map backend distribution (array of {Rating: 5, Count: 10, ...}) to object {5: 10, ...}
+        // Backend 'distribution' is typically array from stats query or mapped object.
+        // Looking at tutor.service.ts:
+        /*
+          distribution: [
+            { rating: 5, count: 189, percentage: ... }
+          ]
+        */
+        const distMap: any = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        data.distribution.forEach((d: any) => {
+            distMap[d.rating] = d.count;
+        });
+
+        setRatingStats({
+          average: data.averageRating,
+          total: data.totalReviews,
+          distribution: distMap
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
+  const fetchReviews = async (pageNum = 1) => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/reviews`, {
+        params: { page: pageNum, limit: 5, sort: sortBy },
+        withCredentials: true
+      });
+
+      if (response.data.success) {
+        const newReviews = response.data.data.map((r: any) => ({
+          id: r.id,
+          studentName: r.student.name,
+          studentAvatar: r.student.image ? <img src={r.student.image} alt={r.student.name} className="w-full h-full object-cover" /> : r.student.name.charAt(0).toUpperCase(),
+          rating: r.rating,
+          date: r.createdAt,
+          courseName: r.booking?.subject || 'Session',
+          comment: r.comment,
+          helpful: 0 // Backend might not have this yet
+        }));
+
+        if (pageNum === 1) {
+            setReviews(newReviews);
+        } else {
+            setReviews(prev => [...prev, ...newReviews]);
+        }
+        
+        setHasMore(newReviews.length === 5); // Assuming limit 5
+        setPage(pageNum);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      toast.error('Failed to load reviews');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const StarIcon: React.FC<{ filled: boolean; half?: boolean }> = ({ filled, half }) => (
     <svg
@@ -378,7 +394,7 @@ const TutorReviewsSection: React.FC = () => {
                 <div className="flex flex-col lg:flex-row gap-6">
                   {/* Avatar & Student Info */}
                   <div className="flex items-start gap-4 lg:w-64 flex-shrink-0">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg overflow-hidden">
                       {review.studentAvatar}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -445,9 +461,11 @@ const TutorReviewsSection: React.FC = () => {
         <div className="mt-12 text-center">
           <button
             type="button"
-            className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 hover:from-indigo-600 hover:to-purple-600 text-gray-700 dark:text-gray-300 hover:text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+            onClick={loadMore}
+            disabled={!hasMore || loading}
+            className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 hover:from-indigo-600 hover:to-purple-600 text-gray-700 dark:text-gray-300 hover:text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>Load More Reviews</span>
+            <span>{loading ? 'Loading...' : hasMore ? 'Load More Reviews' : 'No More Reviews'}</span>
             <svg
               className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1"
               fill="none"
