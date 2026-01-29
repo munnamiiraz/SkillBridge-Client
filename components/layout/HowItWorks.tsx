@@ -49,9 +49,9 @@ const HowItWorksSection: React.FC = () => {
   return (
     <section className="relative w-full py-24 lg:py-32 bg-white dark:bg-gray-900 overflow-hidden">
       {/* Background Elements */}
-      <div className="absolute inset-0 pointer-events-none opacity-50 dark:opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-indigo-200 dark:bg-indigo-900 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-200 dark:bg-purple-900 rounded-full blur-3xl"></div>
+      <div className="absolute inset-0 pointer-events-none opacity-60 dark:opacity-40">
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-indigo-300/30 dark:bg-indigo-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-purple-300/30 dark:bg-purple-600/20 rounded-full blur-[100px] animate-pulse-slower"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
@@ -63,7 +63,7 @@ const HowItWorksSection: React.FC = () => {
             </span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Get started with Skillbride in four simple steps. Learning has never been easier.
+            Get started with SkillBridge in four simple steps. Learning has never been easier.
           </p>
         </div>
 
@@ -78,19 +78,19 @@ const HowItWorksSection: React.FC = () => {
               {/* Connector Line (Desktop Only) */}
               {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-16 left-full w-full h-0.5 -z-10">
-                  <div className="w-full h-full bg-gradient-to-r from-indigo-200 via-purple-200 to-transparent dark:from-indigo-800 dark:via-purple-800 dark:to-transparent"></div>
+                  <div className="w-full h-full bg-gradient-to-r from-indigo-300 via-purple-300 to-transparent dark:from-indigo-700/50 dark:via-purple-700/50 dark:to-transparent"></div>
                 </div>
               )}
 
               {/* Step Card */}
-              <div className="relative h-full p-8 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-850 rounded-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-1">
+              <div className="relative h-full p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-1">
                 {/* Number Badge */}
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50">
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-xl shadow-indigo-500/30 dark:shadow-indigo-500/50 ring-4 ring-white dark:ring-gray-900">
                   {step.number}
                 </div>
 
                 {/* Icon Container */}
-                <div className="mb-6 w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                <div className="mb-6 w-16 h-16 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                   {step.icon}
                 </div>
 

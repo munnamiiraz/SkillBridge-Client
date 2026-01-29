@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React from 'react';
 
 const HeroSection: React.FC = () => {
@@ -34,7 +35,10 @@ const HeroSection: React.FC = () => {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up-delay-3">
-              <button className="group relative px-8 py-4 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 overflow-hidden">
+              <Link 
+                href="/tutors"
+                className="group relative px-8 py-4 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 overflow-hidden flex items-center justify-center gap-2"
+              >
                 <span className="relative z-10 flex items-center gap-2">
                   Find a Teacher
                   <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 20 20">
@@ -42,7 +46,7 @@ const HeroSection: React.FC = () => {
                   </svg>
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </button>
+              </Link>
               
               <button className="group px-8 py-4 bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 text-gray-900 dark:text-white font-semibold rounded-xl border border-gray-200 dark:border-white/10 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5">
                 <span className="flex items-center gap-2">

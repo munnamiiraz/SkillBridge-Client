@@ -1,8 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { authClient } from '@/lib/auth-client';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const LoginPage: React.FC = () => {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
@@ -17,10 +22,30 @@ const LoginPage: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Form submission logic will be added later
-    console.log({ ...formData, rememberMe });
+    setIsLoading(true);
+
+    try {
+      await authClient.signIn.email({
+        email: formData.email,
+        password: formData.password,
+        rememberMe: rememberMe,
+      }, {
+        onSuccess: () => {
+          toast.success('Login successful! Welcome back.');
+          router.push('/');
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message || 'Login failed. Please check your credentials.');
+        }
+      });
+    } catch (err) {
+      console.error('Login error:', err);
+      toast.error('An unexpected error occurred during login.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -130,9 +155,20 @@ const LoginPage: React.FC = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-4 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40"
+              disabled={isLoading}
+              className={`w-full py-4 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
             >
-              Log In
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Logging in...</span>
+                </>
+              ) : (
+                'Log In'
+              )}
             </button>
 
             {/* Divider */}
@@ -151,6 +187,20 @@ const LoginPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
+                onClick={async () => {
+                  setIsLoading(true);
+                  try {
+                    await authClient.signIn.social({
+                      provider: 'google',
+                      callbackURL: '/',
+                    });
+                  } catch (err) {
+                    console.error('Google login error:', err);
+                    toast.error('Failed to login with Google');
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -163,6 +213,9 @@ const LoginPage: React.FC = () => {
               </button>
               <button
                 type="button"
+                onClick={() => {
+                  toast.info('GitHub login is not yet configured. Please use Email or Google.');
+                }}
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

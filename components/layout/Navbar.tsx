@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface NavLink {
   label: string;
@@ -10,6 +12,7 @@ interface NavLink {
 }
 
 const Navbar: React.FC = () => {
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -50,7 +53,7 @@ const Navbar: React.FC = () => {
   };
 
   const navLinks: NavLink[] = [
-    { label: 'Find Teachers', href: '/teachers' },
+    { label: 'Find Teachers', href: '/tutors' },
     { label: 'How It Works', href: '/how-it-works' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'About', href: '/about' },
@@ -252,8 +255,15 @@ const Navbar: React.FC = () => {
                     </Link>
                     <button
                       onClick={async () => {
-                        await authClient.signOut();
-                        setIsUserMenuOpen(false);
+                        await authClient.signOut({
+                          fetchOptions: {
+                            onSuccess: () => {
+                              toast.success('Logged out successfully');
+                              router.push('/login');
+                              setIsUserMenuOpen(false);
+                            }
+                          }
+                        });
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
                     >
@@ -409,8 +419,15 @@ const Navbar: React.FC = () => {
                   </div>
                   <button
                     onClick={async () => {
-                      await authClient.signOut();
-                      setIsMobileMenuOpen(false);
+                      await authClient.signOut({
+                        fetchOptions: {
+                          onSuccess: () => {
+                            toast.success('Logged out successfully');
+                            router.push('/login');
+                            setIsMobileMenuOpen(false);
+                          }
+                        }
+                      });
                     }}
                     className="w-full flex items-center justify-center gap-2 p-3 text-sm font-bold text-red-600 bg-red-50 dark:bg-red-900/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
                   >
