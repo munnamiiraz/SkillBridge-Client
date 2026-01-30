@@ -78,7 +78,7 @@ const BookSessionPage: React.FC = () => {
               .map((slot: any) => ({
                 id: slot.id,
                 time: slot.startTime,
-                available: true,
+                available: !slot.isBooked,
                 price: tutor.hourlyRate,
               }));
               
@@ -196,18 +196,32 @@ const BookSessionPage: React.FC = () => {
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/student/bookings`,
           bookingData,
-          { withCredentials: true }
+          { 
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
         );
 
         if (response.data.success) {
           toast.success('Booking confirmed successfully!');
-          router.push('/student/sessions'); // Or wherever bookings are listed
+          router.push('/dashboards/bookings'); // Updated path
         } else {
           toast.error(response.data.message || 'Booking failed');
         }
       } catch (err: any) {
         console.error('Booking error:', err);
-        toast.error(err.response?.data?.message || 'Failed to confirm booking');
+        console.error('Error response:', err.response?.data);
+        
+        if (err.response?.status === 401) {
+          toast.error('Please login to book a session');
+          router.push('/login');
+        } else if (err.response?.status === 403) {
+          toast.error('Please verify your email to book sessions');
+        } else {
+          toast.error(err.response?.data?.message || 'Failed to confirm booking');
+        }
       } finally {
         setIsBooking(false);
       }

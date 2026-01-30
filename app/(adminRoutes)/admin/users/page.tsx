@@ -202,51 +202,27 @@ const AdminUserManagement: React.FC = () => {
   };
 
   return (
-    <section className="relative w-full min-h-screen py-24 lg:py-32 bg-white dark:bg-gray-900 overflow-hidden">
-      {/* Background Pattern */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.02]"
-        aria-hidden="true"
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(99, 102, 241) 1px, transparent 0)',
-            backgroundSize: '40px 40px',
-          }}
-        ></div>
-      </div>
-
-      {/* Gradient Orbs */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-30 dark:opacity-20"
-        aria-hidden="true"
-      >
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-400 dark:bg-indigo-600 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-400 dark:bg-purple-600 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl">
-              <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">
-                <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                  User Management
-                </span>
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
-                Manage all students and tutors in one place
-              </p>
-            </div>
+    <div className="p-6 lg:p-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl">
+            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold">
+              <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                User Management
+              </span>
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Manage all students and tutors in one place
+            </p>
           </div>
         </div>
+      </div>
 
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
@@ -707,7 +683,7 @@ const AdminUserManagement: React.FC = () => {
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 };
 

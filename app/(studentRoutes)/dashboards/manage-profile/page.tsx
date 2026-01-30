@@ -45,10 +45,10 @@ const StudentProfilePage: React.FC = () => {
           const userData = response.data.data;
           const mappedProfile = {
             id: userData.id,
-            name: userData.name || '',
-            email: userData.email || '',
-            phone: userData.phone || '',
-            address: userData.address || '',
+            name: userData.name || 'N/A',
+            email: userData.email || 'N/A',
+            phone: userData.phone || 'N/A',
+            address: userData.address || 'N/A',
             image: userData.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.name || 'User'}`,
           };
           setProfile(mappedProfile);
@@ -67,7 +67,7 @@ const StudentProfilePage: React.FC = () => {
     } else if (!sessionPending) {
       setIsLoading(false);
     }
-  }, [session, sessionPending]);
+  }, [session?.user?.id, sessionPending]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,9 +81,10 @@ const StudentProfilePage: React.FC = () => {
       const updateData = {
         name: profile.name,
         phone: profile.phone,
-        address: profile.address,
-        image: profile.image
+        address: profile.address
       };
+      console.log(updateData);
+      
 
       const response = await axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/student/profile`,

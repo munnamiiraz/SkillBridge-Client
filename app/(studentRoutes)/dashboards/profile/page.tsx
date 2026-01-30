@@ -1,6 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { authClient } from '@/lib/auth-client';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 // Types based on Prisma schema
 type UserStatus = 'ACTIVE' | 'INACTIVE' | 'BANNED';
@@ -27,8 +32,7 @@ interface Booking {
   status: BookingStatus;
   subject: string | null;
   price: number;
-  tutorProfile: {
-    userId: string;
+  tutor_profile: {
     user: {
       name: string;
       image: string | null;
@@ -51,99 +55,78 @@ interface Review {
 }
 
 const StudentProfilePage: React.FC = () => {
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   const [activeTab, setActiveTab] = useState<'overview' | 'bookings' | 'reviews'>('overview');
+  const [isLoading, setIsLoading] = useState(true);
+  const [student, setStudent] = useState<StudentProfile | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
-  // Sample data - would come from API/database
-  const student: StudentProfile = {
-    id: 'user_123',
-    name: 'John Davis',
-    email: 'john.davis@example.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Main Street, Boston, MA 02101',
-    image: null,
-    role: 'STUDENT',
-    status: 'ACTIVE',
-    emailVerified: true,
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-12-20'),
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!session) return;
+      
+      try {
+        setIsLoading(true);
+        
+        // Fetch profile
+        const profileResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/student/profile`,
+          { withCredentials: true }
+        );
+        
+        if (profileResponse.data.success) {
+          const userData = profileResponse.data.data;
+          setStudent({
+            ...userData,
+            createdAt: new Date(userData.createdAt),
+            updatedAt: new Date(userData.updatedAt)
+          });
+        }
+        
+        // Fetch bookings
+        const bookingsResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/student/bookings`,
+          { withCredentials: true }
+        );
+        
+        if (bookingsResponse.data.success) {
+          setBookings(bookingsResponse.data.data.map((booking: any) => ({
+            ...booking,
+            scheduledAt: new Date(booking.scheduledAt)
+          })));
+        }
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load profile data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (session) {
+      fetchData();
+    } else if (!sessionPending) {
+      setIsLoading(false);
+    }
+  }, [session?.user?.id, sessionPending]);
 
-  const bookings: Booking[] = [
-    {
-      id: 'booking_1',
-      scheduledAt: new Date('2024-02-05T10:00:00'),
-      duration: 60,
-      status: 'CONFIRMED',
-      subject: 'Calculus II',
-      price: 65,
-      tutorProfile: {
-        userId: 'tutor_1',
-        user: {
-          name: 'Dr. Sarah Johnson',
-          image: null,
-        },
-      },
-    },
-    {
-      id: 'booking_2',
-      scheduledAt: new Date('2024-01-28T14:00:00'),
-      duration: 60,
-      status: 'COMPLETED',
-      subject: 'Linear Algebra',
-      price: 65,
-      tutorProfile: {
-        userId: 'tutor_1',
-        user: {
-          name: 'Dr. Sarah Johnson',
-          image: null,
-        },
-      },
-    },
-    {
-      id: 'booking_3',
-      scheduledAt: new Date('2024-01-20T09:00:00'),
-      duration: 60,
-      status: 'COMPLETED',
-      subject: 'Physics 101',
-      price: 60,
-      tutorProfile: {
-        userId: 'tutor_2',
-        user: {
-          name: 'Michael Rodriguez',
-          image: null,
-        },
-      },
-    },
-  ];
+  if (isLoading || sessionPending) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
 
-  const reviews: Review[] = [
-    {
-      id: 'review_1',
-      rating: 5,
-      comment: 'Excellent tutor! Dr. Johnson explained complex concepts very clearly.',
-      createdAt: new Date('2024-01-28'),
-      booking: {
-        tutorProfile: {
-          user: {
-            name: 'Dr. Sarah Johnson',
-          },
-        },
-      },
-    },
-    {
-      id: 'review_2',
-      rating: 5,
-      comment: 'Great session. Very patient and knowledgeable.',
-      createdAt: new Date('2024-01-20'),
-      booking: {
-        tutorProfile: {
-          user: {
-            name: 'Michael Rodriguez',
-          },
-        },
-      },
-    },
-  ];
+  if (!session || !student) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-gray-900 p-4">
+        <h1 className="text-2xl font-bold mb-4">Please login to view your profile</h1>
+      </div>
+    );
+  }
 
   const stats = {
     totalBookings: bookings.length,
@@ -208,7 +191,7 @@ const StudentProfilePage: React.FC = () => {
 
           {/* Profile Content */}
           <div className="px-6 sm:px-8 lg:px-10 pb-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-16 sm:-mt-12 gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-20 sm:-mt-16 gap-6">
               
               {/* Avatar and Basic Info */}
               <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
@@ -233,9 +216,9 @@ const StudentProfilePage: React.FC = () => {
 
                 {/* Name and Info */}
                 <div className="text-center sm:text-left space-y-2">
-                  <div>
+                  <div className='mt-[85px]'>
                     <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
-                      {student.name}
+                      {student.name || 'Student'}
                     </h1>
                     <div className="flex items-center justify-center sm:justify-start gap-2 mt-2">
                       <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-semibold rounded-full">
@@ -261,7 +244,9 @@ const StudentProfilePage: React.FC = () => {
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
+                <Link href='/dashboards/manage-profile'>
                 Manage Profile
+                </Link>
               </button>
             </div>
           </div>
@@ -490,10 +475,10 @@ const StudentProfilePage: React.FC = () => {
                           <div className="flex items-start gap-4 flex-1">
                             {/* Tutor Avatar */}
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold flex-shrink-0">
-                              {booking.tutorProfile.user.image ? (
-                                <img src={booking.tutorProfile.user.image} alt={booking.tutorProfile.user.name} className="w-full h-full rounded-xl object-cover" />
+                              {booking.tutor_profile.user.image ? (
+                                <img src={booking.tutor_profile.user.image} alt={booking.tutor_profile.user.name} className="w-full h-full rounded-xl object-cover" />
                               ) : (
-                                getInitials(booking.tutorProfile.user.name)
+                                getInitials(booking.tutor_profile.user.name)
                               )}
                             </div>
 
@@ -503,7 +488,7 @@ const StudentProfilePage: React.FC = () => {
                                 {booking.subject || 'Session'}
                               </h3>
                               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                with {booking.tutorProfile.user.name}
+                                with {booking.tutor_profile.user.name}
                               </p>
                               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                                 <div className="flex items-center gap-1">
