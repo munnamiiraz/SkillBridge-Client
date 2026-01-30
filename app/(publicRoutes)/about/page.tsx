@@ -43,7 +43,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-24 lg:py-32">
         <div className="absolute inset-0 pointer-events-none opacity-30 dark:opacity-20">

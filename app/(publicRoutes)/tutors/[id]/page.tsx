@@ -95,33 +95,36 @@ const TutorProfilePage: React.FC = () => {
                         ],
                         availability: {
                             timezone: 'EST (UTC-5)',
-                            weekSchedule: [
-                                { day: 'Mon', slots: [], available: true },
-                                { day: 'Tue', slots: [], available: true },
-                                // ... Populate from availability slots if fetched
-                                // Currently public endpoint might not return full slots or needs separate call
-                                // For MVP we map availability slots if included
-                            ],
+                            weekSchedule: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => {
+                                const dayOfWeekInt = idx + 1; // 1=Mon, 7=Sun
+                                const slots = (data.availability_slot || [])
+                                    .filter((s: any) => s.dayOfWeek === dayOfWeekInt)
+                                    .map((s: any) => s.startTime);
+                                return {
+                                    day,
+                                    slots,
+                                    available: slots.length > 0,
+                                };
+                            }),
                         },
                         reviews: {
                             stats: {
                                 averageRating: data.averageRating || 0,
                                 totalReviews: data.totalReviews || 0,
-                                breakdown: [
-                                    { stars: 5, count: 0, percentage: 0 },
-                                    { stars: 4, count: 0, percentage: 0 },
-                                    { stars: 3, count: 0, percentage: 0 },
-                                    { stars: 2, count: 0, percentage: 0 },
-                                    { stars: 1, count: 0, percentage: 0 },
-                                ],
+                                breakdown: [5, 4, 3, 2, 1].map(stars => ({
+                                    stars,
+                                    count: 0, // Breakdown not yet provided by public API
+                                    percentage: 0,
+                                })),
                             },
                             recent: [], // Should fetch reviews separately or include
                         },
                         summary: {
+                            id: data.id,
                             name: user.name,
-                            subjects: data.headline || 'Tutor',
+                            subjects: data.tutor_subject?.map((ts: any) => ts.subject.name).join(' & ') || 'Tutor',
                             experience: `${data.experience} years`,
-                            students: 0,
+                            students: data.totalSessions || 0,
                             rating: data.averageRating,
                         },
                     };

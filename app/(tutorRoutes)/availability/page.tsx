@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
 
 interface TimeSlot {
@@ -42,12 +42,10 @@ const TutorAvailabilityPage: React.FC = () => {
 
   const fetchAvailability = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/availability-slots`, {
-        withCredentials: true
-      });
+      const response = await apiClient.get('/api/tutor/availability-slots');
       
-      if (response.data.success) {
-        const slots = response.data.data;
+      if (response.success) {
+        const slots = response.data;
         const newSchedule = { ...schedule };
         
         // Reset all days first
@@ -158,13 +156,9 @@ const TutorAvailabilityPage: React.FC = () => {
         }
       });
 
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/availability-slots`,
-        { slots: slotsToSave },
-        { withCredentials: true }
-      );
+      const response = await apiClient.put('/api/tutor/availability-slots', { slots: slotsToSave });
 
-      if (response.data.success) {
+      if (response.success) {
         toast.success('Availability saved successfully');
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
@@ -173,7 +167,7 @@ const TutorAvailabilityPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error saving schedule:', error);
-      toast.error(error.response?.data?.message || 'Failed to save availability');
+      toast.error(error.message || 'Failed to save availability');
     } finally {
       setIsSaving(false);
     }

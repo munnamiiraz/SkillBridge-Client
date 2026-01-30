@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
 
 interface Student {
@@ -42,13 +42,11 @@ const TutorSessionsPage: React.FC = () => {
 
   const fetchSessions = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/sessions`, {
-        withCredentials: true
-      });
+      const response = await apiClient.get('/api/tutor/sessions');
       
-      if (response.data.success) {
+      if (response.success) {
         // Map backend data to frontend model
-        const mappedSessions: Session[] = response.data.data.map((booking: any) => ({
+        const mappedSessions: Session[] = response.data.map((booking: any) => ({
           id: booking.id,
           student: {
             id: booking.user.id,
@@ -106,13 +104,11 @@ const TutorSessionsPage: React.FC = () => {
     setIsMarkingComplete(true);
     
     try {
-      const response = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/sessions/${sessionId}/status`,
-        { status: 'COMPLETED' },
-        { withCredentials: true }
-      );
+      const response = await apiClient.patch(`/api/tutor/sessions/${sessionId}/status`, {
+        status: 'COMPLETED'
+      });
 
-      if (response.data.success) {
+      if (response.success) {
         toast.success('Session marked as complete');
         // Refresh sessions to show update
         fetchSessions();

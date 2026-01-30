@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 interface TutorAvailabilityReviewsCTAProps {
   availability: {
@@ -30,6 +31,7 @@ interface TutorAvailabilityReviewsCTAProps {
     verified: boolean;
   }[];
   tutorSummary: {
+    id: string;
     name: string;
     subjects: string;
     experience: string;
@@ -167,9 +169,12 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
                   Popular time slots fill up fast. Secure your preferred session time today.
                 </p>
               </div>
-              <button className="w-full py-3 bg-linear-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+              <Link 
+                href={`/tutors/${tutorSummary.id}/book-sessions`}
+                className="w-full py-3 bg-linear-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center"
+              >
                 Book Now
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -340,12 +345,15 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
 
             {/* Right - CTA */}
             <div className="space-y-4">
-              <button className="w-full py-5 bg-white hover:bg-gray-50 text-indigo-600 font-bold text-lg rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex items-center justify-center gap-3">
+              <Link 
+                href={`/tutors/${tutorSummary.id}/book-sessions`}
+                className="w-full py-5 bg-white hover:bg-gray-50 text-indigo-600 font-bold text-lg rounded-xl shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex items-center justify-center gap-3"
+              >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 Book Your First Session
-              </button>
+              </Link>
               <button className="w-full py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl border-2 border-white/30 transition-all duration-300 flex items-center justify-center gap-2">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

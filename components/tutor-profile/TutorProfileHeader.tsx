@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import Link from 'next/link';
 
 interface TutorProfileHeaderProps {
   tutor: {
+    id: string;
     name: string;
     avatar: string;
     primarySubjects: string[];
@@ -160,12 +161,15 @@ export const TutorBookingCard: React.FC<TutorProfileHeaderProps> = ({ tutor }) =
 
         {/* CTA Buttons */}
         <div className="space-y-3 pt-2">
-          <button className="w-full py-4 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 flex items-center justify-center gap-2">
+          <Link 
+            href={`/tutors/${tutor.id}/book-sessions`}
+            className="w-full py-4 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 flex items-center justify-center gap-2"
+          >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Book a Session
-          </button>
+          </Link>
 
           <button className="w-full py-4 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-xl border-2 border-gray-200 dark:border-gray-600 transition-all duration-300 flex items-center justify-center gap-2">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
