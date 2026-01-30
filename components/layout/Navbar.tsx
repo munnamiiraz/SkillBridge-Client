@@ -184,7 +184,7 @@ const Navbar: React.FC = () => {
                       {session.user.name}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Student
+                      {session.user.role}
                     </p>
                   </div>
                   <svg 
@@ -206,7 +206,7 @@ const Navbar: React.FC = () => {
                       </p>
                     </div>
                     <Link
-                      href="/dashboard"
+                      href={session.user.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
@@ -217,7 +217,7 @@ const Navbar: React.FC = () => {
                       Dashboard
                     </Link>
                     <Link
-                      href={session.user.role === 'STUDENT' ? '/dashboards/profile' : '/profile'}
+                      href={session.user.role === 'ADMIN' ? '/admin/profile' : session.user.role === 'STUDENT' ? '/dashboards/profile' : '/profile'}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >

@@ -42,7 +42,8 @@ const RegisterPage: React.FC = () => {
         name: formData.name,
         phone: formData.phone,
         role: role,
-      } as any, {
+      }, {
+        
         onSuccess: () => {
           toast.success('Registration successful! Please check your email for verification.');
           router.push('/login');
@@ -55,6 +56,8 @@ const RegisterPage: React.FC = () => {
       if (error) {
         console.error('Registration error:', error);
       }
+      console.log(data);
+
     } catch (err) {
       console.error('Unexpected error:', err);
       toast.error('An unexpected error occurred');

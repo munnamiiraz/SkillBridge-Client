@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { apiClient } from '@/lib/api-client';
+import { authClient } from '@/lib/auth-client';
+import axios from 'axios';
 import { toast } from 'sonner';
 
 interface User {
@@ -57,9 +58,12 @@ const AdminUserManagement: React.FC = () => {
       if (statusFilter !== 'all') params.status = statusFilter.toUpperCase();
       
       const queryString = new URLSearchParams(params).toString();
-      const response = await apiClient.get(`/api/admin/users?${queryString}`);
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/admin/users?${queryString}`,
+        { withCredentials: true }
+      );
 
-      if (response.success) {
+      if (response.data.success) {
         const { data, meta } = response.data;
         
         // Map backend users to frontend model
@@ -147,10 +151,12 @@ const AdminUserManagement: React.FC = () => {
   const confirmBanUser = async () => {
     if (userToBan) {
       try {
-        const response = await apiClient.patch(`/api/admin/users/${userToBan.id}/ban`, {
-          banReason
-        });
-        if (response.success) {
+        const response = await axios.patch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/admin/users/${userToBan.id}/ban`,
+          { banReason },
+          { withCredentials: true }
+        );
+        if (response.data.success) {
             toast.success('User banned successfully');
             fetchUsers(); // Refresh
         }
@@ -168,8 +174,12 @@ const AdminUserManagement: React.FC = () => {
   const handleUnbanUser = async (userId: string) => {
     if (!confirm('Are you sure you want to unban this user?')) return;
     try {
-        const response = await apiClient.patch(`/api/admin/users/${userId}/unban`, {});
-        if (response.success) {
+        const response = await axios.patch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/admin/users/${userId}/unban`,
+          {},
+          { withCredentials: true }
+        );
+        if (response.data.success) {
             toast.success('User unbanned successfully');
             fetchUsers();
         }
@@ -612,7 +622,6 @@ const AdminUserManagement: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
 
       {/* Ban Modal */}
       {showBanModal && userToBan && (
