@@ -35,7 +35,7 @@ const TutorProfilePage: React.FC = () => {
                             userId: user.id,
                             name: user.name,
                             avatar: user.image || (user.name ? user.name.charAt(0).toUpperCase() : '?'),
-                            primarySubjects: data.subjects || ['Mathematics', 'Physics'], // Fallback or fetched
+                            primarySubjects: data.tutor_subject?.map((ts: any) => ts.subject.name) || [],
                             tagline: data.headline || 'Experienced Tutor',
                             rating: data.averageRating || 0,
                             reviewCount: data.totalReviews || 0,
@@ -90,7 +90,7 @@ const TutorProfilePage: React.FC = () => {
                             // Mock categories if backend doesn't return structured skills yet or map flat list
                             {
                                 category: 'Expertise',
-                                skills: (data.skills || []).map((s: string) => ({ name: s, level: 'Expert' }))
+                                skills: (data.tutor_subject || []).map((ts: any) => ({ name: ts.subject.name, level: 'Expert' }))
                             }
                         ],
                         availability: {

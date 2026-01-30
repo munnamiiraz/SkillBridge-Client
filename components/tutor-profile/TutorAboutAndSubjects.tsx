@@ -79,9 +79,9 @@ export const TutorAboutContent: React.FC<TutorAboutAndSubjectsProps> = ({ about,
           {about.teachingStyle.map((style, index) => (
             <div
               key={index}
-              className="group p-6 bg-linear-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-850 rounded-xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+              className="group p-6 bg-linear-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
             >
-              <div className="w-10 h-10 rounded-lg bg-linear-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-4 transition-transform duration-300 group-hover:scale-110">
+              <div className="w-10 h-10 rounded-lg bg-linear-to-br from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-4 transition-transform duration-300 group-hover:scale-110">
                 {style.icon}
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
@@ -112,9 +112,9 @@ export const TutorAboutContent: React.FC<TutorAboutAndSubjectsProps> = ({ about,
           {about.experience.map((exp, index) => (
             <div
               key={index}
-              className="flex gap-4 p-5 bg-linear-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-850 rounded-xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg"
+              className="flex gap-4 p-5 bg-linear-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg"
             >
-              <div className="shrink-0 w-12 h-12 rounded-lg bg-linear-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+              <div className="shrink-0 w-12 h-12 rounded-lg bg-linear-to-br from-blue-100 to-cyan-100 dark:from-blue-900/50 dark:to-cyan-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
                 {exp.icon}
               </div>
               <div className="flex-1">
@@ -126,7 +126,7 @@ export const TutorAboutContent: React.FC<TutorAboutAndSubjectsProps> = ({ about,
                 </p>
               </div>
               <div className="text-right">
-                <span className="inline-block px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-semibold rounded-full">
+                <span className="inline-block px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-semibold rounded-full">
                   {exp.year}
                 </span>
               </div>
@@ -152,7 +152,7 @@ export const TutorAboutContent: React.FC<TutorAboutAndSubjectsProps> = ({ about,
           {subjects.map((subject, index) => (
             <div key={index} className="space-y-4">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-linear-to-br from-indigo-500 to-purple-500"></span>
+                <span className="w-2 h-2 rounded-full bg-linear-to-br from-orange-500 to-red-500"></span>
                 {subject.category}
               </h3>
               <div className="flex flex-wrap gap-3">

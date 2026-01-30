@@ -187,9 +187,10 @@ const FeaturedTeachersSection: React.FC = () => {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                 {teachers.map((teacher, index) => (
-                  <div
+                  <Link
                     key={teacher.id}
-                    className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-2 animate-fade-in-up"
+                    href={`/tutors/${teacher.id}`}
+                    className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-2 animate-fade-in-up block"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {/* Card Header with Avatar */}
@@ -276,18 +277,15 @@ const FeaturedTeachersSection: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* CTA Button */}
-                      <Link 
-                        href={`/tutors/${teacher.id}`}
-                        className="block w-full py-3 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-center font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/30 dark:hover:shadow-indigo-500/50"
-                      >
+                      {/* CTA Button (Styled div instead of Link to avoid nesting) */}
+                      <div className="block w-full py-3 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-center font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/30 dark:hover:shadow-indigo-500/50">
                         View Profile
-                      </Link>
+                      </div>
                     </div>
 
                     {/* Hover Glow */}
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/5 group-hover:to-purple-500/5 dark:group-hover:from-indigo-500/10 dark:group-hover:to-purple-500/10 transition-all duration-300 pointer-events-none"></div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}

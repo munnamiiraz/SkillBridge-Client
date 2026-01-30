@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 interface NavLink {
   label: string;
@@ -14,21 +15,13 @@ interface NavLink {
 const Navbar: React.FC = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
   const [scrolled, setScrolled] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { data: session } = authClient.useSession();
 
   useEffect(() => {
-    // Check for user's theme preference
-    const theme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (theme === 'dark' || (!theme && prefersDark)) {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    }
-
     // Scroll effect
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -37,16 +30,6 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (!isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -97,12 +80,12 @@ const Navbar: React.FC = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <Link href="/" className="inline-flex items-center group">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 dark:shadow-indigo-500/40 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+              <div className="w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 dark:shadow-indigo-500/40 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                 <span className="text-white font-bold text-lg">S</span>
               </div>
-              <span className="ml-3 text-xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+              <span className="ml-3 text-xl font-bold bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                 SkillBridge
               </span>
             </Link>
@@ -118,7 +101,7 @@ const Navbar: React.FC = () => {
               >
                 <span>{link.label}</span>
                 {/* Underline Effect */}
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-linear-to-r from-indigo-500 to-purple-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
             ))}
           </div>
@@ -166,7 +149,7 @@ const Navbar: React.FC = () => {
 
                 <Link
                   href="/signup"
-                  className="group relative px-6 py-2.5 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold rounded-lg shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 overflow-hidden"
+                  className="group relative px-6 py-2.5 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold rounded-lg shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     Get Started
@@ -445,7 +428,7 @@ const Navbar: React.FC = () => {
                   </Link>
                   <Link
                     href="/signup"
-                    className="group flex items-center justify-center gap-2 px-4 py-3 text-base font-semibold text-white bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300"
+                    className="group flex items-center justify-center gap-2 px-4 py-3 text-base font-semibold text-white bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <span>Get Started</span>

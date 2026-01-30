@@ -153,7 +153,7 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
 
           {/* Right Column - Quick Booking Reminder */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-200 dark:border-green-800">
+            <div className="sticky top-24 p-6 bg-linear-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-200 dark:border-green-800">
               <div className="text-center mb-4">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-linear-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -223,7 +223,7 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
                   </div>
                   <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full transition-all duration-500"
+                      className="h-full bg-linear-to-r from-yellow-400 to-orange-400 rounded-full transition-all duration-500"
                       style={{ width: `${item.percentage}%` }}
                     ></div>
                   </div>
