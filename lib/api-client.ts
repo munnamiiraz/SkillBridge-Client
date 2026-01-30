@@ -43,4 +43,10 @@ export const apiClient = {
       body: JSON.stringify(data),
     });
   },
+
+  delete(endpoint: string) {
+    return this.fetch(endpoint, {
+      method: "DELETE",
+    });
+  },
 };

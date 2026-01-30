@@ -1,5 +1,7 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 interface Booking {
   id: string;
@@ -47,217 +49,83 @@ const AdminBookingsManagement: React.FC = () => {
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
   const [cancelReason, setCancelReason] = useState('');
   const [refundAmount, setRefundAmount] = useState('');
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
-  // Mock data - replace with real data from your backend
-  const bookings: Booking[] = [
-    {
-      id: '1',
-      bookingNumber: 'BK-2026-00234',
-      student: {
-        id: 's1',
-        name: 'Sarah Mitchell',
-        email: 'sarah.mitchell@email.com',
-        avatar: 'SM',
-      },
-      tutor: {
-        id: 't1',
-        name: 'Dr. Michael Chen',
-        email: 'michael.chen@email.com',
-        avatar: 'MC',
-      },
-      course: {
-        id: 'c1',
-        name: 'Advanced React Patterns',
-        category: 'Web Development',
-      },
-      session: {
-        date: '2026-01-30',
-        time: '14:00',
-        duration: 60,
-        type: 'video',
-      },
-      payment: {
-        amount: 89.99,
-        status: 'paid',
-        method: 'Credit Card',
-      },
-      status: 'upcoming',
-      createdAt: '2026-01-25T10:30:00',
-      notes: 'Student requested focus on hooks and context API',
-    },
-    {
-      id: '2',
-      bookingNumber: 'BK-2026-00233',
-      student: {
-        id: 's2',
-        name: 'Emily Rodriguez',
-        email: 'emily.r@email.com',
-        avatar: 'ER',
-      },
-      tutor: {
-        id: 't2',
-        name: 'Prof. James Thompson',
-        email: 'j.thompson@email.com',
-        avatar: 'JT',
-      },
-      course: {
-        id: 'c2',
-        name: 'TypeScript Fundamentals',
-        category: 'Programming',
-      },
-      session: {
-        date: '2026-01-29',
-        time: '16:30',
-        duration: 90,
-        type: 'video',
-      },
-      payment: {
-        amount: 129.99,
-        status: 'paid',
-        method: 'PayPal',
-      },
-      status: 'ongoing',
-      createdAt: '2026-01-22T14:20:00',
-    },
-    {
-      id: '3',
-      bookingNumber: 'BK-2026-00232',
-      student: {
-        id: 's3',
-        name: 'Michael Zhang',
-        email: 'michael.z@email.com',
-        avatar: 'MZ',
-      },
-      tutor: {
-        id: 't3',
-        name: 'Dr. Priya Sharma',
-        email: 'priya.sharma@email.com',
-        avatar: 'PS',
-      },
-      course: {
-        id: 'c3',
-        name: 'System Design Basics',
-        category: 'Software Engineering',
-      },
-      session: {
-        date: '2026-01-28',
-        time: '10:00',
-        duration: 120,
-        type: 'video',
-      },
-      payment: {
-        amount: 159.99,
-        status: 'paid',
-        method: 'Credit Card',
-      },
-      status: 'completed',
-      createdAt: '2026-01-20T09:15:00',
-    },
-    {
-      id: '4',
-      bookingNumber: 'BK-2026-00231',
-      student: {
-        id: 's4',
-        name: 'Jessica Brown',
-        email: 'jessica.b@email.com',
-        avatar: 'JB',
-      },
-      tutor: {
-        id: 't1',
-        name: 'Dr. Michael Chen',
-        email: 'michael.chen@email.com',
-        avatar: 'MC',
-      },
-      course: {
-        id: 'c4',
-        name: 'Next.js Full Stack',
-        category: 'Web Development',
-      },
-      session: {
-        date: '2026-01-27',
-        time: '13:00',
-        duration: 60,
-        type: 'video',
-      },
-      payment: {
-        amount: 99.99,
-        status: 'refunded',
-        method: 'Credit Card',
-      },
-      status: 'cancelled',
-      createdAt: '2026-01-18T11:45:00',
-      notes: 'Cancelled by admin due to tutor unavailability',
-    },
-    {
-      id: '5',
-      bookingNumber: 'BK-2026-00230',
-      student: {
-        id: 's5',
-        name: 'Alex Kumar',
-        email: 'alex.kumar@email.com',
-        avatar: 'AK',
-      },
-      tutor: {
-        id: 't4',
-        name: 'Lisa Anderson',
-        email: 'lisa.anderson@email.com',
-        avatar: 'LA',
-      },
-      course: {
-        id: 'c5',
-        name: 'Python for Data Science',
-        category: 'Data Science',
-      },
-      session: {
-        date: '2026-01-26',
-        time: '15:00',
-        duration: 60,
-        type: 'video',
-      },
-      payment: {
-        amount: 79.99,
-        status: 'paid',
-        method: 'Debit Card',
-      },
-      status: 'no-show',
-      createdAt: '2026-01-19T16:30:00',
-      notes: 'Student did not attend the session',
-    },
-    {
-      id: '6',
-      bookingNumber: 'BK-2026-00229',
-      student: {
-        id: 's6',
-        name: 'David Kim',
-        email: 'david.kim@email.com',
-        avatar: 'DK',
-      },
-      tutor: {
-        id: 't2',
-        name: 'Prof. James Thompson',
-        email: 'j.thompson@email.com',
-        avatar: 'JT',
-      },
-      course: {
-        id: 'c6',
-        name: 'Machine Learning Basics',
-        category: 'AI & ML',
-      },
-      session: {
-        date: '2026-02-02',
-        time: '11:00',
-        duration: 90,
-        type: 'video',
-      },
-      payment: {
-        amount: 139.99,
-        status: 'pending',
-        method: 'Bank Transfer',
-      },
-      status: 'upcoming',
-      createdAt: '2026-01-26T08:20:00',
-    },
-  ];
+  useEffect(() => {
+    fetchBookings();
+  }, [statusFilter, paymentFilter, pagination.page]);
+
+  const fetchBookings = async () => {
+    setLoading(true);
+    try {
+      const params: any = {
+        page: pagination.page,
+        limit: pagination.limit,
+      };
+      
+      if (statusFilter !== 'all') params.status = statusFilter.toUpperCase();
+      if (paymentFilter !== 'all') params.paymentStatus = paymentFilter.toUpperCase();
+      
+      const queryString = new URLSearchParams(params).toString();
+      const response = await apiClient.get(`/api/admin/bookings?${queryString}`);
+
+      if (response.success) {
+        const { data, meta } = response.data;
+        
+        // Map backend bookings to frontend model
+        const mappedBookings: Booking[] = data.map((b: any) => ({
+          id: b.id,
+          bookingNumber: `BK-${b.id.slice(0, 8)}`,
+          student: {
+            id: b.user.id,
+            name: b.user.name,
+            email: b.user.email,
+            avatar: b.user.name.charAt(0).toUpperCase(),
+          },
+          tutor: {
+            id: b.tutor_profile.userId,
+            name: b.tutor_profile.user.name,
+            email: b.tutor_profile.user.email,
+            avatar: b.tutor_profile.user.name.charAt(0).toUpperCase(),
+          },
+          course: {
+            id: b.id,
+            name: b.subject || 'Session',
+            category: 'Learning',
+          },
+          session: {
+            date: b.scheduledAt.split('T')[0],
+            time: new Date(b.scheduledAt).toTimeString().slice(0, 5),
+            duration: b.duration,
+            type: 'video',
+          },
+          payment: {
+            amount: b.price,
+            status: 'paid', // Backend doesn't have payment status yet
+            method: 'Credit Card',
+          },
+          status: b.status.toLowerCase(),
+          createdAt: b.createdAt,
+          notes: b.notes,
+        }));
+
+        setBookings(mappedBookings);
+        setPagination({
+          page: meta.page,
+          limit: meta.limit,
+          total: meta.total,
+          totalPages: meta.totalPages
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      toast.error('Failed to load bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const stats = {
     totalBookings: bookings.length,
@@ -289,16 +157,26 @@ const AdminBookingsManagement: React.FC = () => {
     setShowCancelModal(true);
   };
 
-  const confirmCancelBooking = () => {
+  const confirmCancelBooking = async () => {
     if (bookingToCancel) {
-      console.log(`Cancelling booking ${bookingToCancel.id}`);
-      console.log(`Reason: ${cancelReason}`);
-      console.log(`Refund amount: $${refundAmount}`);
-      // Here you would call your API to cancel the booking
-      setShowCancelModal(false);
-      setBookingToCancel(null);
-      setCancelReason('');
-      setRefundAmount('');
+      try {
+        const response = await apiClient.patch(`/api/admin/bookings/${bookingToCancel.id}/cancel`, {
+          reason: cancelReason,
+          refundAmount: parseFloat(refundAmount)
+        });
+        if (response.success) {
+          toast.success('Booking cancelled successfully');
+          fetchBookings();
+        }
+      } catch (error) {
+        console.error('Error cancelling booking:', error);
+        toast.error('Failed to cancel booking');
+      } finally {
+        setShowCancelModal(false);
+        setBookingToCancel(null);
+        setCancelReason('');
+        setRefundAmount('');
+      }
     }
   };
 

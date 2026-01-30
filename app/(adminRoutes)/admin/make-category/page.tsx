@@ -1,5 +1,7 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 interface Category {
   id: string;
@@ -29,7 +31,6 @@ const AdminCategoryManagement: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
-  // Form states
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -37,114 +38,40 @@ const AdminCategoryManagement: React.FC = () => {
     color: 'indigo',
     status: 'active' as 'active' | 'inactive',
   });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - replace with real data from your backend
-  const categories: Category[] = [
-    {
-      id: '1',
-      name: 'Web Development',
-      slug: 'web-development',
-      description: 'Learn modern web development technologies including HTML, CSS, JavaScript, React, and more',
-      icon: '💻',
-      color: 'indigo',
-      status: 'active',
-      tutorCount: 45,
-      courseCount: 128,
-      createdAt: '2025-01-15T10:00:00',
-      updatedAt: '2026-01-20T14:30:00',
-    },
-    {
-      id: '2',
-      name: 'Mobile Development',
-      slug: 'mobile-development',
-      description: 'Master iOS and Android app development with native and cross-platform technologies',
-      icon: '📱',
-      color: 'blue',
-      status: 'active',
-      tutorCount: 32,
-      courseCount: 89,
-      createdAt: '2025-01-16T11:00:00',
-      updatedAt: '2026-01-18T09:20:00',
-    },
-    {
-      id: '3',
-      name: 'Data Science',
-      slug: 'data-science',
-      description: 'Explore data analysis, machine learning, and artificial intelligence fundamentals',
-      icon: '📊',
-      color: 'purple',
-      status: 'active',
-      tutorCount: 38,
-      courseCount: 96,
-      createdAt: '2025-01-17T09:30:00',
-      updatedAt: '2026-01-22T16:45:00',
-    },
-    {
-      id: '4',
-      name: 'Design & UX',
-      slug: 'design-ux',
-      description: 'Master UI/UX design principles, tools like Figma, and create stunning user experiences',
-      icon: '🎨',
-      color: 'pink',
-      status: 'active',
-      tutorCount: 28,
-      courseCount: 74,
-      createdAt: '2025-01-18T13:15:00',
-      updatedAt: '2026-01-25T11:30:00',
-    },
-    {
-      id: '5',
-      name: 'Cloud Computing',
-      slug: 'cloud-computing',
-      description: 'Learn AWS, Azure, Google Cloud, and modern cloud infrastructure management',
-      icon: '☁️',
-      color: 'cyan',
-      status: 'active',
-      tutorCount: 25,
-      courseCount: 67,
-      createdAt: '2025-01-19T15:45:00',
-      updatedAt: '2026-01-23T10:15:00',
-    },
-    {
-      id: '6',
-      name: 'Cybersecurity',
-      slug: 'cybersecurity',
-      description: 'Understand security principles, ethical hacking, and protect digital systems',
-      icon: '🔒',
-      color: 'red',
-      status: 'active',
-      tutorCount: 22,
-      courseCount: 54,
-      createdAt: '2025-01-20T08:20:00',
-      updatedAt: '2026-01-21T13:50:00',
-    },
-    {
-      id: '7',
-      name: 'DevOps',
-      slug: 'devops',
-      description: 'Master CI/CD, containerization, Kubernetes, and modern DevOps practices',
-      icon: '⚙️',
-      color: 'orange',
-      status: 'active',
-      tutorCount: 19,
-      courseCount: 48,
-      createdAt: '2025-01-21T12:00:00',
-      updatedAt: '2026-01-24T15:20:00',
-    },
-    {
-      id: '8',
-      name: 'Game Development',
-      slug: 'game-development',
-      description: 'Create games with Unity, Unreal Engine, and learn game design principles',
-      icon: '🎮',
-      color: 'green',
-      status: 'inactive',
-      tutorCount: 15,
-      courseCount: 42,
-      createdAt: '2025-01-22T10:30:00',
-      updatedAt: '2026-01-19T09:40:00',
-    },
-  ];
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const response = await apiClient.get('/api/admin/categories');
+      if (response.success) {
+        const mappedCategories: Category[] = response.data.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
+          description: c.description || '',
+          icon: c.icon || '💻',
+          color: c.color || 'indigo',
+          status: c.status?.toLowerCase() || 'active',
+          tutorCount: c._count?.tutor_profiles || 0,
+          courseCount: 0, // Not available in current backend
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+        }));
+        setCategories(mappedCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      toast.error('Failed to load categories');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const iconOptions = [
     '💻', '📱', '📊', '🎨', '☁️', '🔒', '⚙️', '🎮',
@@ -182,36 +109,82 @@ const AdminCategoryManagement: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleCreateCategory = () => {
-    console.log('Creating category:', formData);
-    // Here you would call your API to create the category
-    setShowCreateModal(false);
-    resetForm();
-  };
-
-  const handleEditCategory = () => {
-    if (selectedCategory) {
-      console.log('Updating category:', selectedCategory.id, formData);
-      // Here you would call your API to update the category
-      setShowEditModal(false);
-      setSelectedCategory(null);
-      resetForm();
+  const handleCreateCategory = async () => {
+    try {
+      const response = await apiClient.post('/api/admin/categories', {
+        name: formData.name,
+        description: formData.description,
+        icon: formData.icon,
+        color: formData.color,
+        status: formData.status.toUpperCase()
+      });
+      if (response.success) {
+        toast.success('Category created successfully');
+        fetchCategories();
+        setShowCreateModal(false);
+        resetForm();
+      }
+    } catch (error) {
+      console.error('Error creating category:', error);
+      toast.error('Failed to create category');
     }
   };
 
-  const handleDeleteCategory = () => {
+  const handleEditCategory = async () => {
     if (selectedCategory) {
-      console.log('Deleting category:', selectedCategory.id);
-      // Here you would call your API to delete the category
-      setShowDeleteModal(false);
-      setSelectedCategory(null);
+      try {
+        const response = await apiClient.patch(`/api/admin/categories/${selectedCategory.id}`, {
+          name: formData.name,
+          description: formData.description,
+          icon: formData.icon,
+          color: formData.color,
+          status: formData.status.toUpperCase()
+        });
+        if (response.success) {
+          toast.success('Category updated successfully');
+          fetchCategories();
+          setShowEditModal(false);
+          setSelectedCategory(null);
+          resetForm();
+        }
+      } catch (error) {
+        console.error('Error updating category:', error);
+        toast.error('Failed to update category');
+      }
     }
   };
 
-  const handleToggleStatus = (category: Category) => {
-    const newStatus = category.status === 'active' ? 'inactive' : 'active';
-    console.log(`Toggling category ${category.id} status to ${newStatus}`);
-    // Here you would call your API to update the status
+  const handleDeleteCategory = async () => {
+    if (selectedCategory) {
+      try {
+        const response = await apiClient.delete(`/api/admin/categories/${selectedCategory.id}`);
+        if (response.success) {
+          toast.success('Category deleted successfully');
+          fetchCategories();
+          setShowDeleteModal(false);
+          setSelectedCategory(null);
+        }
+      } catch (error) {
+        console.error('Error deleting category:', error);
+        toast.error('Failed to delete category');
+      }
+    }
+  };
+
+  const handleToggleStatus = async (category: Category) => {
+    const newStatus = category.status === 'active' ? 'INACTIVE' : 'ACTIVE';
+    try {
+      const response = await apiClient.patch(`/api/admin/categories/${category.id}`, {
+        status: newStatus
+      });
+      if (response.success) {
+        toast.success(`Category ${newStatus.toLowerCase()} successfully`);
+        fetchCategories();
+      }
+    } catch (error) {
+      console.error('Error toggling category status:', error);
+      toast.error('Failed to update category status');
+    }
   };
 
   const openEditModal = (category: Category) => {

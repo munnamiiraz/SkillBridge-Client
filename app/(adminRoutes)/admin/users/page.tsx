@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
 
 interface User {
@@ -55,24 +55,12 @@ const AdminUserManagement: React.FC = () => {
       
       if (activeTab !== 'all') params.role = activeTab === 'students' ? 'STUDENT' : 'TUTOR';
       if (statusFilter !== 'all') params.status = statusFilter.toUpperCase();
-      // Search might need backend support, currently not in admin.service.ts visible logic explicitly but usually filtered.
-      // admin.service.ts getUsers doesn't seem to have search for name/email in `whereClause` currently shown in `view_file` output?
-      // Wait, `getUsers` uses `whereClause`. It checks `role` and `status`. It doesn't check name/email.
-      // I will add search support in backend in next step if needed, or filter client side if dataset is small.
-      // But user asked to fetch from backend.
-      // For now, I will fetch and let backend handle filtering if it can, otherwise I might need to filter client side or update backend.
-      // Given the `getUsers` implementation I saw, it DOES NOT support search. 
-      // I will implement client-side filtering for search for now, OR I should update backend.
-      // User asked "Fetch the data from backend".
-      // I will stick to what backend provides.
       
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/admin/users`, {
-        params,
-        withCredentials: true
-      });
+      const queryString = new URLSearchParams(params).toString();
+      const response = await apiClient.get(`/api/admin/users?${queryString}`);
 
-      if (response.data.success) {
-        const { data, meta } = response.data.data;
+      if (response.success) {
+        const { data, meta } = response.data;
         
         // Map backend users to frontend model
         const mappedUsers: User[] = data.map((u: any) => ({
@@ -159,12 +147,10 @@ const AdminUserManagement: React.FC = () => {
   const confirmBanUser = async () => {
     if (userToBan) {
       try {
-        const response = await axios.patch(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/admin/users/${userToBan.id}/ban`,
-            { banReason },
-            { withCredentials: true }
-        );
-        if (response.data.success) {
+        const response = await apiClient.patch(`/api/admin/users/${userToBan.id}/ban`, {
+          banReason
+        });
+        if (response.success) {
             toast.success('User banned successfully');
             fetchUsers(); // Refresh
         }
@@ -182,12 +168,8 @@ const AdminUserManagement: React.FC = () => {
   const handleUnbanUser = async (userId: string) => {
     if (!confirm('Are you sure you want to unban this user?')) return;
     try {
-        const response = await axios.patch(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/admin/users/${userId}/unban`,
-            {},
-            { withCredentials: true }
-        );
-        if (response.data.success) {
+        const response = await apiClient.patch(`/api/admin/users/${userId}/unban`, {});
+        if (response.success) {
             toast.success('User unbanned successfully');
             fetchUsers();
         }
