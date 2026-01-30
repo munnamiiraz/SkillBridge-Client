@@ -190,7 +190,8 @@ const StudentBookingsView: React.FC = () => {
         setRating(0);
         setReviewComment('');
       } catch (err: any) {
-        alert(err.message || 'Failed to submit review');
+        console.error('Error submitting review:', err);
+        setError(err.message || 'Failed to submit review');
       }
     }
   };
