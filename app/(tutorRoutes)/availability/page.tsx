@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
+import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 
 interface TimeSlot {
@@ -20,6 +21,7 @@ interface WeeklySchedule {
 }
 
 const TutorAvailabilityPage: React.FC = () => {
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   
   const [schedule, setSchedule] = useState<WeeklySchedule>({
@@ -37,8 +39,12 @@ const TutorAvailabilityPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAvailability();
-  }, []);
+    if (session?.user?.id) {
+      fetchAvailability();
+    } else if (!sessionPending) {
+      setLoading(false);
+    }
+  }, [session?.user?.id, sessionPending]);
 
   const fetchAvailability = async () => {
     try {
@@ -202,6 +208,43 @@ const TutorAvailabilityPage: React.FC = () => {
     }, 0);
     return total + dayHours;
   }, 0);
+
+  // Loading state
+  if (loading || sessionPending) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading availability...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not authenticated
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg">
+          <svg className="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Access Denied
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Please log in to manage your availability.
+          </p>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900">

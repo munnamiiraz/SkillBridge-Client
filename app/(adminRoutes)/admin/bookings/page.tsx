@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { apiClient } from '@/lib/api-client';
+import axios from 'axios';
 import { toast } from 'sonner';
 
 interface Booking {
@@ -55,7 +55,7 @@ const AdminBookingsManagement: React.FC = () => {
 
   useEffect(() => {
     fetchBookings();
-  }, [statusFilter, paymentFilter, pagination.page]);
+  }, [statusFilter, pagination.page]);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -66,12 +66,14 @@ const AdminBookingsManagement: React.FC = () => {
       };
       
       if (statusFilter !== 'all') params.status = statusFilter.toUpperCase();
-      if (paymentFilter !== 'all') params.paymentStatus = paymentFilter.toUpperCase();
       
       const queryString = new URLSearchParams(params).toString();
-      const response = await apiClient.get(`/api/admin/bookings?${queryString}`);
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/admin/bookings?${queryString}`,
+        { withCredentials: true }
+      );
 
-      if (response.success) {
+      if (response.data.success) {
         const { data, meta } = response.data;
         
         // Map backend bookings to frontend model
@@ -103,7 +105,7 @@ const AdminBookingsManagement: React.FC = () => {
           },
           payment: {
             amount: b.price,
-            status: 'paid', // Backend doesn't have payment status yet
+            status: 'paid',
             method: 'Credit Card',
           },
           status: b.status.toLowerCase(),
@@ -128,7 +130,7 @@ const AdminBookingsManagement: React.FC = () => {
   };
 
   const stats = {
-    totalBookings: bookings.length,
+    totalBookings: pagination.total,
     upcomingBookings: bookings.filter((b) => b.status === 'upcoming').length,
     ongoingBookings: bookings.filter((b) => b.status === 'ongoing').length,
     completedBookings: bookings.filter((b) => b.status === 'completed').length,
@@ -160,11 +162,15 @@ const AdminBookingsManagement: React.FC = () => {
   const confirmCancelBooking = async () => {
     if (bookingToCancel) {
       try {
-        const response = await apiClient.patch(`/api/admin/bookings/${bookingToCancel.id}/cancel`, {
-          reason: cancelReason,
-          refundAmount: parseFloat(refundAmount)
-        });
-        if (response.success) {
+        const response = await axios.patch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/admin/bookings/${bookingToCancel.id}/cancel`,
+          {
+            reason: cancelReason,
+            refundAmount: parseFloat(refundAmount)
+          },
+          { withCredentials: true }
+        );
+        if (response.data.success) {
           toast.success('Booking cancelled successfully');
           fetchBookings();
         }
