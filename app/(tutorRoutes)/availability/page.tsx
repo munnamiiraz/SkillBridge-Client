@@ -59,7 +59,7 @@ const TutorAvailabilityPage: React.FC = () => {
           newSchedule[day] = { day, isEnabled: false, slots: [] };
         });
 
-        // Group slots by day
+        // Add slots from backend
         slots.forEach((slot: any) => {
           const dayName = slot.dayOfWeek.charAt(0) + slot.dayOfWeek.slice(1).toLowerCase();
           if (newSchedule[dayName]) {
@@ -70,13 +70,6 @@ const TutorAvailabilityPage: React.FC = () => {
               endTime: slot.endTime
             });
           }
-        });
-
-        // Loop to check if enabled days have no slots (should ideally not happen from backend but handling for UI)
-        daysOfWeek.forEach(day => {
-           if (newSchedule[day].slots.length > 0) {
-             newSchedule[day].isEnabled = true;
-           }
         });
 
         setSchedule(newSchedule);
@@ -96,7 +89,7 @@ const TutorAvailabilityPage: React.FC = () => {
         ...prev[day],
         isEnabled: !prev[day].isEnabled,
         slots: !prev[day].isEnabled && prev[day].slots.length === 0 
-          ? [{ id: Date.now().toString(), startTime: '09:00', endTime: '17:00' }]
+          ? [{ id: `temp-${Date.now()}`, startTime: '09:00', endTime: '17:00' }]
           : prev[day].slots,
       },
     }));
@@ -106,6 +99,12 @@ const TutorAvailabilityPage: React.FC = () => {
     const lastSlot = schedule[day].slots[schedule[day].slots.length - 1];
     const newStartTime = lastSlot ? lastSlot.endTime : '09:00';
     
+    // Calculate end time (at least 1 hour after start)
+    const [hours, minutes] = newStartTime.split(':').map(Number);
+    let newEndHours = hours + 8; // Default 8 hours
+    if (newEndHours > 23) newEndHours = 23;
+    const newEndTime = `${newEndHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    
     setSchedule(prev => ({
       ...prev,
       [day]: {
@@ -113,9 +112,9 @@ const TutorAvailabilityPage: React.FC = () => {
         slots: [
           ...prev[day].slots,
           {
-            id: Date.now().toString(),
+            id: `temp-${Date.now()}`,
             startTime: newStartTime,
-            endTime: '17:00',
+            endTime: newEndTime,
           },
         ],
       },
@@ -144,14 +143,67 @@ const TutorAvailabilityPage: React.FC = () => {
     }));
   };
 
+  const validateSchedule = (): { valid: boolean; error?: string } => {
+    for (const day of daysOfWeek) {
+      const dayData = schedule[day];
+      if (!dayData.isEnabled) continue;
+      
+      for (const slot of dayData.slots) {
+        const startMinutes = parseTimeToMinutes(slot.startTime);
+        const endMinutes = parseTimeToMinutes(slot.endTime);
+        
+        // Validate end time is after start time
+        if (endMinutes <= startMinutes) {
+          return { valid: false, error: `${day}: End time must be after start time` };
+        }
+        
+        // Validate minimum duration is 1 hour
+        if (endMinutes - startMinutes < 60) {
+          return { valid: false, error: `${day}: Minimum time slot duration is 1 hour` };
+        }
+        
+        // Check time is in valid range
+        if (startMinutes < 0 || startMinutes >= 1440 || endMinutes < 0 || endMinutes > 1440) {
+          return { valid: false, error: `${day}: Invalid time range` };
+        }
+      }
+      
+      // Check for overlapping slots on same day
+      for (let i = 0; i < dayData.slots.length; i++) {
+        for (let j = i + 1; j < dayData.slots.length; j++) {
+          const slot1 = dayData.slots[i];
+          const slot2 = dayData.slots[j];
+          
+          const start1 = parseTimeToMinutes(slot1.startTime);
+          const end1 = parseTimeToMinutes(slot1.endTime);
+          const start2 = parseTimeToMinutes(slot2.startTime);
+          const end2 = parseTimeToMinutes(slot2.endTime);
+          
+          if (start1 < end2 && start2 < end1) {
+            return { valid: false, error: `${day}: Time slots cannot overlap` };
+          }
+        }
+      }
+    }
+    
+    return { valid: true };
+  };
+
   const handleSaveSchedule = async () => {
+    // Validate schedule first
+    const validation = validateSchedule();
+    if (!validation.valid) {
+      toast.error(validation.error || 'Invalid schedule');
+      return;
+    }
+    
     setIsSaving(true);
 
     try {
       // Prepare data for backend
       const slotsToSave: any[] = [];
       Object.values(schedule).forEach(day => {
-        if (day.isEnabled) {
+        if (day.isEnabled && day.slots.length > 0) {
           day.slots.forEach(slot => {
             slotsToSave.push({
               dayOfWeek: day.day.toUpperCase(),
@@ -161,15 +213,15 @@ const TutorAvailabilityPage: React.FC = () => {
           });
         }
       });
-
+      console.log(slotsToSave);
       const response = await apiClient.put('/api/tutor/availability-slots', { slots: slotsToSave });
-
+      console.log(response);
       if (response.success) {
-        toast.success('Availability saved successfully');
+        toast.success('Availability saved successfully! Your time ranges have been split into 1-hour bookable slots.');
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
-        // Refresh to get new IDs etc
-        fetchAvailability();
+        // Refresh to get the data back from server
+        await fetchAvailability();
       }
     } catch (error: any) {
       console.error('Error saving schedule:', error);
@@ -190,7 +242,7 @@ const TutorAvailabilityPage: React.FC = () => {
           isEnabled: sourceDaySchedule.isEnabled,
           slots: sourceDaySchedule.slots.map(slot => ({
             ...slot,
-            id: `${day}-${Date.now()}-${Math.random()}`,
+            id: `temp-${day}-${Date.now()}-${Math.random()}`,
           })),
         };
       }
@@ -208,6 +260,8 @@ const TutorAvailabilityPage: React.FC = () => {
     }, 0);
     return total + dayHours;
   }, 0);
+
+  const totalOneHourSlots = Math.floor(totalHoursPerWeek);
 
   // Loading state
   if (loading || sessionPending) {
@@ -280,7 +334,7 @@ const TutorAvailabilityPage: React.FC = () => {
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed">
-            Define your weekly schedule so students can book sessions at times that work for you.
+            Define your weekly schedule. Students can book 1-hour sessions during your available times.
           </p>
         </div>
 
@@ -310,9 +364,26 @@ const TutorAvailabilityPage: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             }
-            label="Total Slots"
-            value={`${Object.values(schedule).reduce((total, day) => total + day.slots.length, 0)} slots`}
+            label="Bookable Slots"
+            value={`${totalOneHourSlots} slots`}
           />
+        </div>
+
+        {/* Info Banner */}
+        <div className="mb-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                How it works
+              </p>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                Set your available time ranges (e.g., 9:00 AM - 5:00 PM). These will automatically be split into 1-hour bookable slots for students. For example, 9:00 AM - 12:00 PM creates three slots: 9:00-10:00, 10:00-11:00, and 11:00-12:00.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Weekly Schedule */}
@@ -322,7 +393,7 @@ const TutorAvailabilityPage: React.FC = () => {
               Weekly Schedule
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Toggle days on/off and add time slots for each active day.
+              Toggle days on/off and add time ranges for each active day.
             </p>
           </div>
 
@@ -356,7 +427,7 @@ const TutorAvailabilityPage: React.FC = () => {
                   newSchedule[day] = {
                     ...newSchedule[day],
                     isEnabled: true,
-                    slots: [{ id: `${day}-${Date.now()}`, startTime: '09:00', endTime: '17:00' }],
+                    slots: [{ id: `temp-${day}-${Date.now()}`, startTime: '09:00', endTime: '17:00' }],
                   };
                 });
                 setSchedule(newSchedule);
@@ -374,7 +445,7 @@ const TutorAvailabilityPage: React.FC = () => {
                     ...newSchedule[day],
                     isEnabled: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(day),
                     slots: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(day)
-                      ? [{ id: `${day}-${Date.now()}`, startTime: '09:00', endTime: '17:00' }]
+                      ? [{ id: `temp-${day}-${Date.now()}`, startTime: '09:00', endTime: '17:00' }]
                       : [],
                   };
                 });
@@ -404,7 +475,7 @@ const TutorAvailabilityPage: React.FC = () => {
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="text-center sm:text-left">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Students will be able to book sessions during your available time slots.
+              Your time ranges will be converted to 1-hour bookable slots automatically.
             </p>
           </div>
           
@@ -514,7 +585,7 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
             </h3>
             {dayData.isEnabled && dayData.slots.length > 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                {dayData.slots.length} slot{dayData.slots.length !== 1 ? 's' : ''}
+                {dayData.slots.length} range{dayData.slots.length !== 1 ? 's' : ''}
               </p>
             )}
           </div>
@@ -572,7 +643,7 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                     type="button"
                     onClick={() => onRemoveSlot(day, slot.id)}
                     className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title="Remove slot"
+                    title="Remove time range"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -590,7 +661,7 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  <span>Add Time Slot</span>
+                  <span>Add Time Range</span>
                 </button>
 
                 <div className="relative">

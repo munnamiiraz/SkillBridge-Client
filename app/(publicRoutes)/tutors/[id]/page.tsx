@@ -95,17 +95,30 @@ const TutorProfilePage: React.FC = () => {
                         ],
                         availability: {
                             timezone: 'EST (UTC-5)',
-                            weekSchedule: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => {
-                                const dayOfWeekInt = idx + 1; // 1=Mon, 7=Sun
-                                const slots = (data.availability_slot || [])
-                                    .filter((s: any) => s.dayOfWeek === dayOfWeekInt)
-                                    .map((s: any) => s.startTime);
-                                return {
-                                    day,
-                                    slots,
-                                    available: slots.length > 0,
-                                };
-                            }),
+                            weekSchedule: (() => {
+                                const schedule = [];
+                                const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                                const today = new Date();
+                                
+                                for (let i = 0; i < 7; i++) {
+                                    const date = new Date(today);
+                                    date.setDate(today.getDate() + i);
+                                    
+                                    const dayIdx = date.getDay();
+                                    const dayOfWeekInt = dayIdx === 0 ? 7 : dayIdx;
+                                    
+                                    const slots = (data.availability_slot || [])
+                                        .filter((s: any) => s.dayOfWeek === dayOfWeekInt && !s.isBooked)
+                                        .map((s: any) => s.startTime);
+                                        
+                                    schedule.push({
+                                        day: `${shortDays[dayIdx]} ${date.getDate()}`,
+                                        slots,
+                                        available: slots.length > 0,
+                                    });
+                                }
+                                return schedule;
+                            })(),
                         },
                         reviews: {
                             stats: {

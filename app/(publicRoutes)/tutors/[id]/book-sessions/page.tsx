@@ -193,6 +193,7 @@ const BookSessionPage: React.FC = () => {
           notes: 'Session booked via SkillBridge profile'
         };
 
+        console.log('Booking data being sent:', bookingData);
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/student/bookings`,
           bookingData,
@@ -203,7 +204,7 @@ const BookSessionPage: React.FC = () => {
             }
           }
         );
-
+        console.log('Booking response:', response);
         if (response.data.success) {
           toast.success('Booking confirmed successfully!');
           router.push('/dashboards/bookings'); // Updated path
