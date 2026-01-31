@@ -207,7 +207,7 @@ const BookSessionPage: React.FC = () => {
         console.log('Booking response:', response);
         if (response.data.success) {
           toast.success('Booking confirmed successfully!');
-          router.push('/dashboards/bookings'); // Updated path
+          router.push('/dashboard/bookings'); // Updated path
         } else {
           toast.error(response.data.message || 'Booking failed');
         }

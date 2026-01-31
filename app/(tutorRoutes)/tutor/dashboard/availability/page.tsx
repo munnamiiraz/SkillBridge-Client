@@ -212,7 +212,7 @@ const TutorAvailabilityPage: React.FC = () => {
             });
           });
         }
-      });
+      });      
       console.log(slotsToSave);
       const response = await apiClient.put('/api/tutor/availability-slots', { slots: slotsToSave });
       console.log(response);

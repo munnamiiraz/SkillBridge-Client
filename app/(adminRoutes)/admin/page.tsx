@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
+import { getErrorMsg } from '@/lib/error-handler';
 
 interface UserStats {
   total: number;
@@ -58,7 +59,7 @@ const AdminStatsPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
-      toast.error('Failed to load platform statistics');
+      toast.error(getErrorMsg(error));
     } finally {
       setLoading(false);
     }

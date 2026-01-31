@@ -2,14 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
+import { getErrorMsg } from '@/lib/error-handler';
 
 interface Category {
   id: string;
   name: string;
-  slug: string;
   description: string;
-  icon: string;
-  color: string;
   status: 'active' | 'inactive';
   tutorCount: number;
   courseCount: number;
@@ -34,8 +32,6 @@ const AdminCategoryManagement: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    icon: '💻',
-    color: 'indigo',
     status: 'active' as 'active' | 'inactive',
   });
   const [categories, setCategories] = useState<Category[]>([]);
@@ -53,13 +49,10 @@ const AdminCategoryManagement: React.FC = () => {
         const mappedCategories: Category[] = response.data.map((c: any) => ({
           id: c.id,
           name: c.name,
-          slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
           description: c.description || '',
-          icon: c.icon || '💻',
-          color: c.color || 'indigo',
           status: c.status?.toLowerCase() || 'active',
           tutorCount: c._count?.tutor_profiles || 0,
-          courseCount: 0, // Not available in current backend
+          courseCount: 0, 
           createdAt: c.createdAt,
           updatedAt: c.updatedAt,
         }));
@@ -67,30 +60,11 @@ const AdminCategoryManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
-      toast.error('Failed to load categories');
+      toast.error(getErrorMsg(error));
     } finally {
       setLoading(false);
     }
   };
-
-  const iconOptions = [
-    '💻', '📱', '📊', '🎨', '☁️', '🔒', '⚙️', '🎮',
-    '🤖', '🧠', '📈', '🎯', '🚀', '💡', '🔧', '📚',
-    '🎓', '💼', '🌐', '📝', '🎬', '🎵', '📸', '✏️',
-  ];
-
-  const colorOptions = [
-    { name: 'Indigo', value: 'indigo', class: 'from-indigo-500 to-indigo-600' },
-    { name: 'Blue', value: 'blue', class: 'from-blue-500 to-blue-600' },
-    { name: 'Purple', value: 'purple', class: 'from-purple-500 to-purple-600' },
-    { name: 'Pink', value: 'pink', class: 'from-pink-500 to-pink-600' },
-    { name: 'Red', value: 'red', class: 'from-red-500 to-red-600' },
-    { name: 'Orange', value: 'orange', class: 'from-orange-500 to-orange-600' },
-    { name: 'Yellow', value: 'yellow', class: 'from-yellow-500 to-yellow-600' },
-    { name: 'Green', value: 'green', class: 'from-green-500 to-green-600' },
-    { name: 'Teal', value: 'teal', class: 'from-teal-500 to-teal-600' },
-    { name: 'Cyan', value: 'cyan', class: 'from-cyan-500 to-cyan-600' },
-  ];
 
   const stats = {
     totalCategories: categories.length,
@@ -114,8 +88,6 @@ const AdminCategoryManagement: React.FC = () => {
       const response = await apiClient.post('/api/admin/categories', {
         name: formData.name,
         description: formData.description,
-        icon: formData.icon,
-        color: formData.color,
         status: formData.status.toUpperCase()
       });
       if (response.success) {
@@ -126,7 +98,7 @@ const AdminCategoryManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error creating category:', error);
-      toast.error('Failed to create category');
+      toast.error(getErrorMsg(error));
     }
   };
 
@@ -136,8 +108,6 @@ const AdminCategoryManagement: React.FC = () => {
         const response = await apiClient.patch(`/api/admin/categories/${selectedCategory.id}`, {
           name: formData.name,
           description: formData.description,
-          icon: formData.icon,
-          color: formData.color,
           status: formData.status.toUpperCase()
         });
         if (response.success) {
@@ -149,7 +119,7 @@ const AdminCategoryManagement: React.FC = () => {
         }
       } catch (error) {
         console.error('Error updating category:', error);
-        toast.error('Failed to update category');
+        toast.error(getErrorMsg(error));
       }
     }
   };
@@ -166,7 +136,7 @@ const AdminCategoryManagement: React.FC = () => {
         }
       } catch (error) {
         console.error('Error deleting category:', error);
-        toast.error('Failed to delete category');
+        toast.error(getErrorMsg(error));
       }
     }
   };
@@ -183,7 +153,7 @@ const AdminCategoryManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error toggling category status:', error);
-      toast.error('Failed to update category status');
+      toast.error(getErrorMsg(error));
     }
   };
 
@@ -192,8 +162,6 @@ const AdminCategoryManagement: React.FC = () => {
     setFormData({
       name: category.name,
       description: category.description,
-      icon: category.icon,
-      color: category.color,
       status: category.status,
     });
     setShowEditModal(true);
@@ -208,27 +176,11 @@ const AdminCategoryManagement: React.FC = () => {
     setFormData({
       name: '',
       description: '',
-      icon: '💻',
-      color: 'indigo',
       status: 'active',
     });
   };
 
-  const getColorClass = (color: string) => {
-    const colorMap: Record<string, string> = {
-      indigo: 'from-indigo-500 to-indigo-600',
-      blue: 'from-blue-500 to-blue-600',
-      purple: 'from-purple-500 to-purple-600',
-      pink: 'from-pink-500 to-pink-600',
-      red: 'from-red-500 to-red-600',
-      orange: 'from-orange-500 to-orange-600',
-      yellow: 'from-yellow-500 to-yellow-600',
-      green: 'from-green-500 to-green-600',
-      teal: 'from-teal-500 to-teal-600',
-      cyan: 'from-cyan-500 to-cyan-600',
-    };
-    return colorMap[color] || 'from-indigo-500 to-indigo-600';
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -398,12 +350,12 @@ const AdminCategoryManagement: React.FC = () => {
               style={{ animationDelay: `${index * 50}ms` }}
             >
               {/* Gradient Accent */}
-              <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${getColorClass(category.color)} rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+              <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-indigo-500 to-purple-500 rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getColorClass(category.color)} flex items-center justify-center text-4xl shadow-lg`}>
-                  {category.icon}
+                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-4xl shadow-lg">
+                  📚
                 </div>
                 <div className="flex items-center gap-2">
                   <span
@@ -580,62 +532,6 @@ const AdminCategoryManagement: React.FC = () => {
                 />
               </div>
 
-              {/* Icon Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                  Icon <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-8 gap-2">
-                  {iconOptions.map((icon) => (
-                    <button
-                      key={icon}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, icon })}
-                      className={`p-3 text-2xl rounded-xl border-2 transition-all ${
-                        formData.icon === icon
-                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 scale-110'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
-                      }`}
-                    >
-                      {icon}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Color Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                  Color Theme <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-5 gap-3">
-                  {colorOptions.map((color) => (
-                    <button
-                      key={color.value}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, color: color.value })}
-                      className={`relative p-4 rounded-xl border-2 transition-all ${
-                        formData.color === color.value
-                          ? 'border-gray-900 dark:border-white scale-105'
-                          : 'border-gray-200 dark:border-gray-700'
-                      }`}
-                    >
-                      <div className={`w-full h-12 rounded-lg bg-gradient-to-br ${color.class}`}></div>
-                      <p className="text-xs font-medium text-gray-900 dark:text-white mt-2 text-center">
-                        {color.name}
-                      </p>
-                      {formData.color === color.value && (
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center">
-                          <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Status */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
@@ -667,23 +563,6 @@ const AdminCategoryManagement: React.FC = () => {
                 </div>
               </div>
 
-              {/* Preview */}
-              <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Preview</p>
-                <div className="flex items-center gap-4">
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getColorClass(formData.color)} flex items-center justify-center text-4xl shadow-lg`}>
-                    {formData.icon}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {formData.name || 'Category Name'}
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
-                      {formData.description || 'Category description will appear here'}
-                    </p>
-                  </div>
-                </div>
-              </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-3 pt-4">
@@ -735,8 +614,8 @@ const AdminCategoryManagement: React.FC = () => {
             <div className="p-6">
               {/* Category Info */}
               <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl flex items-center gap-4">
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getColorClass(selectedCategory.color)} flex items-center justify-center text-3xl shadow-lg flex-shrink-0`}>
-                  {selectedCategory.icon}
+                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
+                  📚
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-lg font-bold text-gray-900 dark:text-white truncate">

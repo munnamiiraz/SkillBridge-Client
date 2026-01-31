@@ -38,7 +38,6 @@ const Navbar: React.FC = () => {
   const navLinks: NavLink[] = [
     { label: 'Find Teachers', href: '/tutors' },
     { label: 'How It Works', href: '/how-it-works' },
-    { label: 'Pricing', href: '/pricing' },
     { label: 'About', href: '/about' },
   ];
 
@@ -141,7 +140,7 @@ const Navbar: React.FC = () => {
             {!session ? (
               <>
                 <Link
-                  href="/teach"
+                  href="/register"
                   className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
                 >
                   Become a Teacher
@@ -206,7 +205,13 @@ const Navbar: React.FC = () => {
                       </p>
                     </div>
                     <Link
-                      href={session.user.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'}
+                      href={
+                        session.user.role === 'ADMIN' 
+                          ? '/admin' 
+                          : session.user.role === 'TUTOR' 
+                            ? '/tutor/dashboard' 
+                            : '/dashboard'
+                      }
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
@@ -217,7 +222,13 @@ const Navbar: React.FC = () => {
                       Dashboard
                     </Link>
                     <Link
-                      href={session.user.role === 'ADMIN' ? '/admin/profile' : session.user.role === 'STUDENT' ? '/dashboards/profile' : '/profile'}
+                      href={
+                        session.user.role === 'ADMIN' 
+                          ? '/admin' 
+                          : session.user.role === 'TUTOR' 
+                            ? '/tutor/dashboard/profile' 
+                            : '/dashboard/profile'
+                      }
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
@@ -227,7 +238,11 @@ const Navbar: React.FC = () => {
                       My Profile
                     </Link>
                     <Link
-                      href={session.user.role === 'STUDENT' ? '/dashboards/manage-profile' : '/manage-profile'}
+                      href={
+                        session.user.role === 'TUTOR' 
+                          ? '/tutor/dashboard/manage-profile' 
+                          : '/dashboard/manage-profile'
+                      }
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
@@ -241,7 +256,7 @@ const Navbar: React.FC = () => {
                     {session.user.role === 'TUTOR' && (
                       <>
                         <Link
-                          href="/availability"
+                          href="/tutor/dashboard/availability"
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
@@ -251,7 +266,7 @@ const Navbar: React.FC = () => {
                           Availability
                         </Link>
                         <Link
-                          href="/sessions"
+                          href="/tutor/dashboard/sessions"
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
@@ -261,7 +276,7 @@ const Navbar: React.FC = () => {
                           My Sessions
                         </Link>
                         <Link
-                          href="/reviews"
+                          href="/tutor/dashboard/reviews"
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
@@ -276,7 +291,7 @@ const Navbar: React.FC = () => {
                     {/* Student-specific menu items */}
                     {session.user.role === 'STUDENT' && (
                       <Link
-                        href="/dashboards/bookings"
+                        href="/dashboard/bookings"
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
@@ -448,21 +463,37 @@ const Navbar: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Link
-                      href="/dashboard"
+                      href={
+                        session.user.role === 'ADMIN' 
+                          ? '/admin' 
+                          : session.user.role === 'TUTOR' 
+                            ? '/tutor/dashboard' 
+                            : '/dashboard'
+                      }
                       className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Dashboard
                     </Link>
                     <Link
-                      href={session.user.role === 'STUDENT' ? '/dashboards/profile' : '/profile'}
+                      href={
+                        session.user.role === 'ADMIN' 
+                          ? '/admin' 
+                          : session.user.role === 'TUTOR' 
+                            ? '/tutor/dashboard/profile' 
+                            : '/dashboard/profile'
+                      }
                       className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       My Profile
                     </Link>
                     <Link
-                      href={session.user.role === 'STUDENT' ? '/dashboards/manage-profile' : '/manage-profile'}
+                      href={
+                        session.user.role === 'TUTOR' 
+                          ? '/tutor/dashboard/manage-profile' 
+                          : '/dashboard/manage-profile'
+                      }
                       className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -473,21 +504,21 @@ const Navbar: React.FC = () => {
                     {session.user.role === 'TUTOR' && (
                       <>
                         <Link
-                          href="/availability"
+                          href="/tutor/dashboard/availability"
                           className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Availability
                         </Link>
                         <Link
-                          href="/sessions"
+                          href="/tutor/dashboard/sessions"
                           className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Sessions
                         </Link>
                         <Link
-                          href="/reviews"
+                          href="/tutor/dashboard/reviews"
                           className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
@@ -499,7 +530,7 @@ const Navbar: React.FC = () => {
                     {/* Student-specific mobile menu items */}
                     {session.user.role === 'STUDENT' && (
                       <Link
-                        href="/dashboards/bookings"
+                        href="/dashboard/bookings"
                         className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >

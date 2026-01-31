@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense } from 'react';
 
 interface Tutor {
   id: string;
@@ -24,14 +26,21 @@ interface FilterState {
   selectedSubjects: string[];
   priceRange: [number, number];
   minRating: number | null;
+  minTotalReviews: number | null;
+  category: string | null;
 }
 
-const TutorDiscoveryPage: React.FC = () => {
+const TutorDiscoveryPageContent: React.FC = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: '',
     selectedSubjects: [],
     priceRange: [0, 200],
     minRating: null,
+    minTotalReviews: null,
+    category: searchParams.get('category') || null,
   });
   
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -42,6 +51,7 @@ const TutorDiscoveryPage: React.FC = () => {
   const [totalTutors, setTotalTutors] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [categories, setCategories] = useState<any[]>([]);
   const itemsPerPage = 20;
 
   const gradients = [
@@ -66,6 +76,21 @@ const TutorDiscoveryPage: React.FC = () => {
     'Languages',
   ];
 
+  // Fetch Categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/categories`);
+        if (response.data.success) {
+          setCategories(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   useEffect(() => {
     const fetchTutors = async () => {
       setLoading(true);
@@ -85,13 +110,15 @@ const TutorDiscoveryPage: React.FC = () => {
         }
 
         if (filters.selectedSubjects.length > 0) {
-          // Backend filter takes single subject string usually, or we need to loop. 
-          // Let's send the first selected subject for now or join them if backend supported 'IN' query.
-          // The backend `searchTutors` takes `subject` string (contains). 
           params.subject = filters.selectedSubjects[0]; 
         }
 
+        if (filters.category) {
+          params.category = filters.category;
+        }
+
         if (filters.minRating) params.minRating = filters.minRating;
+        if (filters.minTotalReviews) params.minTotalReviews = filters.minTotalReviews;
         if (filters.priceRange[0] > 0) params.minPrice = filters.priceRange[0];
         if (filters.priceRange[1] < 200) params.maxPrice = filters.priceRange[1];
 
@@ -138,7 +165,9 @@ const TutorDiscoveryPage: React.FC = () => {
     (filters.searchQuery ? 1 : 0) +
     filters.selectedSubjects.length +
     (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 200 ? 1 : 0) +
-    (filters.minRating ? 1 : 0);
+    (filters.minRating ? 1 : 0) +
+    (filters.minTotalReviews ? 1 : 0) + 
+    (filters.category ? 1 : 0);
 
   const handleClearFilters = () => {
     setFilters({
@@ -146,7 +175,10 @@ const TutorDiscoveryPage: React.FC = () => {
       selectedSubjects: [],
       priceRange: [0, 200],
       minRating: null,
+      minTotalReviews: null,
+      category: null,
     });
+    router.push('/tutors');
   };
 
   const toggleSubject = (subject: string) => {
@@ -200,6 +232,7 @@ const TutorDiscoveryPage: React.FC = () => {
                 toggleSubject={toggleSubject}
                 handleClearFilters={handleClearFilters}
                 activeFilterCount={activeFilterCount}
+                categories={categories}
               />
             </div>
           </aside>
@@ -273,7 +306,7 @@ const TutorDiscoveryPage: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsMobileFilterOpen(true)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-6 py-4 bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-semibold rounded-full shadow-lg shadow-indigo-500/50 transition-all duration-300 hover:scale-105 active:scale-95"
+        className="lg:hidden fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-6 py-4 bg-linear-to-br from-indigo-600 to-purple-600 text-white font-semibold rounded-full shadow-lg shadow-indigo-500/50 transition-all duration-300 hover:scale-105 active:scale-95"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -296,9 +329,18 @@ const TutorDiscoveryPage: React.FC = () => {
           handleClearFilters={handleClearFilters}
           activeFilterCount={activeFilterCount}
           onClose={() => setIsMobileFilterOpen(false)}
+          categories={categories}
         />
       )}
     </div>
+  );
+};
+
+const TutorDiscoveryPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <TutorDiscoveryPageContent />
+    </Suspense>
   );
 };
 
@@ -310,6 +352,7 @@ interface FilterPanelProps {
   toggleSubject: (subject: string) => void;
   handleClearFilters: () => void;
   activeFilterCount: number;
+  categories: any[];
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
@@ -319,6 +362,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   toggleSubject,
   handleClearFilters,
   activeFilterCount,
+  categories,
 }) => {
   const [showAllSubjects, setShowAllSubjects] = useState(false);
   const displayedSubjects = showAllSubjects ? subjects : subjects.slice(0, 6);
@@ -361,6 +405,29 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
+          </div>
+        </div>
+
+        {/* Category Filter */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
+            Category
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => setFilters(prev => ({ ...prev, category: prev.category === category.name ? null : category.name }))}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  filters.category === category.name
+                    ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                {category.name}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -474,6 +541,29 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Reviews Filter */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
+            Minimum reviews
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {[0, 10, 20, 50].map((count) => (
+              <button
+                key={count}
+                type="button"
+                onClick={() => setFilters(prev => ({ ...prev, minTotalReviews: count || null }))}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  (filters.minTotalReviews === count || (!filters.minTotalReviews && count === 0))
+                    ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg'
+                    : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                {count === 0 ? 'Any reviews' : `${count}+ reviews`}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -553,7 +643,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor }) => {
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3 min-h-[4.5rem]">
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3 min-h-18">
               {tutor.bio}
             </p>
 
@@ -641,6 +731,7 @@ const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   handleClearFilters,
   activeFilterCount,
   onClose,
+  categories,
 }) => {
   return (
     <>
@@ -673,6 +764,7 @@ const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
             toggleSubject={toggleSubject}
             handleClearFilters={handleClearFilters}
             activeFilterCount={activeFilterCount}
+            categories={categories}
           />
         </div>
 

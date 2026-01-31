@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { getErrorMsg } from '@/lib/error-handler';
 
 interface Booking {
   id: string;
@@ -108,7 +109,7 @@ const AdminBookingsManagement: React.FC = () => {
             status: 'paid',
             method: 'Credit Card',
           },
-          status: b.status.toLowerCase(),
+          status: (b.status === 'PENDING' || b.status === 'CONFIRMED') ? 'upcoming' : b.status.toLowerCase(),
           createdAt: b.createdAt,
           notes: b.notes,
         }));
@@ -123,7 +124,7 @@ const AdminBookingsManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching bookings:', error);
-      toast.error('Failed to load bookings');
+      toast.error(getErrorMsg(error));
     } finally {
       setLoading(false);
     }
@@ -176,7 +177,7 @@ const AdminBookingsManagement: React.FC = () => {
         }
       } catch (error) {
         console.error('Error cancelling booking:', error);
-        toast.error('Failed to cancel booking');
+        toast.error(getErrorMsg(error));
       } finally {
         setShowCancelModal(false);
         setBookingToCancel(null);
@@ -539,16 +540,6 @@ const AdminBookingsManagement: React.FC = () => {
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2 mt-4">
-                  <button
-                    type="button"
-                    className="w-full px-4 py-2 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 text-indigo-700 dark:text-indigo-300 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-indigo-200 dark:border-indigo-800"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    View Details
-                  </button>
                   {(booking.status === 'upcoming' || booking.status === 'ongoing') && (
                     <button
                       type="button"
@@ -602,23 +593,62 @@ const AdminBookingsManagement: React.FC = () => {
       )}
 
       {/* Pagination */}
-      {filteredBookings.length > 0 && (
-        <div className="mt-8 flex items-center justify-between">
+      {pagination.totalPages > 1 && (
+        <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Showing <span className="font-semibold text-gray-900 dark:text-white">{filteredBookings.length}</span> of{' '}
-            <span className="font-semibold text-gray-900 dark:text-white">{bookings.length}</span> bookings
+            Showing <span className="font-semibold text-gray-900 dark:text-white">{bookings.length}</span> of{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">{pagination.total}</span> bookings
           </p>
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+              disabled={pagination.page === 1}
               className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled
             >
               Previous
             </button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                .filter(p => {
+                  // Logic to show: 1, current-1, current, current+1, last
+                  // or just some window
+                  const current = pagination.page;
+                  const total = pagination.totalPages;
+                  return p === 1 || p === total || (p >= current - 1 && p <= current + 1);
+                })
+                .map((p, i, arr) => {
+                  const elements = [];
+                  // Add ellipsis
+                  if (i > 0 && p > arr[i - 1] + 1) {
+                    elements.push(
+                      <span key={`ellipsis-${p}`} className="px-2 text-gray-400">...</span>
+                    );
+                  }
+                  elements.push(
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setPagination(prev => ({ ...prev, page: p }))}
+                      className={`w-10 h-10 flex items-center justify-center rounded-lg font-medium transition-all ${
+                        pagination.page === p
+                          ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  );
+                  return elements;
+                })}
+            </div>
+
             <button
               type="button"
-              className="px-4 py-2 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 transition-all"
+              onClick={() => setPagination(prev => ({ ...prev, page: Math.min(pagination.totalPages, prev.page + 1) }))}
+              disabled={pagination.page === pagination.totalPages}
+              className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>

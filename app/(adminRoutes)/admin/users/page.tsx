@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { getErrorMsg } from '@/lib/error-handler';
 
 interface User {
   id: string;
@@ -71,7 +72,7 @@ const AdminUserManagement: React.FC = () => {
           id: u.id,
           name: u.name,
           email: u.email,
-          avatar: u.image || (u.name ? u.name.charAt(0).toUpperCase() : '?'),
+          // avatar: u.image || (u.name ? u.name.charAt(0).toUpperCase() : '?'),
           role: u.role.toLowerCase(),
           status: u.status.toLowerCase(), // 'ACTIVE', 'BANNED' -> 'active', 'banned'
           joinDate: u.createdAt,
@@ -102,7 +103,7 @@ const AdminUserManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error('Failed to load users');
+      toast.error(getErrorMsg(error));
     } finally {
       setLoading(false);
     }
@@ -162,7 +163,7 @@ const AdminUserManagement: React.FC = () => {
         }
       } catch (error) {
         console.error('Error banning user:', error);
-        toast.error('Failed to ban user');
+        toast.error(getErrorMsg(error));
       } finally {
         setShowBanModal(false);
         setUserToBan(null);
@@ -185,7 +186,7 @@ const AdminUserManagement: React.FC = () => {
         }
       } catch (error) {
         console.error('Error unbanning user:', error);
-        toast.error('Failed to unban user');
+        toast.error(getErrorMsg(error));
       }
   };
 
@@ -216,14 +217,14 @@ const AdminUserManagement: React.FC = () => {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl">
+          <div className="p-3 bg-linear-to-br from-indigo-500 to-purple-500 rounded-xl">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
           </div>
           <div>
             <h1 className="text-3xl md:text-4xl font-bold">
-              <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+              <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                 User Management
               </span>
             </h1>
@@ -236,7 +237,7 @@ const AdminUserManagement: React.FC = () => {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          <div className="p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800">
+          <div className="p-6 bg-linear-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800">
             <div className="flex items-center gap-2 mb-2">
               <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -246,7 +247,7 @@ const AdminUserManagement: React.FC = () => {
             <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalUsers}</p>
           </div>
 
-          <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
+          <div className="p-6 bg-linear-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
             <div className="flex items-center gap-2 mb-2">
               <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -256,7 +257,7 @@ const AdminUserManagement: React.FC = () => {
             <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalStudents}</p>
           </div>
 
-          <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl border border-purple-100 dark:border-purple-800">
+          <div className="p-6 bg-linear-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl border border-purple-100 dark:border-purple-800">
             <div className="flex items-center gap-2 mb-2">
               <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -266,7 +267,7 @@ const AdminUserManagement: React.FC = () => {
             <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalTutors}</p>
           </div>
 
-          <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-100 dark:border-green-800">
+          <div className="p-6 bg-linear-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-100 dark:border-green-800">
             <div className="flex items-center gap-2 mb-2">
               <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -276,7 +277,7 @@ const AdminUserManagement: React.FC = () => {
             <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.activeUsers}</p>
           </div>
 
-          <div className="p-6 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl border border-red-100 dark:border-red-800">
+          <div className="p-6 bg-linear-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl border border-red-100 dark:border-red-800">
             <div className="flex items-center gap-2 mb-2">
               <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -286,7 +287,7 @@ const AdminUserManagement: React.FC = () => {
             <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.bannedUsers}</p>
           </div>
 
-          <div className="p-6 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-2xl border border-yellow-100 dark:border-yellow-800">
+          <div className="p-6 bg-linear-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-2xl border border-yellow-100 dark:border-yellow-800">
             <div className="flex items-center gap-2 mb-2">
               <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -310,7 +311,7 @@ const AdminUserManagement: React.FC = () => {
               onClick={() => setActiveTab(tab.key as typeof activeTab)}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 whitespace-nowrap ${
                 activeTab === tab.key
-                  ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                  ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                   : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
               }`}
             >
@@ -399,25 +400,25 @@ const AdminUserManagement: React.FC = () => {
                       className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                     />
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider min-w-[240px]">
                     User
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                     Role
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                     Stats
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                     Verification
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                     Joined
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                     Actions
                   </th>
                 </tr>
@@ -437,21 +438,21 @@ const AdminUserManagement: React.FC = () => {
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0">
+                      <div className="flex items-center gap-3 min-w-[200px] max-w-[300px]">
+                        <div className="w-12 h-12 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-lg shrink-0">
                           {user.avatar}
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-gray-900 dark:text-white truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-gray-900 dark:text-white truncate" title={user.name}>
                             {user.name}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate" title={user.email}>
                             {user.email}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
                           user.role === 'tutor'
@@ -471,8 +472,8 @@ const AdminUserManagement: React.FC = () => {
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </span>
                     </td>
-                    <td className="px-6 py-4">{getStatusBadge(user.status)}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(user.status)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm">
                         {user.role === 'tutor' ? (
                           <>
@@ -501,7 +502,7 @@ const AdminUserManagement: React.FC = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         <div
                           className={`w-2 h-2 rounded-full ${
@@ -523,12 +524,10 @@ const AdminUserManagement: React.FC = () => {
                         ></div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {formatDate(user.joinDate)}
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                      {formatDate(user.joinDate)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
@@ -615,7 +614,7 @@ const AdminUserManagement: React.FC = () => {
                 type="button"
                 onClick={() => setPagination(prev => ({ ...prev, page: Math.min(pagination.totalPages, prev.page + 1) }))}
                 disabled={pagination.page >= pagination.totalPages || loading}
-                className="px-4 py-2 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-linear-to-br from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
@@ -628,7 +627,7 @@ const AdminUserManagement: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             {/* Gradient Header */}
-            <div className="relative p-6 bg-gradient-to-br from-red-500 to-orange-500 text-white overflow-hidden">
+            <div className="relative p-6 bg-linear-to-br from-red-500 to-orange-500 text-white overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
               <div className="relative z-10 flex items-center gap-3">
                 <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
@@ -645,7 +644,7 @@ const AdminUserManagement: React.FC = () => {
 
             <div className="p-6">
               <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shrink-0">
                   {userToBan.avatar}
                 </div>
                 <div className="min-w-0">
@@ -683,7 +682,7 @@ const AdminUserManagement: React.FC = () => {
                   type="button"
                   onClick={confirmBanUser}
                   disabled={!banReason.trim()}
-                  className="flex-1 px-6 py-3 bg-gradient-to-br from-red-600 to-orange-600 text-white font-semibold rounded-xl hover:from-red-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-500/30"
+                  className="flex-1 px-6 py-3 bg-linear-to-br from-red-600 to-orange-600 text-white font-semibold rounded-xl hover:from-red-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-500/30"
                 >
                   Ban User
                 </button>

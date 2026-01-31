@@ -185,6 +185,7 @@ const StudentBookingsView: React.FC = () => {
 
     try {
       setIsCancelling(bookingId);
+      
       await apiClient.patch(`/api/student/bookings/${bookingId}/cancel`, {});
       toast.success('Booking cancelled successfully');
       await fetchBookings();

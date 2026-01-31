@@ -22,6 +22,7 @@ const FeaturedTeachersSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'teachers' | 'categories'>('teachers');
 
   const [teachers, setTeachers] = useState<Tutor[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,14 +35,31 @@ const FeaturedTeachersSection: React.FC = () => {
     'from-green-500 to-emerald-500',
   ];
 
+  const categoryIcons: Record<string, string> = {
+    'Programming': '💻',
+    'Mathematics': '📊',
+    'Languages': '🌍',
+    'Design': '🎨',
+    'Music': '🎵',
+    'Business': '💼',
+    'Science': '🔬',
+    'Arts': '🎭',
+  };
+
   useEffect(() => {
-    const fetchTutors = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/featured`);
-        const result = await response.json();
+        setIsLoading(true);
+        const [tutorsRes, categoriesRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/featured`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/categories`)
+        ]);
+
+        const tutorsResult = await tutorsRes.json();
+        const categoriesResult = await categoriesRes.json();
         
-        if (result.success) {
-          const mappedTutors = result.data.map((t: any, index: number) => ({
+        if (tutorsResult.success) {
+          const mappedTutors = tutorsResult.data.map((t: any, index: number) => ({
             id: t.id,
             name: t.user.name,
             specialty: t.headline || 'Expert Educator',
@@ -56,8 +74,23 @@ const FeaturedTeachersSection: React.FC = () => {
             bgGradient: gradients[index % gradients.length],
           }));
           setTeachers(mappedTutors);
-        } else {
-          setError(result.message || 'Failed to fetch tutors');
+        }
+
+        if (categoriesResult.success) {
+          const mappedCategories = categoriesResult.data.map((c: any, index: number) => {
+            // Count total tutors in this category across all its subjects
+            const totalTutors = c.subject?.reduce((acc: number, s: any) => acc + (s._count?.tutor_subject || 0), 0) || 0;
+            
+            return {
+              name: c.name,
+              icon: categoryIcons[c.name] || '📚',
+              teacherCount: totalTutors,
+              studentCount: 'Active', 
+              bgGradient: gradients[index % gradients.length],
+              topics: c.subject?.slice(0, 4).map((s: any) => s.name) || [],
+            };
+          });
+          setCategories(mappedCategories);
         }
       } catch (err) {
         setError('Failed to connect to the server');
@@ -67,59 +100,8 @@ const FeaturedTeachersSection: React.FC = () => {
       }
     };
 
-    fetchTutors();
+    fetchData();
   }, []);
-
-  const categories = [
-    {
-      name: 'Programming',
-      icon: '💻',
-      teacherCount: 342,
-      studentCount: '12k+',
-      bgGradient: 'from-indigo-500 to-purple-500',
-      topics: ['Web Development', 'Mobile Apps', 'Data Science', 'AI/ML'],
-    },
-    {
-      name: 'Mathematics',
-      icon: '📊',
-      teacherCount: 256,
-      studentCount: '8k+',
-      bgGradient: 'from-blue-500 to-cyan-500',
-      topics: ['Calculus', 'Statistics', 'Algebra', 'Geometry'],
-    },
-    {
-      name: 'Languages',
-      icon: '🌍',
-      teacherCount: 418,
-      studentCount: '15k+',
-      bgGradient: 'from-purple-500 to-pink-500',
-      topics: ['English', 'Spanish', 'Mandarin', 'French'],
-    },
-    {
-      name: 'Design',
-      icon: '🎨',
-      teacherCount: 189,
-      studentCount: '6k+',
-      bgGradient: 'from-pink-500 to-rose-500',
-      topics: ['Graphic Design', 'UI/UX', 'Illustration', 'Animation'],
-    },
-    {
-      name: 'Music',
-      icon: '🎵',
-      teacherCount: 201,
-      studentCount: '7k+',
-      bgGradient: 'from-orange-500 to-red-500',
-      topics: ['Piano', 'Guitar', 'Vocals', 'Music Theory'],
-    },
-    {
-      name: 'Business',
-      icon: '💼',
-      teacherCount: 167,
-      studentCount: '5k+',
-      bgGradient: 'from-green-500 to-emerald-500',
-      topics: ['Marketing', 'Finance', 'Entrepreneurship', 'Management'],
-    },
-  ];
 
   return (
     <section className="relative w-full py-24 lg:py-32 bg-gray-50 dark:bg-gray-950 overflow-hidden">
@@ -161,7 +143,7 @@ const FeaturedTeachersSection: React.FC = () => {
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              Skill Categories
+              Categories
             </button>
           </div>
         </div>
@@ -296,9 +278,10 @@ const FeaturedTeachersSection: React.FC = () => {
         {activeTab === 'categories' && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {categories.map((category, index) => (
-              <div
+              <Link
                 key={index}
-                className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-2 cursor-pointer animate-fade-in-up"
+                href={`/tutors?category=${encodeURIComponent(category.name)}`}
+                className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-2 cursor-pointer animate-fade-in-up block"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {/* Gradient Background */}
@@ -324,7 +307,7 @@ const FeaturedTeachersSection: React.FC = () => {
 
                   {/* Topics */}
                   <div className="flex flex-wrap gap-2">
-                    {category.topics.map((topic, idx) => (
+                    {category.topics.map((topic: any, idx: number) => (
                       <span
                         key={idx}
                         className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-full"
@@ -342,7 +325,7 @@ const FeaturedTeachersSection: React.FC = () => {
                     </svg>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
