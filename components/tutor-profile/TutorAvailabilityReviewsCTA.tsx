@@ -294,12 +294,15 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
 
           {/* View All Reviews Button */}
           <div className="flex justify-center pt-4">
-            <button className="group inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-2 border-gray-200 dark:border-gray-700 rounded-xl font-semibold text-gray-900 dark:text-white transition-all duration-300 hover:shadow-lg">
+            <Link 
+              href={`/tutors/${tutorSummary.id}/reviews`}
+              className="group inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-2 border-gray-200 dark:border-gray-700 rounded-xl font-semibold text-gray-900 dark:text-white transition-all duration-300 hover:shadow-lg"
+            >
               View All {reviewStats.totalReviews} Reviews
               <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 20 20" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 10H16M16 10L11 5M16 10L11 15" />
               </svg>
-            </button>
+            </Link>
           </div>
         </div>
 

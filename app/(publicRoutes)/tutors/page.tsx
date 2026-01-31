@@ -211,7 +211,7 @@ const TutorDiscoveryPageContent: React.FC = () => {
         {/* Page Header */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               Find Your Perfect Tutor
             </span>
           </h1>
@@ -421,7 +421,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 onClick={() => setFilters(prev => ({ ...prev, category: prev.category === category.name ? null : category.name }))}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   filters.category === category.name
-                    ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                    ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
@@ -444,7 +444,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 onClick={() => toggleSubject(subject)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   filters.selectedSubjects.includes(subject)
-                    ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                    ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
@@ -518,7 +518,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 onClick={() => setFilters(prev => ({ ...prev, minRating: prev.minRating === rating ? null : rating }))}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${
                   filters.minRating === rating
-                    ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                    ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                     : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
@@ -555,7 +555,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 onClick={() => setFilters(prev => ({ ...prev, minTotalReviews: count || null }))}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   (filters.minTotalReviews === count || (!filters.minTotalReviews && count === 0))
-                    ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg'
+                    ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg'
                     : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
@@ -585,7 +585,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor }) => {
           <div className="absolute inset-0 bg-linear-to-b from-black/10 to-transparent" />
         </div>
 
-        <div className="relative px-6 pb-6 mt-[-3rem]">
+        <div className="relative px-6 pb-6 -mt-12">
           {/* Avatar Section */}
           <div className="flex justify-between items-end mb-4">
             <div className="relative">

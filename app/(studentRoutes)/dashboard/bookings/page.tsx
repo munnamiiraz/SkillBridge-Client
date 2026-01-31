@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { getErrorMsg } from '@/lib/error-handler';
 
 interface Booking {
   id: string;
@@ -68,7 +69,9 @@ const StudentBookingsView: React.FC = () => {
       setBookings(transformedBookings);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch bookings');
+      const msg = getErrorMsg(err);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -191,7 +194,7 @@ const StudentBookingsView: React.FC = () => {
       await fetchBookings();
     } catch (err: any) {
       console.error('Error cancelling booking:', err);
-      toast.error(err.message || 'Failed to cancel booking');
+      toast.error(getErrorMsg(err));
     } finally {
       setIsCancelling(null);
     }
@@ -211,9 +214,10 @@ const StudentBookingsView: React.FC = () => {
         setSelectedBooking(null);
         setRating(0);
         setReviewComment('');
+        toast.success("Review submitted successfully!");
       } catch (err: any) {
         console.error('Error submitting review:', err);
-        setError(err.message || 'Failed to submit review');
+        toast.error(getErrorMsg(err));
       }
     }
   };
@@ -503,7 +507,7 @@ const StudentBookingsView: React.FC = () => {
               style={{ animationDelay: `${index * 50}ms` }}
             >
               {/* Gradient Accent */}
-              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 to-purple-500 rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-indigo-500 to-purple-500 rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
               <div className="grid lg:grid-cols-12 gap-6">
                 {/* Left Section - Tutor & Course */}
@@ -855,7 +859,7 @@ const StudentBookingsView: React.FC = () => {
                   type="button"
                   onClick={handleSubmitReview}
                   disabled={rating === 0}
-                  className="flex-1 px-6 py-3 bg-gradient-to-br from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/30"
+                  className="flex-1 px-6 py-3 bg-linear-to-br from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/30"
                 >
                   Submit Review
                 </button>

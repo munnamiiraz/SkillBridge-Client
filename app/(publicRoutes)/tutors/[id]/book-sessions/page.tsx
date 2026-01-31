@@ -7,6 +7,7 @@ import axios from 'axios';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
+import { getErrorMsg } from '@/lib/error-handler';
 
 type SessionType = 'single' | 'package';
 type FilterType = 'all' | 'today' | 'week' | 'month';
@@ -44,6 +45,8 @@ const BookSessionPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [packageNotice, setPackageNotice] = useState(false);
 
   useEffect(() => {
     const fetchTutorData = async () => {
@@ -75,12 +78,28 @@ const BookSessionPage: React.FC = () => {
             // Find slots for this day of week
             const daySlots = tutor.availability_slot
               .filter((slot: any) => slot.dayOfWeek === dayOfWeekInt)
-              .map((slot: any) => ({
-                id: slot.id,
-                time: slot.startTime,
-                available: !slot.isBooked,
-                price: tutor.hourlyRate,
-              }));
+              .map((slot: any) => {
+                const slotTime = slot.startTime; // e.g. "09:00"
+                
+                // Check if this specific date/time is already booked
+                const isAlreadyBooked = tutor.booking?.some((b: any) => {
+                  const bDate = new Date(b.scheduledAt);
+                  const [h, m] = slotTime.split(':').map(Number);
+                  
+                  return bDate.getFullYear() === date.getFullYear() &&
+                         bDate.getMonth() === date.getMonth() &&
+                         bDate.getDate() === date.getDate() &&
+                         bDate.getHours() === h &&
+                         bDate.getMinutes() === m;
+                });
+
+                return {
+                  id: slot.id,
+                  time: slotTime,
+                  available: !slot.isBooked && !isAlreadyBooked,
+                  price: tutor.hourlyRate,
+                };
+              });
               
             generatedSchedule.push({
               date: date.getDate().toString(),
@@ -161,6 +180,7 @@ const BookSessionPage: React.FC = () => {
   ];
 
   const handleBooking = async () => {
+    setBookingError(null);
     if (!session) {
       toast.error('Please login to book a session');
       router.push('/login');
@@ -219,15 +239,21 @@ const BookSessionPage: React.FC = () => {
           toast.error('Please login to book a session');
           router.push('/login');
         } else if (err.response?.status === 403) {
-          toast.error('Please verify your email to book sessions');
+          const msg = getErrorMsg(err);
+          setBookingError(msg);
+          toast.error(msg);
         } else {
-          toast.error(err.response?.data?.message || 'Failed to confirm booking');
+          const msg = getErrorMsg(err);
+          setBookingError(msg);
+          toast.error(msg);
         }
       } finally {
         setIsBooking(false);
       }
-    } else if (sessionType === 'package' && selectedPackage) {
-      toast.info('Session packages coming soon! For now, please book single sessions.');
+    } else if (sessionType === 'package') {
+      setPackageNotice(true);
+      setBookingError(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -365,13 +391,18 @@ const BookSessionPage: React.FC = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                       </div>
-                      <p className={`font-bold text-center ${
-                        sessionType === 'package'
-                          ? 'text-purple-700 dark:text-purple-300'
-                          : 'text-gray-700 dark:text-gray-300'
-                      }`}>
-                        Session Package
-                      </p>
+                      <div className="relative inline-block">
+                        <p className={`font-bold text-center ${
+                          sessionType === 'package'
+                            ? 'text-purple-700 dark:text-purple-300'
+                            : 'text-gray-700 dark:text-gray-300'
+                        }`}>
+                          Session Package
+                        </p>
+                        <span className="absolute -top-1 -right-8 px-1.5 py-0.5 bg-purple-500 text-[10px] text-white font-bold rounded flex items-center justify-center whitespace-nowrap">
+                          SOON
+                        </span>
+                      </div>
                       <p className="text-sm text-gray-500 dark:text-gray-500 text-center mt-1">
                         Save with bundles
                       </p>
@@ -466,8 +497,22 @@ const BookSessionPage: React.FC = () => {
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
                       Choose Your Package
                     </h2>
+
+                    <div className="mb-8 p-4 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl flex items-start gap-4 text-indigo-700 dark:text-indigo-300">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center shrink-0">
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-bold text-lg">Feature Coming Soon!</p>
+                        <p className="text-sm opacity-90">
+                          We are currently integrating automated package management. While we finish this up, you can book individual sessions using the "Single Session" tab above.
+                        </p>
+                      </div>
+                    </div>
                     
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="grid md:grid-cols-3 gap-6 opacity-60">
                       {packages.map((pkg) => (
                         <div
                           key={pkg.id}
@@ -542,10 +587,39 @@ const BookSessionPage: React.FC = () => {
 
           {/* Right Column - Booking Summary (Sticky) */}
           <div className="lg:col-span-1">
-            <div className="sticky top-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-xl">
+            <div className="sticky top-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-xl overflow-hidden">
+              {/* Coming Soon Ribbon */}
+              {sessionType === 'package' && (
+                <div className="absolute top-0 right-0 h-16 w-16">
+                  <div className="absolute transform translate-x-1/2 -translate-y-1/2 rotate-45 bg-purple-600 text-white text-[10px] font-bold py-1 px-10 shadow-lg">
+                    COMING SOON
+                  </div>
+                </div>
+              )}
+
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
                 Booking Summary
               </h3>
+
+              {packageNotice && sessionType === 'package' && (
+                <div className="mb-6 p-4 bg-purple-50 dark:bg-purple-900/40 border-2 border-purple-200 dark:border-purple-700 rounded-xl animate-in fade-in zoom-in duration-300">
+                  <div className="flex items-center gap-3 text-purple-700 dark:text-purple-300 mb-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-bold">Feature Restricted</span>
+                  </div>
+                  <p className="text-sm text-purple-600 dark:text-purple-400">
+                    Session packages are coming soon! We're currently working on this feature. 
+                    <button 
+                      onClick={() => {setSessionType('single'); setPackageNotice(false);}}
+                      className="block mt-2 font-bold underline"
+                    >
+                      Switch to Single Session
+                    </button>
+                  </p>
+                </div>
+              )}
 
               {/* Tutor Info */}
               <div className="flex items-center gap-3 pb-6 mb-6 border-b border-gray-200 dark:border-gray-800">
@@ -657,6 +731,17 @@ const BookSessionPage: React.FC = () => {
               </div>
 
               {/* Booking Action Buttons */}
+              {bookingError && (
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-3 text-red-700 dark:text-red-400 animate-in fade-in slide-in-from-top-2">
+                  <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="text-sm">
+                    <p className="font-bold">Booking Error</p>
+                    <p>{bookingError}</p>
+                  </div>
+                </div>
+              )}
               {!session ? (
                 <div className="mb-6 p-6 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border-2 border-dashed border-amber-300 dark:border-amber-700 animate-pulse">
                   <div className="flex flex-col items-center text-center space-y-4">
@@ -695,7 +780,7 @@ const BookSessionPage: React.FC = () => {
                       Processing...
                     </div>
                   ) : (
-                    sessionType === 'single' ? 'Confirm Booking' : 'Purchase Package'
+                    sessionType === 'single' ? 'Confirm Booking' : 'Packages Coming Soon'
                   )}
                 </button>
               )}
