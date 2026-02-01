@@ -10,19 +10,20 @@ import { authClient } from '@/lib/auth-client';
 import { getErrorMsg } from '@/lib/error-handler';
 
 type SessionType = 'single' | 'package';
-type FilterType = 'all' | 'today' | 'week' | 'month';
 
 interface TimeSlot {
   id: string;
-  time: string;
-  available: boolean;
+  date: string;
+  startTime: string;
+  endTime: string;
+  isBooked: boolean;
   price: number;
 }
 
 interface DaySchedule {
   date: string;
-  day: string;
-  fullDate: string;
+  dayName: string;
+  displayDate: string;
   slots: TimeSlot[];
 }
 
@@ -35,7 +36,7 @@ const BookSessionPage: React.FC = () => {
   const { data: session, isPending: sessionPending } = authClient.useSession();
   
   const [sessionType, setSessionType] = useState<SessionType>('single');
-  const [selectedFilter, setSelectedFilter] = useState<FilterType>('week');
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getMonday(new Date()));
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
@@ -43,10 +44,37 @@ const BookSessionPage: React.FC = () => {
   const [tutorData, setTutorData] = useState<any>(null);
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [error, setError] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [packageNotice, setPackageNotice] = useState(false);
+
+  // Helper Functions
+  function getMonday(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+  }
+
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDisplayDate = (date: Date): string => {
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const getDayName = (date: Date): string => {
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  };
 
   useEffect(() => {
     const fetchTutorData = async () => {
@@ -54,62 +82,39 @@ const BookSessionPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/${id}`);
+        console.log(response.data);
         
         if (response.data.success) {
-          const tutor = response.data.data;
-          setTutorData(tutor);
+          const data = response.data.data;
           
-          // Generate schedule for the next 7 days
-          const generatedSchedule: DaySchedule[] = [];
-          const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-          
-          const today = new Date();
-          
-          for (let i = 0; i < 7; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
+          // Organize availability slots by date and time
+          const organizedSlots = (data.availability_slot || []).reduce((acc: any, slot: any) => {
+            const dateKey = slot.specificDate ? new Date(slot.specificDate).toISOString().split('T')[0] : '';
+            if (!dateKey) return acc;
             
-            const dayIdx = date.getDay(); // 0-6 (Sun-Sat)
-            const dayOfWeekInt = dayIdx === 0 ? 7 : dayIdx; // Adjust to 1=Mon, 7=Sun
-            
-            const dayName = shortDays[dayIdx];
-            const fullDateStr = date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
-            
-            // Find slots for this day of week
-            const daySlots = tutor.availability_slot
-              .filter((slot: any) => slot.dayOfWeek === dayOfWeekInt)
-              .map((slot: any) => {
-                const slotTime = slot.startTime; // e.g. "09:00"
-                
-                // Check if this specific date/time is already booked
-                const isAlreadyBooked = tutor.booking?.some((b: any) => {
-                  const bDate = new Date(b.scheduledAt);
-                  const [h, m] = slotTime.split(':').map(Number);
-                  
-                  return bDate.getFullYear() === date.getFullYear() &&
-                         bDate.getMonth() === date.getMonth() &&
-                         bDate.getDate() === date.getDate() &&
-                         bDate.getHours() === h &&
-                         bDate.getMinutes() === m;
-                });
-
-                return {
-                  id: slot.id,
-                  time: slotTime,
-                  available: !slot.isBooked && !isAlreadyBooked,
-                  price: tutor.hourlyRate,
-                };
-              });
-              
-            generatedSchedule.push({
-              date: date.getDate().toString(),
-              day: dayName,
-              fullDate: fullDateStr,
-              slots: daySlots,
+            if (!acc[dateKey]) {
+              acc[dateKey] = [];
+            }
+            acc[dateKey].push({
+              id: slot.id,
+              startTime: slot.startTime,
+              endTime: slot.endTime,
+              isBooked: slot.isBooked
             });
-          }
+            return acc;
+          }, {});
           
-          setSchedule(generatedSchedule);
+          // Sort slots by time within each date
+          Object.keys(organizedSlots).forEach(dateKey => {
+            organizedSlots[dateKey].sort((a: any, b: any) => 
+              a.startTime.localeCompare(b.startTime)
+            );
+          });
+          
+          setTutorData({
+            ...data,
+            organizedSlots
+          });
         } else {
           setError(true);
         }
@@ -123,6 +128,99 @@ const BookSessionPage: React.FC = () => {
 
     fetchTutorData();
   }, [id]);
+
+  useEffect(() => {
+  if (!id || !tutorData) return;
+
+  const fetchAvailability = async () => {
+    try {
+      setAvailabilityLoading(true);
+
+      const weekStartDate = formatDate(currentWeekStart);
+
+      const { data: response } = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000"}/api/public/tutors/${id}?weekStartDate=${weekStartDate}`
+      );
+
+      if (!response.success) return;
+
+      const apiSlots = response.data.availability_slot ?? [];
+
+      // 1️⃣ Initialize empty week map
+      const slotsByDate: Record<string, any[]> = {};
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(currentWeekStart);
+        date.setDate(currentWeekStart.getDate() + i);
+        slotsByDate[formatDate(date)] = [];
+      }
+
+      // 2️⃣ Group slots by specificDate
+      apiSlots.forEach((slot: any) => {
+        const dateKey = formatDate(new Date(slot.specificDate));
+        if (slotsByDate[dateKey]) {
+          slotsByDate[dateKey].push(slot);
+        }
+      });
+
+      // 3️⃣ Generate schedule for UI
+      const generatedSchedule = Object.entries(slotsByDate).map(
+        ([dateKey, slots]) => {
+          const date = new Date(`${dateKey}T00:00:00Z`);
+
+          return {
+            date: date.getDate().toString(),
+            dayName: getDayName(date),
+            displayDate: dateKey,
+            slots: slots.map(slot => ({
+              ...slot,
+              price: tutorData.hourlyRate
+            }))
+          };
+        }
+      );
+
+      setSchedule(generatedSchedule);
+
+      // 4️⃣ Auto-select first available day
+      if (!selectedDay) {
+        const firstAvailableDay = generatedSchedule.find(day =>
+          day.slots.some(slot => !slot.isBooked)
+        );
+
+        if (firstAvailableDay) {
+          setSelectedDay(firstAvailableDay.displayDate);
+        }
+      }
+
+    } catch (error) {
+      console.error("Error fetching availability:", error);
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  };
+
+  fetchAvailability();
+}, [id, tutorData, currentWeekStart]);
+
+
+  const goToPreviousWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() - 7);
+    setCurrentWeekStart(newWeekStart);
+    setSelectedSlot(null);
+  };
+
+  const goToNextWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() + 7);
+    setCurrentWeekStart(newWeekStart);
+    setSelectedSlot(null);
+  };
+
+  const goToCurrentWeek = () => {
+    setCurrentWeekStart(getMonday(new Date()));
+    setSelectedSlot(null);
+  };
 
   if (loading || sessionPending) {
     return (
@@ -199,11 +297,17 @@ const BookSessionPage: React.FC = () => {
           return;
         }
 
-        // Construct date: dayInfo.fullDate is "Friday, Jan 15, 2026"
-        // slotInfo.time is "09:00"
-        const datePart = new Date(dayInfo.fullDate);
-        const [hours, minutes] = slotInfo.time.split(':');
-        datePart.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        // Construct date: dayInfo.displayDate is "2026-02-04"
+        // slotInfo.startTime is "09:00"
+        const datePart = new Date(dayInfo.displayDate + "T00:00:00.000Z");
+        const [hours, minutes] = slotInfo.startTime.split(':');
+        datePart.setUTCHours(parseInt(hours || '0'), parseInt(minutes || '0'), 0, 0);
+
+        // Client side validation
+        if (datePart <= new Date()) {
+          toast.error('This slot has already passed. Please select a future time.');
+          return;
+        }
 
         const bookingData = {
           tutorProfileId: tutorData.id,
@@ -428,29 +532,61 @@ const BookSessionPage: React.FC = () => {
                       </div>
 
                       {/* Days Grid */}
-                      <div className="grid grid-cols-5 gap-3 mb-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={goToPreviousWeek}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors border border-gray-200 dark:border-gray-700"
+                            title="Previous week"
+                          >
+                            <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={goToCurrentWeek}
+                            className="px-3 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors border border-gray-200 dark:border-gray-700"
+                          >
+                            Today
+                          </button>
+                          <button
+                            onClick={goToNextWeek}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors border border-gray-200 dark:border-gray-700"
+                            title="Next week"
+                          >
+                            <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+                        <div className="font-bold text-gray-900 dark:text-white">
+                          Week of {currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-7 gap-2 mb-6">
                         {schedule.map((day) => (
                           <button
-                            key={day.date}
-                            onClick={() => setSelectedDay(day.fullDate)}
-                            className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                              selectedDay === day.fullDate
-                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-lg'
+                            key={day.displayDate}
+                            onClick={() => setSelectedDay(day.displayDate)}
+                            className={`p-3 rounded-xl border-2 transition-all duration-300 ${
+                              selectedDay === day.displayDate
+                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
                                 : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600'
                             }`}
                           >
-                            <div className="text-xs text-gray-500 dark:text-gray-500 mb-1">
-                              {day.day}
+                            <div className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-500 mb-1">
+                              {day.dayName}
                             </div>
-                            <div className={`text-2xl font-bold mb-2 ${
-                              selectedDay === day.fullDate
+                            <div className={`text-lg font-bold ${
+                              selectedDay === day.displayDate
                                 ? 'text-indigo-600 dark:text-indigo-400'
                                 : 'text-gray-900 dark:text-white'
                             }`}>
                               {day.date}
                             </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400">
-                              {day.slots.filter(s => s.available).length} slots
+                            <div className="text-[10px] text-gray-600 dark:text-gray-400">
+                              {day.slots.filter(s => !s.isBooked).length} slots
                             </div>
                           </button>
                         ))}
@@ -460,31 +596,41 @@ const BookSessionPage: React.FC = () => {
                       {selectedDay && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                           <h3 className="font-semibold text-gray-900 dark:text-white">
-                            Available times for {selectedDay}
+                            Available times for {new Date(selectedDay + "T00:00:00.000Z").toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                           </h3>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                            {schedule
-                              .find(d => d.fullDate === selectedDay)
-                              ?.slots.map((slot) => (
-                                <button
-                                  key={slot.id}
-                                  onClick={() => slot.available && setSelectedSlot(slot.id)}
-                                  disabled={!slot.available}
-                                  className={`p-4 rounded-xl border-2 font-semibold transition-all duration-300 ${
-                                    selectedSlot === slot.id
-                                      ? 'border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 shadow-lg'
-                                      : slot.available
-                                      ? 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:border-green-300 dark:hover:border-green-600'
-                                      : 'border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'
-                                  }`}
-                                >
-                                  <div className="text-sm">{slot.time}</div>
-                                  {!slot.available && (
-                                    <div className="text-xs mt-1">Booked</div>
-                                  )}
-                                </button>
-                              ))}
-                          </div>
+                          {availabilityLoading ? (
+                            <div className="flex justify-center py-8">
+                               <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                            </div>
+                          ) : schedule.find(d => d.displayDate === selectedDay)?.slots.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">
+                                No available slots for this day.
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {schedule
+                                .find(d => d.displayDate === selectedDay)
+                                ?.slots.map((slot) => (
+                                    <button
+                                    key={slot.id}
+                                    onClick={() => !slot.isBooked && setSelectedSlot(slot.id)}
+                                    disabled={slot.isBooked}
+                                    className={`p-4 rounded-xl border-2 font-semibold transition-all duration-300 ${
+                                        selectedSlot === slot.id
+                                        ? 'border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 shadow-lg'
+                                        : !slot.isBooked
+                                        ? 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:border-green-300 dark:hover:border-green-600'
+                                        : 'border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-700 cursor-not-allowed opacity-50'
+                                    }`}
+                                    >
+                                    <div className="text-sm">{slot.startTime}</div>
+                                    {slot.isBooked && (
+                                        <div className="text-[10px] mt-1">Booked</div>
+                                    )}
+                                    </button>
+                                ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -652,7 +798,7 @@ const BookSessionPage: React.FC = () => {
                         <span className="font-semibold text-gray-900 dark:text-white">
                           {schedule
                             .flatMap(d => d.slots)
-                            .find(s => s.id === selectedSlot)?.time}
+                            .find(s => s.id === selectedSlot)?.startTime}
                         </span>
                       </div>
                     )}

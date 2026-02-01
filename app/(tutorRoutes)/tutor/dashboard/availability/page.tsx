@@ -6,12 +6,16 @@ import { toast } from 'sonner';
 
 interface TimeSlot {
   id: string;
+  date: string;
   startTime: string;
   endTime: string;
+  isBooked?: boolean;
 }
 
 interface DayAvailability {
-  day: string;
+  date: string;
+  dayName: string;
+  displayDate: string;
   isEnabled: boolean;
   slots: TimeSlot[];
 }
@@ -22,21 +26,74 @@ interface WeeklySchedule {
 
 const TutorAvailabilityPage: React.FC = () => {
   const { data: session, isPending: sessionPending } = authClient.useSession();
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   
-  const [schedule, setSchedule] = useState<WeeklySchedule>({
-    Monday: { day: 'Monday', isEnabled: false, slots: [] },
-    Tuesday: { day: 'Tuesday', isEnabled: false, slots: [] },
-    Wednesday: { day: 'Wednesday', isEnabled: false, slots: [] },
-    Thursday: { day: 'Thursday', isEnabled: false, slots: [] },
-    Friday: { day: 'Friday', isEnabled: false, slots: [] },
-    Saturday: { day: 'Saturday', isEnabled: false, slots: [] },
-    Sunday: { day: 'Sunday', isEnabled: false, slots: [] },
-  });
-
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getMonday(new Date()));
+  const [schedule, setSchedule] = useState<WeeklySchedule>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Get Monday of the current week
+  function getMonday(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+  }
+
+  // Format date to YYYY-MM-DD
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Format date for display (e.g., "Mon, Feb 3")
+  const formatDisplayDate = (date: Date): string => {
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  // Get day name
+  const getDayName = (date: Date): string => {
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  };
+
+  // Initialize week schedule
+  const initializeWeekSchedule = (weekStart: Date): WeeklySchedule => {
+    const schedule: WeeklySchedule = {};
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate() + i);
+      
+      const dateKey = formatDate(date);
+      schedule[dateKey] = {
+        date: dateKey,
+        dayName: getDayName(date),
+        displayDate: formatDisplayDate(date),
+        isEnabled: false,
+        slots: []
+      };
+    }
+    
+    return schedule;
+  };
+
+  // Get week dates array for display
+  const getWeekDates = (): string[] => {
+    const dates: string[] = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(currentWeekStart);
+      date.setDate(currentWeekStart.getDate() + i);
+      dates.push(formatDate(date));
+    }
+    return dates;
+  };
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -44,30 +101,26 @@ const TutorAvailabilityPage: React.FC = () => {
     } else if (!sessionPending) {
       setLoading(false);
     }
-  }, [session?.user?.id, sessionPending]);
+  }, [session?.user?.id, sessionPending, currentWeekStart]);
 
   const fetchAvailability = async () => {
     try {
-      const response = await apiClient.get('/api/tutor/availability-slots');
-      
+      const weekStartDate = formatDate(currentWeekStart);
+      const response = await apiClient.get(`/api/tutor/availability-slots?weekStartDate=${weekStartDate}`);
       if (response.success) {
-        const slots = response.data;
-        const newSchedule = { ...schedule };
+        const slots = response.data.slots || [];
+        const newSchedule = initializeWeekSchedule(currentWeekStart);
         
-        // Reset all days first
-        daysOfWeek.forEach(day => {
-          newSchedule[day] = { day, isEnabled: false, slots: [] };
-        });
-
-        // Add slots from backend
+        // Populate slots from backend
         slots.forEach((slot: any) => {
-          const dayName = slot.dayOfWeek.charAt(0) + slot.dayOfWeek.slice(1).toLowerCase();
-          if (newSchedule[dayName]) {
-            newSchedule[dayName].isEnabled = true;
-            newSchedule[dayName].slots.push({
+          if (newSchedule[slot.date]) {
+            newSchedule[slot.date].isEnabled = true;
+            newSchedule[slot.date].slots.push({
               id: slot.id,
+              date: slot.date,
               startTime: slot.startTime,
-              endTime: slot.endTime
+              endTime: slot.endTime,
+              isBooked: slot.isBooked
             });
           }
         });
@@ -77,42 +130,51 @@ const TutorAvailabilityPage: React.FC = () => {
     } catch (error) {
       console.error('Error fetching availability:', error);
       toast.error('Failed to load availability');
+      // Initialize empty schedule on error
+      setSchedule(initializeWeekSchedule(currentWeekStart));
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleDay = (day: string) => {
+  const toggleDay = (dateKey: string) => {
     setSchedule(prev => ({
       ...prev,
-      [day]: {
-        ...prev[day],
-        isEnabled: !prev[day].isEnabled,
-        slots: !prev[day].isEnabled && prev[day].slots.length === 0 
-          ? [{ id: `temp-${Date.now()}`, startTime: '09:00', endTime: '17:00' }]
-          : prev[day].slots,
+      [dateKey]: {
+        ...prev[dateKey],
+        isEnabled: !prev[dateKey].isEnabled,
+        slots: !prev[dateKey].isEnabled && prev[dateKey].slots.length === 0 
+          ? [{ 
+              id: `temp-${Date.now()}`, 
+              date: dateKey,
+              startTime: '09:00', 
+              endTime: '17:00' 
+            }]
+          : prev[dateKey].slots,
       },
     }));
   };
 
-  const addTimeSlot = (day: string) => {
-    const lastSlot = schedule[day].slots[schedule[day].slots.length - 1];
+  const addTimeSlot = (dateKey: string) => {
+    const dayData = schedule[dateKey];
+    const lastSlot = dayData.slots[dayData.slots.length - 1];
     const newStartTime = lastSlot ? lastSlot.endTime : '09:00';
     
     // Calculate end time (at least 1 hour after start)
     const [hours, minutes] = newStartTime.split(':').map(Number);
-    let newEndHours = hours + 8; // Default 8 hours
+    let newEndHours = hours + 8;
     if (newEndHours > 23) newEndHours = 23;
     const newEndTime = `${newEndHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     
     setSchedule(prev => ({
       ...prev,
-      [day]: {
-        ...prev[day],
+      [dateKey]: {
+        ...prev[dateKey],
         slots: [
-          ...prev[day].slots,
+          ...prev[dateKey].slots,
           {
             id: `temp-${Date.now()}`,
+            date: dateKey,
             startTime: newStartTime,
             endTime: newEndTime,
           },
@@ -121,22 +183,22 @@ const TutorAvailabilityPage: React.FC = () => {
     }));
   };
 
-  const removeTimeSlot = (day: string, slotId: string) => {
+  const removeTimeSlot = (dateKey: string, slotId: string) => {
     setSchedule(prev => ({
       ...prev,
-      [day]: {
-        ...prev[day],
-        slots: prev[day].slots.filter(slot => slot.id !== slotId),
+      [dateKey]: {
+        ...prev[dateKey],
+        slots: prev[dateKey].slots.filter(slot => slot.id !== slotId),
       },
     }));
   };
 
-  const updateTimeSlot = (day: string, slotId: string, field: 'startTime' | 'endTime', value: string) => {
+  const updateTimeSlot = (dateKey: string, slotId: string, field: 'startTime' | 'endTime', value: string) => {
     setSchedule(prev => ({
       ...prev,
-      [day]: {
-        ...prev[day],
-        slots: prev[day].slots.map(slot =>
+      [dateKey]: {
+        ...prev[dateKey],
+        slots: prev[dateKey].slots.map(slot =>
           slot.id === slotId ? { ...slot, [field]: value } : slot
         ),
       },
@@ -144,8 +206,10 @@ const TutorAvailabilityPage: React.FC = () => {
   };
 
   const validateSchedule = (): { valid: boolean; error?: string } => {
-    for (const day of daysOfWeek) {
-      const dayData = schedule[day];
+    const weekDates = getWeekDates();
+    
+    for (const dateKey of weekDates) {
+      const dayData = schedule[dateKey];
       if (!dayData.isEnabled) continue;
       
       for (const slot of dayData.slots) {
@@ -154,17 +218,17 @@ const TutorAvailabilityPage: React.FC = () => {
         
         // Validate end time is after start time
         if (endMinutes <= startMinutes) {
-          return { valid: false, error: `${day}: End time must be after start time` };
+          return { valid: false, error: `${dayData.displayDate}: End time must be after start time` };
         }
         
         // Validate minimum duration is 1 hour
         if (endMinutes - startMinutes < 60) {
-          return { valid: false, error: `${day}: Minimum time slot duration is 1 hour` };
+          return { valid: false, error: `${dayData.displayDate}: Minimum time slot duration is 1 hour` };
         }
         
         // Check time is in valid range
         if (startMinutes < 0 || startMinutes >= 1440 || endMinutes < 0 || endMinutes > 1440) {
-          return { valid: false, error: `${day}: Invalid time range` };
+          return { valid: false, error: `${dayData.displayDate}: Invalid time range` };
         }
       }
       
@@ -180,7 +244,7 @@ const TutorAvailabilityPage: React.FC = () => {
           const end2 = parseTimeToMinutes(slot2.endTime);
           
           if (start1 < end2 && start2 < end1) {
-            return { valid: false, error: `${day}: Time slots cannot overlap` };
+            return { valid: false, error: `${dayData.displayDate}: Time slots cannot overlap` };
           }
         }
       }
@@ -192,35 +256,44 @@ const TutorAvailabilityPage: React.FC = () => {
   const handleSaveSchedule = async () => {
     // Validate schedule first
     const validation = validateSchedule();
-    if (!validation.valid) {
-      toast.error(validation.error || 'Invalid schedule');
-      return;
-    }
+    // if (!validation.valid) {
+    //   toast.error(validation.error || 'Invalid schedule');
+    //   return;
+    // }
     
     setIsSaving(true);
-
     try {
       // Prepare data for backend
       const slotsToSave: any[] = [];
       Object.values(schedule).forEach(day => {
         if (day.isEnabled && day.slots.length > 0) {
           day.slots.forEach(slot => {
-            slotsToSave.push({
-              dayOfWeek: day.day.toUpperCase(),
-              startTime: slot.startTime,
-              endTime: slot.endTime
-            });
+            // Only save slots that are NOT booked
+            if (!slot.isBooked) {
+              slotsToSave.push({
+                date: slot.date,
+                startTime: slot.startTime,
+                endTime: slot.endTime
+              });
+            }
           });
         }
-      });      
+      });
+
+      if (slotsToSave.length === 0) {
+        toast.info('No new available slots to save');
+        setIsSaving(false);
+        return;
+      }
       console.log(slotsToSave);
-      const response = await apiClient.put('/api/tutor/availability-slots', { slots: slotsToSave });
+      
+      const response = await apiClient.put('/api/tutor/availability-slots', slotsToSave);
       console.log(response);
+      
       if (response.success) {
-        toast.success('Availability saved successfully! Your time ranges have been split into 1-hour bookable slots.');
+        toast.success('Availability saved successfully!');
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
-        // Refresh to get the data back from server
         await fetchAvailability();
       }
     } catch (error: any) {
@@ -231,24 +304,45 @@ const TutorAvailabilityPage: React.FC = () => {
     }
   };
 
-  const handleCopyToAll = (sourceDay: string) => {
-    const sourceDaySchedule = schedule[sourceDay];
+  const handleCopyToAll = (sourceDateKey: string) => {
+    const sourceDaySchedule = schedule[sourceDateKey];
     const newSchedule = { ...schedule };
+    const weekDates = getWeekDates();
 
-    daysOfWeek.forEach(day => {
-      if (day !== sourceDay) {
-        newSchedule[day] = {
-          ...newSchedule[day],
+    weekDates.forEach(dateKey => {
+      if (dateKey !== sourceDateKey) {
+        newSchedule[dateKey] = {
+          ...newSchedule[dateKey],
           isEnabled: sourceDaySchedule.isEnabled,
           slots: sourceDaySchedule.slots.map(slot => ({
             ...slot,
-            id: `temp-${day}-${Date.now()}-${Math.random()}`,
+            id: `temp-${dateKey}-${Date.now()}-${Math.random()}`,
+            date: dateKey
           })),
         };
       }
     });
 
     setSchedule(newSchedule);
+  };
+
+  const goToPreviousWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() - 7);
+    setCurrentWeekStart(newWeekStart);
+    setLoading(true);
+  };
+
+  const goToNextWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() + 7);
+    setCurrentWeekStart(newWeekStart);
+    setLoading(true);
+  };
+
+  const goToCurrentWeek = () => {
+    setCurrentWeekStart(getMonday(new Date()));
+    setLoading(true);
   };
 
   const totalHoursPerWeek = Object.values(schedule).reduce((total, day) => {
@@ -262,6 +356,9 @@ const TutorAvailabilityPage: React.FC = () => {
   }, 0);
 
   const totalOneHourSlots = Math.floor(totalHoursPerWeek);
+
+  const weekEndDate = new Date(currentWeekStart);
+  weekEndDate.setDate(currentWeekStart.getDate() + 6);
 
   // Loading state
   if (loading || sessionPending) {
@@ -338,6 +435,49 @@ const TutorAvailabilityPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Week Navigator */}
+        <div className="mb-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatDisplayDate(currentWeekStart)} - {formatDisplayDate(weekEndDate)}
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Week of {currentWeekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goToPreviousWeek}
+                className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                title="Previous week"
+              >
+                <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button
+                onClick={goToCurrentWeek}
+                className="px-4 py-2 bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-medium rounded-lg transition-colors"
+              >
+                This Week
+              </button>
+              
+              <button
+                onClick={goToNextWeek}
+                className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                title="Next week"
+              >
+                <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid sm:grid-cols-3 gap-6 mb-12">
           <StatCard
@@ -380,7 +520,7 @@ const TutorAvailabilityPage: React.FC = () => {
                 How it works
               </p>
               <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                Set your available time ranges (e.g., 9:00 AM - 5:00 PM). These will automatically be split into 1-hour bookable slots for students. For example, 9:00 AM - 12:00 PM creates three slots: 9:00-10:00, 10:00-11:00, and 11:00-12:00.
+                Set your available time ranges for each day (e.g., 9:00 AM - 5:00 PM). These will automatically be split into 1-hour bookable slots for students. Navigate between weeks using the arrows above to manage your schedule for different weeks.
               </p>
             </div>
           </div>
@@ -398,11 +538,11 @@ const TutorAvailabilityPage: React.FC = () => {
           </div>
 
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {daysOfWeek.map((day) => (
+            {getWeekDates().map((dateKey) => (
               <DayScheduleRow
-                key={day}
-                day={day}
-                dayData={schedule[day]}
+                key={dateKey}
+                dateKey={dateKey}
+                dayData={schedule[dateKey]}
                 onToggleDay={toggleDay}
                 onAddSlot={addTimeSlot}
                 onRemoveSlot={removeTimeSlot}
@@ -423,11 +563,11 @@ const TutorAvailabilityPage: React.FC = () => {
               type="button"
               onClick={() => {
                 const newSchedule = { ...schedule };
-                daysOfWeek.forEach(day => {
-                  newSchedule[day] = {
-                    ...newSchedule[day],
+                getWeekDates().forEach(dateKey => {
+                  newSchedule[dateKey] = {
+                    ...newSchedule[dateKey],
                     isEnabled: true,
-                    slots: [{ id: `temp-${day}-${Date.now()}`, startTime: '09:00', endTime: '17:00' }],
+                    slots: [{ id: `temp-${dateKey}-${Date.now()}`, date: dateKey, startTime: '09:00', endTime: '17:00' }],
                   };
                 });
                 setSchedule(newSchedule);
@@ -440,12 +580,14 @@ const TutorAvailabilityPage: React.FC = () => {
               type="button"
               onClick={() => {
                 const newSchedule = { ...schedule };
-                daysOfWeek.forEach(day => {
-                  newSchedule[day] = {
-                    ...newSchedule[day],
-                    isEnabled: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(day),
-                    slots: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(day)
-                      ? [{ id: `temp-${day}-${Date.now()}`, startTime: '09:00', endTime: '17:00' }]
+                const weekDates = getWeekDates();
+                weekDates.forEach((dateKey, index) => {
+                  const isWeekday = index < 5; // Monday to Friday
+                  newSchedule[dateKey] = {
+                    ...newSchedule[dateKey],
+                    isEnabled: isWeekday,
+                    slots: isWeekday
+                      ? [{ id: `temp-${dateKey}-${Date.now()}`, date: dateKey, startTime: '09:00', endTime: '17:00' }]
                       : [],
                   };
                 });
@@ -459,8 +601,8 @@ const TutorAvailabilityPage: React.FC = () => {
               type="button"
               onClick={() => {
                 const newSchedule = { ...schedule };
-                daysOfWeek.forEach(day => {
-                  newSchedule[day] = { ...newSchedule[day], isEnabled: false, slots: [] };
+                getWeekDates().forEach(dateKey => {
+                  newSchedule[dateKey] = { ...newSchedule[dateKey], isEnabled: false, slots: [] };
                 });
                 setSchedule(newSchedule);
               }}
@@ -548,17 +690,17 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value }) => {
 
 // Day Schedule Row Component
 interface DayScheduleRowProps {
-  day: string;
+  dateKey: string;
   dayData: DayAvailability;
-  onToggleDay: (day: string) => void;
-  onAddSlot: (day: string) => void;
-  onRemoveSlot: (day: string, slotId: string) => void;
-  onUpdateSlot: (day: string, slotId: string, field: 'startTime' | 'endTime', value: string) => void;
-  onCopyToAll: (day: string) => void;
+  onToggleDay: (dateKey: string) => void;
+  onAddSlot: (dateKey: string) => void;
+  onRemoveSlot: (dateKey: string, slotId: string) => void;
+  onUpdateSlot: (dateKey: string, slotId: string, field: 'startTime' | 'endTime', value: string) => void;
+  onCopyToAll: (dateKey: string) => void;
 }
 
 const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
-  day,
+  dateKey,
   dayData,
   onToggleDay,
   onAddSlot,
@@ -568,23 +710,28 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
 }) => {
   const [showCopyConfirm, setShowCopyConfirm] = useState(false);
 
+  if (!dayData) return null;
+
   return (
     <div className={`p-6 lg:p-8 transition-all duration-200 ${
       dayData.isEnabled ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
     }`}>
       <div className="flex flex-col lg:flex-row lg:items-start gap-6">
         {/* Day Toggle */}
-        <div className="flex items-center justify-between lg:w-48 flex-shrink-0">
+        <div className="flex items-center justify-between lg:w-56 flex-shrink-0">
           <div>
             <h3 className={`text-lg font-bold transition-colors ${
               dayData.isEnabled 
                 ? 'text-gray-900 dark:text-white' 
                 : 'text-gray-400 dark:text-gray-600'
             }`}>
-              {day}
+              {dayData.dayName}
             </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              {dayData.displayDate}
+            </p>
             {dayData.isEnabled && dayData.slots.length > 0 && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {dayData.slots.length} range{dayData.slots.length !== 1 ? 's' : ''}
               </p>
             )}
@@ -592,7 +739,7 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
           
           <button
             type="button"
-            onClick={() => onToggleDay(day)}
+            onClick={() => onToggleDay(dateKey)}
             className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
               dayData.isEnabled
                 ? 'bg-gradient-to-r from-indigo-600 to-purple-600'
@@ -618,12 +765,24 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                       #{index + 1}
                     </span>
                     
-                    <div className="flex items-center gap-2 flex-1">
+                    <div className="flex items-center gap-2 flex-1 relative">
+                      {slot.isBooked && (
+                        <div className="absolute -top-6 left-0 text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                          Booked Session
+                        </div>
+                      )}
+                      
                       <input
                         type="time"
                         value={slot.startTime}
-                        onChange={(e) => onUpdateSlot(day, slot.id, 'startTime', e.target.value)}
-                        className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        disabled={slot.isBooked}
+                        onChange={(e) => onUpdateSlot(dateKey, slot.id, 'startTime', e.target.value)}
+                        className={`flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
+                          slot.isBooked ? 'opacity-60 cursor-not-allowed border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-900/10' : ''
+                        }`}
                       />
                       
                       <span className="text-gray-400 dark:text-gray-600 font-medium">
@@ -633,29 +792,40 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                       <input
                         type="time"
                         value={slot.endTime}
-                        onChange={(e) => onUpdateSlot(day, slot.id, 'endTime', e.target.value)}
-                        className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        disabled={slot.isBooked}
+                        onChange={(e) => onUpdateSlot(dateKey, slot.id, 'endTime', e.target.value)}
+                        className={`flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
+                          slot.isBooked ? 'opacity-60 cursor-not-allowed border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-900/10' : ''
+                        }`}
                       />
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => onRemoveSlot(day, slot.id)}
-                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title="Remove time range"
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+                  {!slot.isBooked ? (
+                    <button
+                      type="button"
+                      onClick={() => onRemoveSlot(dateKey, slot.id)}
+                      className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      title="Remove time range"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <div className="p-2 text-amber-500 cursor-help" title="Booked slots cannot be removed">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               ))}
 
               <div className="flex flex-wrap gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => onAddSlot(day)}
+                  onClick={() => onAddSlot(dateKey)}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -684,13 +854,13 @@ const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                       />
                       <div className="absolute top-full left-0 mt-2 z-20 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-4">
                         <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                          This will overwrite all other days with {day}'s schedule. Continue?
+                          This will overwrite all other days this week with {dayData.dayName}'s schedule. Continue?
                         </p>
                         <div className="flex gap-2">
                           <button
                             type="button"
                             onClick={() => {
-                              onCopyToAll(day);
+                              onCopyToAll(dateKey);
                               setShowCopyConfirm(false);
                             }}
                             className="flex-1 px-3 py-2 bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all"
