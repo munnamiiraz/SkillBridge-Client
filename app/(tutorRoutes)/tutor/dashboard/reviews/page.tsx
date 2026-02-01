@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
 
 interface Review {
@@ -42,32 +42,21 @@ const TutorReviewsSection: React.FC = () => {
 
   useEffect(() => {
     fetchRatingStats();
-    fetchReviews();
-  }, [sortBy]);
+    fetchReviews(1);
+  }, [sortBy, filterRating]);
 
-  // Fetch more reviews when 'Load More' is clicked - implement pagination logic if needed
-  // For now simple load
+  // Fetch more reviews when 'Load More' is clicked
   const loadMore = () => {
-    if (hasMore) {
+    if (hasMore && !loading) {
         fetchReviews(page + 1);
     }
   };
 
   const fetchRatingStats = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/rating-stats`, {
-        withCredentials: true
-      });
-      if (response.data.success) {
-        const data = response.data.data;
-        // Map backend distribution (array of {Rating: 5, Count: 10, ...}) to object {5: 10, ...}
-        // Backend 'distribution' is typically array from stats query or mapped object.
-        // Looking at tutor.service.ts:
-        /*
-          distribution: [
-            { rating: 5, count: 189, percentage: ... }
-          ]
-        */
+      const response = await apiClient.get('/api/tutor/rating-stats');
+      if (response.success) {
+        const data = response.data;
         const distMap: any = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
         data.distribution.forEach((d: any) => {
             distMap[d.rating] = d.count;
@@ -85,22 +74,30 @@ const TutorReviewsSection: React.FC = () => {
   };
 
   const fetchReviews = async (pageNum = 1) => {
+    setLoading(true);
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/reviews`, {
-        params: { page: pageNum, limit: 5, sort: sortBy },
-        withCredentials: true
+      const queryParams = new URLSearchParams({
+        page: pageNum.toString(),
+        limit: '5',
+        ...(filterRating && { rating: filterRating.toString() })
       });
 
-      if (response.data.success) {
-        const newReviews = response.data.data.map((r: any) => ({
+      const response = await apiClient.get(`/api/tutor/reviews?${queryParams.toString()}`);
+
+      if (response.success) {
+        const newReviews = response.data.map((r: any) => ({
           id: r.id,
-          studentName: r.student.name,
-          studentAvatar: r.student.image ? <img src={r.student.image} alt={r.student.name} className="w-full h-full object-cover" /> : r.student.name.charAt(0).toUpperCase(),
+          studentName: r.user?.name || 'Anonymous',
+          studentAvatar: r.user?.image ? (
+            <img src={r.user.image} alt={r.user.name} className="w-full h-full object-cover" />
+          ) : (
+            (r.user?.name || 'A').toUpperCase().charAt(0)
+          ),
           rating: r.rating,
           date: r.createdAt,
           courseName: r.booking?.subject || 'Session',
           comment: r.comment,
-          helpful: 0 // Backend might not have this yet
+          helpful: 0
         }));
 
         if (pageNum === 1) {
@@ -109,7 +106,7 @@ const TutorReviewsSection: React.FC = () => {
             setReviews(prev => [...prev, ...newReviews]);
         }
         
-        setHasMore(newReviews.length === 5); // Assuming limit 5
+        setHasMore(response.meta.page < response.meta.totalPages);
         setPage(pageNum);
       }
     } catch (error) {
@@ -213,7 +210,7 @@ const TutorReviewsSection: React.FC = () => {
         {/* Header */}
         <div className="mb-16">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               Reviews & Ratings
             </span>
           </h1>
@@ -225,15 +222,15 @@ const TutorReviewsSection: React.FC = () => {
         {/* Rating Overview */}
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {/* Overall Rating Card */}
-          <div className="relative p-8 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
+          <div className="relative p-8 bg-linear-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
             <div 
-              className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-full blur-3xl"
+              className="absolute top-0 right-0 w-48 h-48 bg-linear-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-full blur-3xl"
               aria-hidden="true"
             ></div>
             
             <div className="relative z-10">
               <div className="flex items-end gap-4 mb-6">
-                <div className="text-6xl md:text-7xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <div className="text-6xl md:text-7xl font-bold bg-linear-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   {ratingStats.average.toFixed(1)}
                 </div>
                 <div className="pb-2">
@@ -248,7 +245,7 @@ const TutorReviewsSection: React.FC = () => {
               <div className="space-y-3">
                 {[5, 4, 3, 2, 1].map((star) => {
                   const count = ratingStats.distribution[star as keyof typeof ratingStats.distribution];
-                  const percentage = (count / ratingStats.total) * 100;
+                  const percentage = ratingStats.total > 0 ? (count / ratingStats.total) * 100 : 0;
 
                   return (
                     <div key={star} className="flex items-center gap-3">
@@ -262,7 +259,7 @@ const TutorReviewsSection: React.FC = () => {
                       </div>
                       <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+                          className="h-full bg-linear-to-r from-indigo-500 to-purple-500 transition-all duration-500"
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
@@ -278,9 +275,9 @@ const TutorReviewsSection: React.FC = () => {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800">
+            <div className="p-6 bg-linear-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                <div className="p-2 bg-linear-to-br from-indigo-500 to-purple-500 rounded-lg">
                   <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -290,9 +287,9 @@ const TutorReviewsSection: React.FC = () => {
               <p className="text-3xl font-bold text-gray-900 dark:text-white">98%</p>
             </div>
 
-            <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl border border-purple-100 dark:border-purple-800">
+            <div className="p-6 bg-linear-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl border border-purple-100 dark:border-purple-800">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                <div className="p-2 bg-linear-to-br from-purple-500 to-pink-500 rounded-lg">
                   <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -302,9 +299,9 @@ const TutorReviewsSection: React.FC = () => {
               <p className="text-3xl font-bold text-gray-900 dark:text-white">2.3h</p>
             </div>
 
-            <div className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800">
+            <div className="p-6 bg-linear-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-lg">
+                <div className="p-2 bg-linear-to-br from-indigo-500 to-blue-500 rounded-lg">
                   <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
@@ -314,9 +311,9 @@ const TutorReviewsSection: React.FC = () => {
               <p className="text-3xl font-bold text-gray-900 dark:text-white">87%</p>
             </div>
 
-            <div className="p-6 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-2xl border border-purple-100 dark:border-purple-800">
+            <div className="p-6 bg-linear-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-2xl border border-purple-100 dark:border-purple-800">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg">
+                <div className="p-2 bg-linear-to-br from-purple-500 to-indigo-500 rounded-lg">
                   <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
@@ -338,7 +335,7 @@ const TutorReviewsSection: React.FC = () => {
                 onClick={() => setFilterRating(null)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   filterRating === null
-                    ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                    ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                 }`}
               >
@@ -351,7 +348,7 @@ const TutorReviewsSection: React.FC = () => {
                   onClick={() => setFilterRating(rating)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
                     filterRating === rating
-                      ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                      ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                       : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                   }`}
                 >
@@ -381,7 +378,6 @@ const TutorReviewsSection: React.FC = () => {
         {/* Reviews List */}
         <div className="space-y-6">
           {reviews
-            .filter((review) => filterRating === null || review.rating === filterRating)
             .map((review, index) => (
               <div
                 key={review.id}
@@ -389,12 +385,12 @@ const TutorReviewsSection: React.FC = () => {
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Gradient Accent */}
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 to-purple-500 rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-indigo-500 to-purple-500 rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                 <div className="flex flex-col lg:flex-row gap-6">
                   {/* Avatar & Student Info */}
-                  <div className="flex items-start gap-4 lg:w-64 flex-shrink-0">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg overflow-hidden">
+                  <div className="flex items-start gap-4 lg:w-64 shrink-0">
+                    <div className="w-14 h-14 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg overflow-hidden">
                       {review.studentAvatar}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -414,7 +410,7 @@ const TutorReviewsSection: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-4">
                       <RatingStars rating={review.rating} />
-                      <span className="px-3 py-1 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border border-indigo-100 dark:border-indigo-800 rounded-full text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                      <span className="px-3 py-1 bg-linear-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border border-indigo-100 dark:border-indigo-800 rounded-full text-sm font-medium text-indigo-700 dark:text-indigo-300">
                         {review.rating}.0
                       </span>
                     </div>
@@ -426,7 +422,7 @@ const TutorReviewsSection: React.FC = () => {
                     <div className="flex items-center gap-4">
                       <button
                         type="button"
-                        className="group/btn flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gradient-to-br hover:from-indigo-500 hover:to-purple-500 hover:text-white text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-all duration-200"
+                        className="group/btn flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-linear-to-br hover:from-indigo-500 hover:to-purple-500 hover:text-white text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-all duration-200"
                       >
                         <svg
                           className="w-4 h-4"
@@ -463,7 +459,7 @@ const TutorReviewsSection: React.FC = () => {
             type="button"
             onClick={loadMore}
             disabled={!hasMore || loading}
-            className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 hover:from-indigo-600 hover:to-purple-600 text-gray-700 dark:text-gray-300 hover:text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group inline-flex items-center gap-2 px-8 py-4 bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 hover:from-indigo-600 hover:to-purple-600 text-gray-700 dark:text-gray-300 hover:text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span>{loading ? 'Loading...' : hasMore ? 'Load More Reviews' : 'No More Reviews'}</span>
             <svg

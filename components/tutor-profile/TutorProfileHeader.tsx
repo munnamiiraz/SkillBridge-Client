@@ -27,8 +27,12 @@ export const TutorProfileInfo: React.FC<TutorProfileHeaderProps> = ({ tutor }) =
     <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
       {/* Avatar */}
       <div className="relative shrink-0">
-        <div className={`w-32 h-32 sm:w-40 sm:h-40 rounded-3xl bg-linear-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold text-4xl sm:text-5xl shadow-2xl border-4 border-white dark:border-gray-900`}>
-          {tutor.avatar}
+        <div className={`w-32 h-32 sm:w-40 sm:h-40 rounded-3xl bg-linear-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold text-4xl sm:text-5xl shadow-2xl border-4 border-white dark:border-gray-900 overflow-hidden`}>
+          {tutor.avatar?.startsWith('http') || tutor.avatar?.startsWith('/') ? (
+            <img src={tutor.avatar} alt={tutor.name} className="w-full h-full object-cover" />
+          ) : (
+            tutor.avatar
+          )}
         </div>
         {/* Verified Badge */}
         {tutor.verified && (

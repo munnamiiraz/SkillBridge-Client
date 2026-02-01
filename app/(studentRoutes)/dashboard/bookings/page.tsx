@@ -76,13 +76,25 @@ const StudentBookingsView: React.FC = () => {
       setLoading(false);
     }
   };
+  const formatUTCDate = (date: Date): string => {
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD
+  };
 
+  const formatUTCTime = (date: Date): string => {
+    const h = date.getUTCHours();
+    const m = date.getUTCMinutes();
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  };
   const transformBooking = (booking: any): Booking => {
-    const scheduledDate = new Date(booking.scheduledAt);
-    const now = new Date();
-    const sessionEndTime = new Date(scheduledDate.getTime() + booking.duration * 60000);
-    
+    const scheduledDate = new Date(booking.scheduledAt); // UTC
+    const sessionEndTime = new Date(
+      scheduledDate.getTime() + booking.duration * 60000
+    );
+
+    const now = new Date(); // current time (UTC internally)
+
     let status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled' = 'upcoming';
+
     if (booking.status === 'CANCELLED') {
       status = 'cancelled';
     } else if (booking.status === 'COMPLETED') {
@@ -96,7 +108,11 @@ const StudentBookingsView: React.FC = () => {
     }
 
     const tutorName = booking.tutor_profile?.user?.name || 'Unknown Tutor';
-    const initials = tutorName.split(' ').map((n: string) => n[0]).join('').toUpperCase();
+    const initials = tutorName
+      .split(' ')
+      .map((n: string) => n[0])
+      .join('')
+      .toUpperCase();
 
     return {
       id: booking.id,
@@ -114,8 +130,9 @@ const StudentBookingsView: React.FC = () => {
         category: 'Learning',
       },
       session: {
-        date: scheduledDate.toISOString().split('T')[0],
-        time: scheduledDate.toTimeString().slice(0, 5),
+        // ✅ UTC-safe extraction
+        date: formatUTCDate(scheduledDate),
+        time: formatUTCTime(scheduledDate),
         duration: booking.duration,
         type: 'video',
         meetingLink: booking.meetingLink,
@@ -126,16 +143,20 @@ const StudentBookingsView: React.FC = () => {
       },
       status,
       createdAt: booking.createdAt,
-      completedAt: booking.status === 'COMPLETED' ? booking.updatedAt : undefined,
+      completedAt:
+        booking.status === 'COMPLETED' ? booking.updatedAt : undefined,
       hasReview: !!booking.review,
-      review: booking.review ? {
-        id: booking.review.id,
-        rating: booking.review.rating,
-        comment: booking.review.comment || '',
-        createdAt: booking.review.createdAt,
-      } : undefined,
+      review: booking.review
+        ? {
+            id: booking.review.id,
+            rating: booking.review.rating,
+            comment: booking.review.comment || '',
+            createdAt: booking.review.createdAt,
+          }
+        : undefined,
     };
   };
+
 
   const upcomingBookings = bookings.filter((b) => b.status === 'upcoming');
   const ongoingBookings = bookings.filter((b) => b.status === 'ongoing');

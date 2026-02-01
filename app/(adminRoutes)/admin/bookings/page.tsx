@@ -3,42 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { getErrorMsg } from '@/lib/error-handler';
-
-interface Booking {
-  id: string;
-  bookingNumber: string;
-  student: {
-    id: string;
-    name: string;
-    email: string;
-    avatar: string;
-  };
-  tutor: {
-    id: string;
-    name: string;
-    email: string;
-    avatar: string;
-  };
-  course: {
-    id: string;
-    name: string;
-    category: string;
-  };
-  session: {
-    date: string;
-    time: string;
-    duration: number;
-    type: 'video' | 'audio' | 'in-person';
-  };
-  payment: {
-    amount: number;
-    status: 'paid' | 'pending' | 'refunded' | 'failed';
-    method: string;
-  };
-  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled' | 'no-show';
-  createdAt: string;
-  notes?: string;
-}
+import { Booking } from '@/app/admin/bookings.service';
 
 const AdminBookingsManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');

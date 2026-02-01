@@ -40,9 +40,16 @@ const TutorSessionsPage: React.FC = () => {
     fetchSessions();
   }, []);
 
+  const formatUTCTime = (date: Date): string => {
+  const h = date.getUTCHours();
+  const m = date.getUTCMinutes();
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
+
   const fetchSessions = async () => {
     try {
       const response = await apiClient.get('/api/tutor/sessions');
+      console.log(response);
       
       if (response.success) {
         // Map backend data to frontend model
@@ -57,9 +64,12 @@ const TutorSessionsPage: React.FC = () => {
           subject: booking.subject || 'General Session',
           date: booking.scheduledAt, 
           // Extract time from scheduledAt date object
-          startTime: new Date(booking.scheduledAt).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+          startTime: formatUTCTime(new Date(booking.scheduledAt)),
           // Calculate end time based on duration
-          endTime: new Date(new Date(booking.scheduledAt).getTime() + booking.duration * 60000).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+          endTime: formatUTCTime(
+            new Date(new Date(booking.scheduledAt).getTime() + 1 * 60 * 60 * 1000)
+          ),
+
           status: booking.status.toLowerCase(),
           duration: booking.duration,
           meetingLink: booking.meetingLink,
@@ -100,26 +110,36 @@ const TutorSessionsPage: React.FC = () => {
     return false;
   });
 
-  const handleMarkAsComplete = async (sessionId: string) => {
+  const handleUpdateStatus = async (sessionId: string, newStatus: string) => {
+    // Avoid re-triggering if already updating
+    if (isMarkingComplete) return;
+    
     setIsMarkingComplete(true);
     
     try {
       const response = await apiClient.patch(`/api/tutor/sessions/${sessionId}/status`, {
-        status: 'COMPLETED'
+        status: newStatus
       });
 
       if (response.success) {
-        toast.success('Session marked as complete');
+        toast.success(`Session status updated to ${newStatus}`);
         // Refresh sessions to show update
         fetchSessions();
+        if (selectedSession && selectedSession.id === sessionId) {
+          // Update selected session in modal if open
+           setSelectedSession(prev => prev ? { ...prev, status: newStatus.toLowerCase() as any } : null);
+        }
       }
     } catch (error) {
-      console.error('Error marking session as complete:', error);
+      console.error('Error updating session status:', error);
       toast.error('Failed to update session status');
     } finally {
       setIsMarkingComplete(false);
-      setSelectedSession(null);
     }
+  };
+
+  const handleMarkAsComplete = async (sessionId: string) => {
+      await handleUpdateStatus(sessionId, 'COMPLETED');
   };
 
   const stats = {
@@ -268,6 +288,7 @@ const TutorSessionsPage: React.FC = () => {
                 key={session.id}
                 session={session}
                 onMarkComplete={handleMarkAsComplete}
+                onUpdateStatus={handleUpdateStatus}
                 onViewDetails={setSelectedSession}
                 isMarkingComplete={isMarkingComplete}
               />
@@ -284,6 +305,7 @@ const TutorSessionsPage: React.FC = () => {
           session={selectedSession}
           onClose={() => setSelectedSession(null)}
           onMarkComplete={handleMarkAsComplete}
+          onUpdateStatus={handleUpdateStatus}
           isMarkingComplete={isMarkingComplete}
         />
       )}
@@ -361,11 +383,12 @@ const TabButton: React.FC<TabButtonProps> = ({ active, onClick, label, count, ic
 interface SessionCardProps {
   session: Session;
   onMarkComplete: (sessionId: string) => void;
+  onUpdateStatus: (sessionId: string, status: string) => void;
   onViewDetails: (session: Session) => void;
   isMarkingComplete: boolean;
 }
 
-const SessionCard: React.FC<SessionCardProps> = ({ session, onMarkComplete, onViewDetails, isMarkingComplete }) => {
+const SessionCard: React.FC<SessionCardProps> = ({ session, onMarkComplete, onUpdateStatus, onViewDetails, isMarkingComplete }) => {
   const isInProgress = session.status === 'in-progress';
   const isCompleted = session.status === 'completed';
   const isUpcoming = session.status === 'upcoming';
@@ -432,21 +455,39 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, onMarkComplete, onVi
             </div>
           </div>
 
-          {/* Status Badge */}
-          <div className="flex items-center gap-3">
-            {isInProgress && (
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-semibold rounded-lg">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                In Progress
-              </span>
-            )}
-            
-            {isCompleted && session.rating && (
-              <div className="flex items-center gap-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            {/* Status Selector */}
+            <div className="flex items-center gap-2">
+               <div className="relative">
+                <select
+                  value={session.status.toUpperCase()}
+                  onChange={(e) => onUpdateStatus(session.id, e.target.value)}
+                  disabled={isMarkingComplete}
+                  className={`appearance-none pl-3 pr-8 py-2 rounded-lg text-sm font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
+                    isInProgress 
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800'
+                      : isCompleted
+                      ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+                      : session.status === 'cancelled'
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800'
+                      : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800'
+                  }`}
+                >
+                  <option value="PENDING">PENDING</option>
+                  <option value="CONFIRMED">CONFIRMED</option>
+                  <option value="ONGOING">ONGOING</option>
+                  <option value="COMPLETED">COMPLETED</option>
+                  <option value="CANCELLED">CANCELLED</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <svg className="w-4 h-4 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+
+             {isCompleted && session.rating && (
+              <div className="flex items-center gap-1 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <span className="text-sm font-bold text-gray-900 dark:text-white">
@@ -455,7 +496,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, onMarkComplete, onVi
               </div>
             )}
 
-            <div className="px-4 py-2 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-sm font-bold rounded-lg shadow-sm">
+            <div className="px-4 py-2 bg-linear-to-br from-indigo-500 to-purple-500 text-white text-sm font-bold rounded-lg shadow-sm">
               ${session.price}
             </div>
           </div>
@@ -467,7 +508,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, onMarkComplete, onVi
                 type="button"
                 onClick={() => onMarkComplete(session.id)}
                 disabled={isMarkingComplete}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
               >
                 {isMarkingComplete ? (
                   <>
@@ -493,7 +534,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, onMarkComplete, onVi
                 href={session.meetingLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -588,6 +629,7 @@ interface SessionDetailsModalProps {
   session: Session;
   onClose: () => void;
   onMarkComplete: (sessionId: string) => void;
+  onUpdateStatus: (sessionId: string, status: string) => void;
   isMarkingComplete: boolean;
 }
 
@@ -595,6 +637,7 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
   session, 
   onClose, 
   onMarkComplete,
+  onUpdateStatus,
   isMarkingComplete 
 }) => {
   const formatDate = (date: string) => {
@@ -764,34 +807,33 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
             )}
           </div>
 
-          {/* Footer Actions */}
-          {session.status === 'in-progress' && (
+            {/* Footer Actions - Status Update */}
             <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-8 py-6">
-              <button
-                type="button"
-                onClick={() => onMarkComplete(session.id)}
-                disabled={isMarkingComplete}
-                className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
-              >
-                {isMarkingComplete ? (
-                  <>
-                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Marking as Complete...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Mark Session as Complete</span>
-                  </>
-                )}
-              </button>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">
+                    Current Status:
+                  </span>
+                  <div className="relative flex-1 max-w-xs">
+                    <select
+                      value={session.status.toUpperCase()}
+                      onChange={(e) => onUpdateStatus(session.id, e.target.value)}
+                      disabled={isMarkingComplete}
+                      className="w-full appearance-none px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="PENDING">PENDING</option>
+                      <option value="CONFIRMED">CONFIRMED</option>
+                      <option value="ONGOING">ONGOING</option>
+                      <option value="COMPLETED">COMPLETED</option>
+                      <option value="CANCELLED">CANCELLED</option>
+                    </select>
+                     <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                  </div>
+                </div>
             </div>
-          )}
         </div>
       </div>
     </>

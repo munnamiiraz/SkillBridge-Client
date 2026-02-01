@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
+import { boolean } from 'better-auth';
 
 interface TimeSlot {
   id: string;
@@ -11,6 +12,12 @@ interface TimeSlot {
   endTime: string;
   isBooked?: boolean;
 }
+type Slot = {
+  date: string;      // YYYY-MM-DD
+  startTime: string; // HH:mm
+  endTime: string;   // HH:mm
+};
+
 
 interface DayAvailability {
   date: string;
@@ -48,6 +55,17 @@ const TutorAvailabilityPage: React.FC = () => {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+  const timeToMinutes = (time: string): number => {
+    const [h, m] = time.split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  const minutesToTime = (minutes: number): string => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  };
+
 
   // Format date for display (e.g., "Mon, Feb 3")
   const formatDisplayDate = (date: Date): string => {
@@ -264,7 +282,9 @@ const TutorAvailabilityPage: React.FC = () => {
     setIsSaving(true);
     try {
       // Prepare data for backend
-      const slotsToSave: any[] = [];
+      let slotsToSave: any[] = [];
+      console.log("Schedule: ", schedule);
+      
       Object.values(schedule).forEach(day => {
         if (day.isEnabled && day.slots.length > 0) {
           day.slots.forEach(slot => {
@@ -279,13 +299,50 @@ const TutorAvailabilityPage: React.FC = () => {
           });
         }
       });
+      
+      
+      const splitSlotsIntoHourly = (slots: Slot[]): Slot[] => {
+        const result: Slot[] = [];
+
+        for (const slot of slots) {
+          let start = timeToMinutes(slot.startTime);
+          const end = timeToMinutes(slot.endTime);
+
+          while (start + 60 <= end) {
+            result.push({
+              date: slot.date,
+              startTime: minutesToTime(start),
+              endTime: minutesToTime(start + 60),
+            });
+
+            start += 60;
+          }
+        }
+
+        return result;
+      };
+
+      slotsToSave = splitSlotsIntoHourly(slotsToSave)
+      console.log(slotsToSave);
+
+      const checkEveryDateIsInFuture = (slots: Slot[]) => {
+        const today = new Date();
+        return slots.every(slot => new Date(slot.date) > today);
+      }
+
+      const isEveryDateInFuture = checkEveryDateIsInFuture(slotsToSave);
+      
+      if(!isEveryDateInFuture){
+        toast.error('All slots must be in the future');
+        setIsSaving(false);
+        return;
+      }
 
       if (slotsToSave.length === 0) {
         toast.info('No new available slots to save');
         setIsSaving(false);
         return;
       }
-      console.log(slotsToSave);
       
       const response = await apiClient.put('/api/tutor/availability-slots', slotsToSave);
       console.log(response);

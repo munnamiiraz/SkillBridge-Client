@@ -93,11 +93,11 @@ const TutorProfilePage: React.FC = () => {
     header: {
       id: profile.id,
       name: profile.user.name,
-      avatar: initials,
+      avatar: profile.user.image || initials,
       primarySubjects: profile.tutor_subject?.slice(0, 2).map((ts: any) => ts.subject.name) || [],
       tagline: profile.headline || 'SkillBridge Tutor',
-      rating: profile.averageRating || 0,
-      reviewCount: profile.totalReviews || 0,
+      rating: profile.ratingStats?.averageRating || profile.averageRating || 0,
+      reviewCount: profile.ratingStats?.totalReviews || profile.totalReviews || 0,
       totalStudents: profile.totalSessions || 0,
       responseTime: '< 2 hours',
       pricePerSession: profile.hourlyRate,
@@ -159,9 +159,9 @@ const TutorProfilePage: React.FC = () => {
     },
     reviews: {
       stats: {
-        averageRating: profile.averageRating || 0,
-        totalReviews: profile.totalReviews || 0,
-        breakdown: [
+        averageRating: profile.ratingStats?.averageRating || 0,
+        totalReviews: profile.ratingStats?.totalReviews || 0,
+        breakdown: profile.ratingStats?.distribution || [
           { stars: 5, count: 0, percentage: 0 },
           { stars: 4, count: 0, percentage: 0 },
           { stars: 3, count: 0, percentage: 0 },
@@ -169,7 +169,15 @@ const TutorProfilePage: React.FC = () => {
           { stars: 1, count: 0, percentage: 0 },
         ],
       },
-      recent: [],
+      recent: profile.recentReviews?.map((r: any) => ({
+        name: r.user?.name || 'Anonymous Student',
+        avatar: (r.user?.name || 'A').split(' ').map((n: string) => n[0]).join('').toUpperCase(),
+        rating: r.rating,
+        date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        subject: r.booking?.subject || 'Learning',
+        review: r.comment || '',
+        verified: true,
+      })) || [],
     },
     summary: {
       id: profile.id,
@@ -177,7 +185,7 @@ const TutorProfilePage: React.FC = () => {
       subjects: profile.tutor_subject?.length > 0 ? profile.tutor_subject[0].subject.name : 'Various',
       experience: `${profile.experience} years`,
       students: profile.totalSessions || 0,
-      rating: profile.averageRating || 0,
+      rating: profile.ratingStats?.averageRating || profile.averageRating || 0,
     },
   };
 
