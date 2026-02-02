@@ -25,11 +25,10 @@ const LoginPage: React.FC = () => {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      const data = await authClient.signIn.social({
+      await authClient.signIn.social({
         provider: 'google',
-        callbackURL: process.env.APP_URL || 'http://localhost:3000'
+        callbackURL: 'http://localhost:3000/complete-profile'
       })
-      console.log('Login successful!', data);
     } catch (err) {
       console.error('Login error:', err);
       toast.error('An unexpected error occurred during login.');
@@ -48,9 +47,14 @@ const LoginPage: React.FC = () => {
         password: formData.password,
         rememberMe: rememberMe,
       }, {
-        onSuccess: () => {
+        onSuccess: (ctx) => {
           toast.success('Login successful! Welcome back.');
-          router.push('/');
+          // If phone is missing, it's an incomplete profile
+          if (!ctx.data.user.phone || ctx.data.user.phone === 'N/A') {
+            router.push('/complete-profile');
+          } else {
+            router.push('/');
+          }
         },
         onError: (ctx) => {
           toast.error(ctx.error.message || 'Login failed. Please check your credentials.');
