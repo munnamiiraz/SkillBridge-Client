@@ -59,7 +59,7 @@ const HowItWorksSection: React.FC = () => {
         {/* Section Header */}
         <div className="text-center mb-16 lg:mb-20 animate-fade-in-up">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               How It Works
             </span>
           </h2>
@@ -79,19 +79,19 @@ const HowItWorksSection: React.FC = () => {
               {/* Connector Line (Desktop Only) */}
               {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-16 left-full w-full h-0.5 -z-10">
-                  <div className="w-full h-full bg-gradient-to-r from-indigo-300 via-purple-300 to-transparent dark:from-indigo-700/50 dark:via-purple-700/50 dark:to-transparent"></div>
+                  <div className="w-full h-full bg-linear-to-r from-indigo-300 via-purple-300 to-transparent dark:from-indigo-700/50 dark:via-purple-700/50 dark:to-transparent"></div>
                 </div>
               )}
 
               {/* Step Card */}
               <div className="relative h-full p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-1">
                 {/* Number Badge */}
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-xl shadow-indigo-500/30 dark:shadow-indigo-500/50 ring-4 ring-white dark:ring-gray-900">
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-linear-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-xl shadow-indigo-500/30 dark:shadow-indigo-500/50 ring-4 ring-white dark:ring-gray-900">
                   {step.number}
                 </div>
 
                 {/* Icon Container */}
-                <div className="mb-6 w-16 h-16 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                <div className="mb-6 w-16 h-16 bg-linear-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                   {step.icon}
                 </div>
 
@@ -106,7 +106,7 @@ const HowItWorksSection: React.FC = () => {
                 </div>
 
                 {/* Hover Glow Effect */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/5 group-hover:to-purple-500/5 dark:group-hover:from-indigo-500/10 dark:group-hover:to-purple-500/10 transition-all duration-300 -z-10"></div>
+                <div className="absolute inset-0 rounded-2xl bg-linear-to-br from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/5 group-hover:to-purple-500/5 dark:group-hover:from-indigo-500/10 dark:group-hover:to-purple-500/10 transition-all duration-300 -z-10"></div>
               </div>
             </div>
           ))}
@@ -117,7 +117,7 @@ const HowItWorksSection: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             Ready to start your learning journey?
           </p>
-          <button className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40">
+          <button className="group inline-flex items-center gap-2 px-8 py-4 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40">
             <Link
              href="/tutors">Get Started Now</Link>
             <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 20 20" stroke="currentColor">

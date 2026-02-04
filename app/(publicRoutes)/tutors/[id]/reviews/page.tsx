@@ -144,9 +144,9 @@ const TutorReviewsPage: React.FC = () => {
         {/* Reviews List */}
         <div className="space-y-6">
           {reviews.length > 0 ? (
-            reviews.map((review) => (
+            reviews.map((review, index) => (
               <div
-                key={review.id}
+                key={index}
                 className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-300"
               >
                 <div className="flex items-start gap-4">

@@ -46,17 +46,15 @@ const TutorProfilePage: React.FC = () => {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      console.log('Fetching profile for user:', session?.user?.id);
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/profile`,
         { withCredentials: true }
       );
-      console.log('Profile response:', response.data);
 
       if (response.data.success) {
         setProfile(response.data.data);
       } else {
-        console.log('Profile fetch unsuccessful:', response.data);
+        // console.log('Profile fetch unsuccessful:', response.data);
         toast.error('No tutor profile found');
       }
     } catch (error: any) {
@@ -124,7 +122,7 @@ const TutorProfilePage: React.FC = () => {
   // Auto-create profile if missing for tutors
   useEffect(() => {
     if (!loading && !profile && (session?.user?.role === 'TUTOR')) {
-      console.log('Auto-creating missing tutor profile...');
+      // console.log('Auto-creating missing tutor profile...');
       handleCreateProfile();
     }
   }, [loading, profile, session?.user?.role]);
@@ -192,7 +190,7 @@ const TutorProfilePage: React.FC = () => {
           </p>
           <button
             onClick={() => window.location.href = '/login'}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5"
           >
             Go to Login
           </button>
@@ -219,7 +217,7 @@ const TutorProfilePage: React.FC = () => {
           <button
             onClick={handleCreateProfile}
             disabled={isSaving}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>
@@ -249,7 +247,7 @@ const TutorProfilePage: React.FC = () => {
         {/* Page Header */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               Tutor Profile
             </span>
           </h1>
@@ -260,7 +258,7 @@ const TutorProfilePage: React.FC = () => {
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Navigation */}
-          <aside className="lg:w-64 flex-shrink-0">
+          <aside className="lg:w-64 shrink-0">
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <nav className="p-2">
                 <button
@@ -268,7 +266,7 @@ const TutorProfilePage: React.FC = () => {
                   onClick={() => setActiveTab('profile')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
                     activeTab === 'profile'
-                      ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                      ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -283,7 +281,7 @@ const TutorProfilePage: React.FC = () => {
                   onClick={() => setActiveTab('professional')}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 mt-2 ${
                     activeTab === 'professional'
-                      ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                      ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -336,7 +334,7 @@ const TutorProfilePage: React.FC = () => {
                     onClick={() => setProfile(prev => prev ? { ...prev, isAvailable: !prev.isAvailable } : null)}
                     className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
                       profile.isAvailable
-                        ? 'bg-gradient-to-r from-green-600 to-emerald-600'
+                        ? 'bg-linear-to-r from-green-600 to-emerald-600'
                         : 'bg-gray-300 dark:bg-gray-700'
                     }`}
                   >
@@ -369,7 +367,7 @@ const TutorProfilePage: React.FC = () => {
                         className="w-32 h-32 rounded-full ring-4 ring-gray-200 dark:ring-gray-700"
                       />
                       {profile.isFeatured && (
-                        <div className="absolute -top-2 -right-2 bg-gradient-to-br from-yellow-400 to-orange-500 text-white p-2 rounded-full shadow-lg">
+                        <div className="absolute -top-2 -right-2 bg-linear-to-br from-yellow-400 to-orange-500 text-white p-2 rounded-full shadow-lg">
                           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                           </svg>
@@ -443,7 +441,7 @@ const TutorProfilePage: React.FC = () => {
                     type="button"
                     onClick={handleProfileUpdate}
                     disabled={isSaving}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
                   >
                     {isSaving ? (
                       <>
@@ -543,7 +541,7 @@ const TutorProfilePage: React.FC = () => {
                     type="button"
                     onClick={handleProfileUpdate}
                     disabled={isSaving}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
                   >
                     {isSaving ? 'Saving...' : 'Save Changes'}
                   </button>

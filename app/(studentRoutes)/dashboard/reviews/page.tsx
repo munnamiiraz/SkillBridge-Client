@@ -96,7 +96,7 @@ const StudentReviewsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 p-6">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Leave Reviews</h1>
@@ -117,7 +117,7 @@ const StudentReviewsPage: React.FC = () => {
               <div key={booking.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                    <div className="w-12 h-12 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
                       {booking.tutor_profile.user.image ? (
                         <img src={booking.tutor_profile.user.image} alt={booking.tutor_profile.user.name} className="w-full h-full rounded-full object-cover" />
                       ) : (
@@ -145,7 +145,7 @@ const StudentReviewsPage: React.FC = () => {
                   </div>
                   <button
                     onClick={() => setSelectedBooking(booking)}
-                    className="px-4 py-2 bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all"
+                    className="px-4 py-2 bg-linear-to-br from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all"
                   >
                     Leave Review
                   </button>
@@ -160,7 +160,7 @@ const StudentReviewsPage: React.FC = () => {
       {selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="relative p-6 bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
+            <div className="relative p-6 bg-linear-to-br from-indigo-500 to-purple-500 text-white">
               <h3 className="text-xl font-bold">Rate Your Session</h3>
               <p className="text-sm text-white/80">with {selectedBooking.tutor_profile.user.name}</p>
             </div>
@@ -211,7 +211,7 @@ const StudentReviewsPage: React.FC = () => {
                 <button
                   onClick={handleSubmitReview}
                   disabled={rating === 0 || submitting}
-                  className="flex-1 px-6 py-3 bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="flex-1 px-6 py-3 bg-linear-to-br from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {submitting ? 'Submitting...' : 'Submit Review'}
                 </button>

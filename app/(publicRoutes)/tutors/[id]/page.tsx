@@ -23,11 +23,54 @@ const TutorProfilePage: React.FC = () => {
             try {
                 // Fetch public tutor profile info
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/${tutorId}`);
-                
                 if (response.data.success) {
                     const data = response.data.data;
+                    
                     const user = data.user;
                     
+                    // Fetch recent reviews
+                    let recentReviews = [];
+                    let ratingBreakdown = [5, 4, 3, 2, 1].map(stars => ({
+                        stars,
+                        count: 0,
+                        percentage: 0,
+                    }));
+                    let statsRes;
+                    try {
+                        // Fetch rating statistics
+                        statsRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/${tutorId}/rating-stats`);
+                        //  console.log(statsRes);
+                        
+                        if (statsRes.data.success) {
+                            ratingBreakdown = statsRes.data.data.distribution.map((d: any) => ({
+                                stars: d.rating,
+                                count: d.count,
+                                percentage: d.percentage,
+                            }));
+
+                            
+                        }
+                    } catch (statsErr) {
+                        console.error('Error fetching rating stats:', statsErr);
+                    }
+                    
+                    try {
+                        const reviewsRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/reviews?tutorProfileId=${data.id}&limit=5`);
+                        if (reviewsRes.data.success) {
+                            recentReviews = reviewsRes.data.data.map((r: any) => ({
+                                name: r.user.name,
+                                avatar: r.user.image || r.user.name.charAt(0).toUpperCase(),
+                                rating: r.rating,
+                                date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                                subject: r.booking?.subject || 'Learning Session',
+                                review: r.comment,
+                                verified: true
+                            }));
+                        }
+                    } catch (reviewErr) {
+                        console.error('Error fetching reviews:', reviewErr);
+                    }
+
                     // Transform backend data to frontend structure
                     const mappedData = {
                         header: {
@@ -37,8 +80,8 @@ const TutorProfilePage: React.FC = () => {
                             avatar: user.image || (user.name ? user.name.charAt(0).toUpperCase() : '?'),
                             primarySubjects: data.tutor_subject?.map((ts: any) => ts.subject.name) || [],
                             tagline: data.headline || 'Experienced Tutor',
-                            rating: data.averageRating || 0,
-                            reviewCount: data.totalReviews || 0,
+                            rating: statsRes?.data.data.averageRating || 0,
+                            reviewCount: statsRes?.data.data.totalReviews || 0,
                             totalStudents: 0, // Not typically active field yet
                             responseTime: '< 2 hours', // Placeholder or calculated if available
                             pricePerSession: data.hourlyRate,
@@ -122,15 +165,11 @@ const TutorProfilePage: React.FC = () => {
                         },
                         reviews: {
                             stats: {
-                                averageRating: data.averageRating || 0,
-                                totalReviews: data.totalReviews || 0,
-                                breakdown: [5, 4, 3, 2, 1].map(stars => ({
-                                    stars,
-                                    count: 0, // Breakdown not yet provided by public API
-                                    percentage: 0,
-                                })),
+                                averageRating: statsRes?.data.data.averageRating || 0,
+                                totalReviews: statsRes?.data.data.totalReviews || 0,
+                                breakdown: ratingBreakdown,
                             },
-                            recent: [], // Should fetch reviews separately or include
+                            recent: recentReviews,
                         },
                         summary: {
                             id: data.id,

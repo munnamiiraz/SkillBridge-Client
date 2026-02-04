@@ -115,7 +115,7 @@ const FeaturedTeachersSection: React.FC = () => {
         {/* Section Header with Tabs */}
         <div className="text-center mb-12 lg:mb-16">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
-            <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               Explore & Discover
             </span>
           </h2>
@@ -129,7 +129,7 @@ const FeaturedTeachersSection: React.FC = () => {
               onClick={() => setActiveTab('teachers')}
               className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
                 activeTab === 'teachers'
-                  ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-md'
+                  ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-md'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -139,7 +139,7 @@ const FeaturedTeachersSection: React.FC = () => {
               onClick={() => setActiveTab('categories')}
               className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
                 activeTab === 'categories'
-                  ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-md'
+                  ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-md'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -176,13 +176,13 @@ const FeaturedTeachersSection: React.FC = () => {
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {/* Card Header with Avatar */}
-                    <div className="relative h-32 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br opacity-10 dark:opacity-20 group-hover:opacity-20 dark:group-hover:opacity-30 transition-opacity duration-300"></div>
-                      <div className={`absolute -bottom-10 -right-10 w-40 h-40 bg-gradient-to-br ${teacher.bgGradient} rounded-full blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`}></div>
+                    <div className="relative h-32 bg-linear-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 overflow-visible">
+                      <div className="absolute inset-0 bg-linear-to-br opacity-10 dark:opacity-20 group-hover:opacity-20 dark:group-hover:opacity-30 transition-opacity duration-300"></div>
+                      <div className={`absolute -bottom-10 -right-10 w-40 h-40 bg-linear-to-br ${teacher.bgGradient} rounded-full blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`}></div>
                       
                       {/* Avatar */}
-                      <div className="absolute -bottom-12 left-6">
-                        <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${teacher.bgGradient} flex items-center justify-center text-white font-bold text-2xl shadow-xl border-4 border-white dark:border-gray-900 overflow-hidden`}>
+                      <div className="absolute -bottom-10 left-6">
+                        <div className={`w-24 h-24 rounded-2xl bg-linear-to-br ${teacher.bgGradient} flex items-center justify-center text-white font-bold text-2xl shadow-xl border-4 border-white dark:border-gray-900 overflow-hidden`}>
                           {teacher.avatar.length > 2 ? (
                             <img src={teacher.avatar} alt={teacher.name} className="w-full h-full object-cover" />
                           ) : (
@@ -207,7 +207,7 @@ const FeaturedTeachersSection: React.FC = () => {
                     </div>
 
                     {/* Card Content */}
-                    <div className="pt-16 p-6 space-y-4">
+                    <div className="pt-14 p-6 space-y-4">
                       {/* Name & Specialty */}
                       <div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
@@ -252,7 +252,7 @@ const FeaturedTeachersSection: React.FC = () => {
                           <span className="ml-1 font-semibold text-gray-900 dark:text-white">{teacher.experience}</span>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+                          <div className="text-2xl font-bold bg-linear-to-br from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
                             ${teacher.hourlyRate}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-500">per hour</div>
@@ -260,13 +260,13 @@ const FeaturedTeachersSection: React.FC = () => {
                       </div>
 
                       {/* CTA Button (Styled div instead of Link to avoid nesting) */}
-                      <div className="block w-full py-3 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-center font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/30 dark:hover:shadow-indigo-500/50">
+                      <div className="block w-full py-3 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-center font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/30 dark:hover:shadow-indigo-500/50">
                         View Profile
                       </div>
                     </div>
 
                     {/* Hover Glow */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/5 group-hover:to-purple-500/5 dark:group-hover:from-indigo-500/10 dark:group-hover:to-purple-500/10 transition-all duration-300 pointer-events-none"></div>
+                    <div className="absolute inset-0 rounded-2xl bg-linear-to-br from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/5 group-hover:to-purple-500/5 dark:group-hover:from-indigo-500/10 dark:group-hover:to-purple-500/10 transition-all duration-300 pointer-events-none"></div>
                   </Link>
                 ))}
               </div>
@@ -285,11 +285,11 @@ const FeaturedTeachersSection: React.FC = () => {
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {/* Gradient Background */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.bgGradient} opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-300`}></div>
+                <div className={`absolute inset-0 bg-linear-to-br ${category.bgGradient} opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-300`}></div>
 
                 <div className="relative p-8 space-y-6">
                   {/* Icon */}
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${category.bgGradient} flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+                  <div className={`w-16 h-16 rounded-2xl bg-linear-to-br ${category.bgGradient} flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
                     {category.icon}
                   </div>
 

@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { TutorProfileInfo, TutorBookingCard } from '@/components/tutor-profile/TutorProfileHeader';
-import { TutorAboutContent, TutorQuickStatsSidebar } from '@/components/tutor-profile/TutorAboutAndSubjects';
-import TutorAvailabilityReviewsCTA from '@/components/tutor-profile/TutorAvailabilityReviewsCTA';
+import { TutorProfileInfo, TutorBookingCard } from '../../../../../components/tutor-profile/TutorProfileHeader';
+import { TutorAboutContent, TutorQuickStatsSidebar } from '../../../../../components/tutor-profile/TutorAboutAndSubjects';
+import TutorAvailabilityReviewsCTA from '../../../../../components/tutor-profile/TutorAvailabilityReviewsCTA';
 
 const TutorProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<any>(null);

@@ -1,249 +1,120 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import { apiClient } from '@/lib/api-client';
-import { authClient } from '@/lib/auth-client';
-import { toast } from 'sonner';
-import { getErrorMsg } from '@/lib/error-handler';
+import { cookies } from 'next/headers';
+import Link from 'next/link';
+import { StatsService } from '@/app/admin/stats.service';
+import { UserService } from '@/app/admin/users.service';
+import { AdminBookings } from '@/app/admin/bookings.service';
+import MainStatCard from './components/MainStatCard';
+import RoleStatCard from './components/RoleStatCard';
+import StatusStatCard from './components/StatusStatCard';
+import RefreshButton from './components/RefreshButton';
 
-interface UserStats {
-  total: number;
-  byRole: {
-    admin: number;
-    tutor: number;
-    student: number;
-  };
-  newThisWeek: number;
-}
+export const dynamic = 'force-dynamic';
 
-interface BookingStats {
-  total: number;
-  byStatus: {
-    completed: number;
-    cancelled: number;
-    pending: number;
-    confirmed: number;
-  };
-  newThisWeek: number;
-}
 
-interface RevenueStats {
-  total: number;
-  completedBookings: number;
-}
 
-interface PlatformStats {
-  users: UserStats;
-  bookings: BookingStats;
-  revenue: RevenueStats;
-}
+export default async function AdminDashboardPage() {
+  const cookieStore = await cookies();
+  const cookieString = cookieStore.toString();
 
-const AdminStatsPage: React.FC = () => {
-  const { data: session, isPending: sessionPending } = authClient.useSession();
-  const [stats, setStats] = useState<PlatformStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetchStats();
-    } else if (!sessionPending) {
-      setLoading(false);
-    }
-  }, [session?.user?.id, sessionPending]);
-
-  const fetchStats = async () => {
-    try {
-      const response = await apiClient.get('/api/admin/stats');
-      
-      if (response.success) {
-        setStats(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-      toast.error(getErrorMsg(error));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Calculate percentages for bookings
-  const getBookingPercentage = (count: number, total: number) => {
-    return total > 0 ? Math.round((count / total) * 100) : 0;
-  };
-
-  // Calculate percentages for users
-  const getUserPercentage = (count: number, total: number) => {
-    return total > 0 ? Math.round((count / total) * 100) : 0;
-  };
-
-  // Calculate average revenue per booking
-  const avgRevenuePerBooking = stats 
-    ? stats.revenue.completedBookings > 0 
-      ? (stats.revenue.total / stats.revenue.completedBookings).toFixed(2)
-      : '0.00'
-    : '0.00';
-
-  // Loading state
-  if (loading || sessionPending) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading statistics...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Not authenticated or not admin
-  if (!session || session.user.role !== 'ADMIN') {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg">
-          <svg className="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Access Denied
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            You need admin privileges to access this page.
-          </p>
-          <button
-            onClick={() => window.location.href = '/'}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-          >
-            Go to Home
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Fetch all necessary data for a comprehensive dashboard
+  const [stats, recentUsersData, recentBookingsData] = await Promise.all([
+    StatsService.getPlatformStats(cookieString).catch(() => null),
+    UserService.getAll({ limit: 5 }, cookieString).catch(() => ({ users: [] })),
+    AdminBookings.getAll({ limit: 5 }, cookieString).catch(() => ({ bookings: [] })),
+  ]);
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400">No statistics available</p>
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 mb-4">
+             <p className="text-red-600 dark:text-red-400 font-semibold">Failed to load platform statistics.</p>
+          </div>
+          <RefreshButton />
         </div>
       </div>
     );
   }
 
+  const avgRevenuePerBooking = stats.revenue.completedBookings > 0 
+    ? (stats.revenue.total / stats.revenue.completedBookings).toFixed(2)
+    : '0.00';
+
+  const getUserPercentage = (count: number, total: number) => 
+    total > 0 ? Math.round((count / total) * 100) : 0;
+
+  const getBookingPercentage = (count: number, total: number) => 
+    total > 0 ? Math.round((count / total) * 100) : 0;
+
   return (
-    <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Background Pattern */}
-      <div 
-        className="fixed inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.02]"
-        aria-hidden="true"
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(99, 102, 241) 1px, transparent 0)',
-            backgroundSize: '40px 40px',
-          }}
-        ></div>
-      </div>
-
-      {/* Gradient Orbs */}
-      <div 
-        className="fixed inset-0 pointer-events-none opacity-20 dark:opacity-10"
-        aria-hidden="true"
-      >
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-indigo-400 dark:bg-indigo-600 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-purple-400 dark:bg-purple-600 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
-        {/* Page Header */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">
-              <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                Platform Statistics
-              </span>
-            </h1>
-            <button
-              onClick={fetchStats}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:border-indigo-500 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span>Refresh</span>
-            </button>
-          </div>
-          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed">
-            Overview of platform performance and key metrics.
+    <div className="relative p-6 lg:p-8 space-y-8 max-w-[1600px] mx-auto">
+      {/* Welcome Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl md:text-5xl font-bold">
+            <span className="bg-linear-to-br from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:via-gray-200 dark:to-gray-400 bg-clip-text text-transparent">
+              Platform Overview
+            </span>
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">
+            Welcome back, Admin. Here's what's happening today.
           </p>
         </div>
-
-        {/* Main Stats Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <MainStatCard
-            icon={
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            }
-            label="Total Users"
-            value={stats.users.total.toLocaleString()}
-            subValue={`+${stats.users.newThisWeek.toLocaleString()} this week`}
-            gradient="from-blue-500 to-cyan-500"
-          />
-          <MainStatCard
-            icon={
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            }
-            label="Total Bookings"
-            value={stats.bookings.total.toLocaleString()}
-            subValue={`+${stats.bookings.newThisWeek.toLocaleString()} this week`}
-            gradient="from-purple-500 to-pink-500"
-          />
-          <MainStatCard
-            icon={
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            }
-            label="Total Revenue"
-            value={`$${stats.revenue.total.toLocaleString()}`}
-            subValue={`${stats.revenue.completedBookings.toLocaleString()} completed`}
-            gradient="from-green-500 to-emerald-500"
-          />
-          <MainStatCard
-            icon={
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            }
-            label="Avg per Booking"
-            value={`$${avgRevenuePerBooking}`}
-            subValue="Average revenue"
-            gradient="from-orange-500 to-red-500"
-          />
+        <div className="flex items-center gap-3">
+          <RefreshButton />
+          <Link 
+            href="/admin/users"
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5"
+          >
+            Manage Users
+          </Link>
         </div>
+      </div>
 
-        {/* Users Breakdown */}
-        <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden mb-8">
-          <div className="p-6 lg:p-8 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              Users by Role
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Distribution of users across different roles
-            </p>
-          </div>
+      {/* Main Stats Grid */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <MainStatCard
+          icon={<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
+          label="Total Users"
+          value={stats.users.total.toLocaleString()}
+          subValue={`+${stats.users.newThisWeek} this week`}
+          gradient="from-blue-500 to-indigo-600"
+        />
+        <MainStatCard
+          icon={<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+          label="Total Bookings"
+          value={stats.bookings.total.toLocaleString()}
+          subValue={`+${stats.bookings.newThisWeek} this week`}
+          gradient="from-purple-500 to-pink-600"
+        />
+        <MainStatCard
+          icon={<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+          label="Total Revenue"
+          value={`$${stats.revenue.total.toLocaleString()}`}
+          subValue={`${stats.revenue.completedBookings} completed`}
+          gradient="from-emerald-500 to-teal-600"
+        />
+        <MainStatCard
+          icon={<svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>}
+          label="Avg. Revenue"
+          value={`$${avgRevenuePerBooking}`}
+          subValue="Per booking"
+          gradient="from-orange-500 to-rose-600"
+        />
+      </div>
 
-          <div className="p-6 lg:p-8">
-            <div className="grid sm:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Left Column: Breakdown Charts */}
+        <div className="lg:col-span-1 space-y-8">
+          {/* Role Breakdown */}
+          <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <span className="w-2 h-6 bg-blue-500 rounded-full"></span>
+                User Breakdown
+              </h2>
+            </div>
+            <div className="p-6 space-y-6">
               <RoleStatCard
                 role="Students"
                 count={stats.users.byRole.student}
@@ -267,37 +138,23 @@ const AdminStatsPage: React.FC = () => {
               />
             </div>
           </div>
-        </div>
 
-        {/* Bookings Breakdown */}
-        <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
-          <div className="p-6 lg:p-8 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              Bookings by Status
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Current status distribution of all bookings
-            </p>
-          </div>
-
-          <div className="p-6 lg:p-8">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Booking Status */}
+          <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <span className="w-2 h-6 bg-purple-500 rounded-full"></span>
+                Booking Status
+              </h2>
+            </div>
+            <div className="p-6 grid sm:grid-cols-2 gap-4">
               <StatusStatCard
                 status="Completed"
                 count={stats.bookings.byStatus.completed}
                 total={stats.bookings.total}
                 percentage={getBookingPercentage(stats.bookings.byStatus.completed, stats.bookings.total)}
                 color="green"
-                icon={
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                }
+                icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
               />
               <StatusStatCard
                 status="Confirmed"
@@ -305,11 +162,7 @@ const AdminStatsPage: React.FC = () => {
                 total={stats.bookings.total}
                 percentage={getBookingPercentage(stats.bookings.byStatus.confirmed, stats.bookings.total)}
                 color="blue"
-                icon={
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                }
+                icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>}
               />
               <StatusStatCard
                 status="Pending"
@@ -317,11 +170,7 @@ const AdminStatsPage: React.FC = () => {
                 total={stats.bookings.total}
                 percentage={getBookingPercentage(stats.bookings.byStatus.pending, stats.bookings.total)}
                 color="yellow"
-                icon={
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                }
+                icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
               />
               <StatusStatCard
                 status="Cancelled"
@@ -329,162 +178,101 @@ const AdminStatsPage: React.FC = () => {
                 total={stats.bookings.total}
                 percentage={getBookingPercentage(stats.bookings.byStatus.cancelled, stats.bookings.total)}
                 color="red"
-                icon={
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                }
+                icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>}
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Recent Activity */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Quick Actions */}
+          <div className="bg-linear-to-br from-indigo-600 to-purple-700 rounded-3xl p-8 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1 space-y-4">
+                <h2 className="text-3xl font-bold text-white">Platform Control Centre</h2>
+                <p className="text-indigo-100/80 text-lg">
+                  Direct access to critical platform management tools and configurations.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/admin/make-category" className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-sm border border-white/20 transition-all font-semibold">
+                    Manage Categories
+                  </Link>
+                  <Link href="/admin/bookings" className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-sm border border-white/20 transition-all font-semibold">
+                    View All Bookings
+                  </Link>
+                </div>
+              </div>
+              <div className="w-32 h-32 md:w-48 md:h-48 flex items-center justify-center bg-white/10 rounded-full backdrop-blur-xl border border-white/20 shadow-2xl">
+                <svg className="w-16 h-16 md:w-24 md:h-24 text-white opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+             {/* Recent Users List */}
+            <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h2 className="text-xl font-bold">Recent Users</h2>
+                <Link href="/admin/users" className="text-sm text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">View All</Link>
+              </div>
+              <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                {recentUsersData.users.length > 0 ? (
+                  recentUsersData.users.map((user, index) => (
+                    <div key={index} className="p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                        {user.avatar}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-gray-900 dark:text-white truncate">{user.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{user.role}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                        user.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {user.status}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-gray-500">No recent users.</div>
+                )}
+              </div>
+            </div>
+
+            {/* Recent Bookings List */}
+            <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h2 className="text-xl font-bold">Latest Bookings</h2>
+                <Link href="/admin/bookings" className="text-sm text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">View All</Link>
+              </div>
+              <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                {recentBookingsData.bookings.length > 0 ? (
+                  recentBookingsData.bookings.map((booking, index) => (
+                    <div key={index} className="p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xl">
+                        🔖
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-gray-900 dark:text-white truncate">{booking.student.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{booking.course.name}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900 dark:text-white">${booking.payment.amount}</p>
+                        <span className="text-[10px] text-gray-500 uppercase">{booking.status}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-gray-500">No recent bookings.</div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-// Main Stat Card Component
-interface MainStatCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  subValue: string;
-  gradient: string;
 }
-
-const MainStatCard: React.FC<MainStatCardProps> = ({ icon, label, value, subValue, gradient }) => {
-  return (
-    <div className="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm overflow-hidden group hover:-translate-y-1 transition-all duration-300">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-10 rounded-full blur-2xl transform translate-x-8 -translate-y-8" 
-        style={{ backgroundImage: `linear-gradient(to bottom right, var(--tw-gradient-stops))` }}
-      />
-      
-      <div className="relative z-10">
-        <div className={`inline-flex p-3 bg-gradient-to-br ${gradient} rounded-xl text-white shadow-lg mb-4`}>
-          {icon}
-        </div>
-        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-          {label}
-        </p>
-        <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-          {value}
-        </p>
-        <p className="text-xs text-gray-500 dark:text-gray-500">
-          {subValue}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// Role Stat Card Component
-interface RoleStatCardProps {
-  role: string;
-  count: number;
-  total: number;
-  percentage: number;
-  color: 'blue' | 'purple' | 'green';
-}
-
-const RoleStatCard: React.FC<RoleStatCardProps> = ({ role, count, total, percentage, color }) => {
-  const colorClasses = {
-    blue: 'bg-blue-500',
-    purple: 'bg-purple-500',
-    green: 'bg-green-500'
-  };
-
-  return (
-    <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {role}
-        </h3>
-        <span className="text-2xl font-bold text-gray-900 dark:text-white">
-          {count.toLocaleString()}
-        </span>
-      </div>
-      
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-2">
-        <div 
-          className={`h-2.5 rounded-full ${colorClasses[color]} transition-all duration-500`}
-          style={{ width: `${percentage}%` }}
-        ></div>
-      </div>
-      
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        {percentage}% of total users
-      </p>
-    </div>
-  );
-};
-
-// Status Stat Card Component
-interface StatusStatCardProps {
-  status: string;
-  count: number;
-  total: number;
-  percentage: number;
-  color: 'green' | 'blue' | 'yellow' | 'red';
-  icon: React.ReactNode;
-}
-
-const StatusStatCard: React.FC<StatusStatCardProps> = ({ status, count, total, percentage, color, icon }) => {
-  const colorClasses = {
-    green: {
-      bg: 'bg-green-100 dark:bg-green-900/20',
-      text: 'text-green-600 dark:text-green-400',
-      border: 'border-green-200 dark:border-green-800',
-      bar: 'bg-green-500'
-    },
-    blue: {
-      bg: 'bg-blue-100 dark:bg-blue-900/20',
-      text: 'text-blue-600 dark:text-blue-400',
-      border: 'border-blue-200 dark:border-blue-800',
-      bar: 'bg-blue-500'
-    },
-    yellow: {
-      bg: 'bg-yellow-100 dark:bg-yellow-900/20',
-      text: 'text-yellow-600 dark:text-yellow-400',
-      border: 'border-yellow-200 dark:border-yellow-800',
-      bar: 'bg-yellow-500'
-    },
-    red: {
-      bg: 'bg-red-100 dark:bg-red-900/20',
-      text: 'text-red-600 dark:text-red-400',
-      border: 'border-red-200 dark:border-red-800',
-      bar: 'bg-red-500'
-    }
-  };
-
-  const classes = colorClasses[color];
-
-  return (
-    <div className={`${classes.bg} border ${classes.border} rounded-xl p-6 transition-all duration-300 hover:shadow-md`}>
-      <div className="flex items-center justify-between mb-3">
-        <div className={`p-2 ${classes.bg} rounded-lg ${classes.text}`}>
-          {icon}
-        </div>
-        <span className={`text-2xl font-bold ${classes.text}`}>
-          {count.toLocaleString()}
-        </span>
-      </div>
-      
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-        {status}
-      </h3>
-      
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-        <div 
-          className={`h-2 rounded-full ${classes.bar} transition-all duration-500`}
-          style={{ width: `${percentage}%` }}
-        ></div>
-      </div>
-      
-      <p className="text-xs text-gray-600 dark:text-gray-400">
-        {percentage}% of total
-      </p>
-    </div>
-  );
-};
-
-export default AdminStatsPage;

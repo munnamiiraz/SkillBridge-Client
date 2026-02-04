@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { useTheme } from '@/components/providers/ThemeProvider';
+// import { useTheme } from '@/components/providers/ThemeProvider';
 
 interface NavLink {
   label: string;
@@ -15,11 +15,14 @@ interface NavLink {
 const Navbar: React.FC = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
-  const isDark = theme === 'dark';
+  // const { theme, toggleTheme } = useTheme();
+  // const isDark = theme === 'dark';
+  const isDark = false;
+  const toggleTheme = () => {};
   const [scrolled, setScrolled] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { data: session } = authClient.useSession();
+  const sessionResponse = authClient.useSession();
+  const session = sessionResponse?.data;
 
   useEffect(() => {
     // Scroll effect
@@ -147,11 +150,11 @@ const Navbar: React.FC = () => {
                 </Link>
 
                 <Link
-                  href="/signup"
+                  href="/login"
                   className="group relative px-6 py-2.5 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold rounded-lg shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    Get Started
+                    Login
                     <svg 
                       className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" 
                       fill="none" 
@@ -176,14 +179,14 @@ const Navbar: React.FC = () => {
                   className="flex items-center gap-3 p-1 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                 >
                   <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md">
-                    {session.user.name?.[0].toUpperCase() || 'U'}
+                    {session?.user.name?.[0].toUpperCase() || 'U'}
                   </div>
                   <div className="hidden md:block text-left">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
-                      {session.user.name}
+                      {session?.user.name}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {session.user.role}
+                      {session?.user.role}
                     </p>
                   </div>
                   <svg 
@@ -221,36 +224,38 @@ const Navbar: React.FC = () => {
                       </svg>
                       Dashboard
                     </Link>
-                    <Link
-                      href={
-                        session.user.role === 'ADMIN' 
-                          ? '/admin' 
-                          : session.user.role === 'TUTOR' 
-                            ? '/tutor/dashboard/profile' 
-                            : '/dashboard/profile'
-                      }
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      My Profile
-                    </Link>
-                    <Link
-                      href={
-                        session.user.role === 'TUTOR' 
-                          ? '/tutor/dashboard/manage-profile' 
-                          : '/dashboard/manage-profile'
-                      }
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      Manage Profile
-                    </Link>
+                    {session.user.role !== 'ADMIN' && (
+                      <>
+                        <Link
+                          href={
+                            session.user.role === 'TUTOR' 
+                              ? '/tutor/dashboard/profile' 
+                              : '/dashboard/profile'
+                          }
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          My Profile
+                        </Link>
+                        <Link
+                          href={
+                            session.user.role === 'TUTOR' 
+                              ? '/tutor/dashboard/manage-profile' 
+                              : '/dashboard/manage-profile'
+                          }
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          Manage Profile
+                        </Link>
+                      </>
+                    )}
                     
                     {/* Tutor-specific menu items */}
                     {session.user.role === 'TUTOR' && (
@@ -487,30 +492,32 @@ const Navbar: React.FC = () => {
                     >
                       Dashboard
                     </Link>
-                    <Link
-                      href={
-                        session.user.role === 'ADMIN' 
-                          ? '/admin' 
-                          : session.user.role === 'TUTOR' 
-                            ? '/tutor/dashboard/profile' 
-                            : '/dashboard/profile'
-                      }
-                      className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      My Profile
-                    </Link>
-                    <Link
-                      href={
-                        session.user.role === 'TUTOR' 
-                          ? '/tutor/dashboard/manage-profile' 
-                          : '/dashboard/manage-profile'
-                      }
-                      className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Manage Profile
-                    </Link>
+                    {session.user.role !== 'ADMIN' && (
+                      <>
+                        <Link
+                          href={
+                            session.user.role === 'TUTOR' 
+                              ? '/tutor/dashboard/profile' 
+                              : '/dashboard/profile'
+                          }
+                          className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          My Profile
+                        </Link>
+                        <Link
+                          href={
+                            session.user.role === 'TUTOR' 
+                              ? '/tutor/dashboard/manage-profile' 
+                              : '/dashboard/manage-profile'
+                          }
+                          className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Manage Profile
+                        </Link>
+                      </>
+                    )}
                     
                     {/* Tutor-specific mobile menu items */}
                     {session.user.role === 'TUTOR' && (

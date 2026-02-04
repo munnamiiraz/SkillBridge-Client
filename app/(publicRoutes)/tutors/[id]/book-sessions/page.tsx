@@ -82,7 +82,6 @@ const BookSessionPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/${id}`);
-        console.log(response.data);
         
         if (response.data.success) {
           const data = response.data.data;
@@ -317,7 +316,6 @@ const BookSessionPage: React.FC = () => {
           notes: 'Session booked via SkillBridge profile'
         };
 
-        console.log('Booking data being sent:', bookingData);
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/student/bookings`,
           bookingData,
@@ -328,7 +326,7 @@ const BookSessionPage: React.FC = () => {
             }
           }
         );
-        console.log('Booking response:', response);
+        // console.log('Booking response:', response);
         if (response.data.success) {
           toast.success('Booking confirmed successfully!');
           router.push('/dashboard/bookings'); // Updated path
@@ -362,7 +360,7 @@ const BookSessionPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+    <div className="min-h-screen w-full bg-linear-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-3xl"></div>
@@ -385,7 +383,7 @@ const BookSessionPage: React.FC = () => {
 
           <div className="flex items-center gap-6">
             {/* Tutor Avatar */}
-            <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
+            <div className={`w-20 h-20 rounded-2xl bg-linear-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
               {tutor.avatar}
             </div>
 
@@ -401,7 +399,6 @@ const BookSessionPage: React.FC = () => {
                     <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                   </svg>
                   <span className="font-semibold text-gray-900 dark:text-white">{tutor.rating}</span>
-                  <span>({tutor.reviews})</span>
                 </div>
               </div>
             </div>
@@ -565,9 +562,9 @@ const BookSessionPage: React.FC = () => {
                       </div>
 
                       <div className="grid grid-cols-7 gap-2 mb-6">
-                        {schedule.map((day) => (
+                        {schedule.map((day, index) => (
                           <button
-                            key={day.displayDate}
+                            key={index}
                             onClick={() => setSelectedDay(day.displayDate)}
                             className={`p-3 rounded-xl border-2 transition-all duration-300 ${
                               selectedDay === day.displayDate
@@ -610,9 +607,9 @@ const BookSessionPage: React.FC = () => {
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                 {schedule
                                 .find(d => d.displayDate === selectedDay)
-                                ?.slots.map((slot) => (
+                                ?.slots.map((slot, index) => (
                                     <button
-                                    key={slot.id}
+                                    key={index}
                                     onClick={() => !slot.isBooked && setSelectedSlot(slot.id)}
                                     disabled={slot.isBooked}
                                     className={`p-4 rounded-xl border-2 font-semibold transition-all duration-300 ${
@@ -659,9 +656,9 @@ const BookSessionPage: React.FC = () => {
                     </div>
                     
                     <div className="grid md:grid-cols-3 gap-6 opacity-60">
-                      {packages.map((pkg) => (
+                      {packages.map((pkg, index) => (
                         <div
-                          key={pkg.id}
+                          key={index}
                           onClick={() => setSelectedPackage(pkg.id)}
                           className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
                             selectedPackage === pkg.id
@@ -670,7 +667,7 @@ const BookSessionPage: React.FC = () => {
                           }`}
                         >
                           {pkg.popular && (
-                            <div className="absolute -top-3 right-4 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full shadow-lg">
+                            <div className="absolute -top-3 right-4 px-3 py-1 bg-linear-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full shadow-lg">
                               Most Popular
                             </div>
                           )}
@@ -679,7 +676,7 @@ const BookSessionPage: React.FC = () => {
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                               {pkg.name}
                             </h3>
-                            <div className="text-4xl font-bold bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent mb-1">
+                            <div className="text-4xl font-bold bg-linear-to-br from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent mb-1">
                               ${pkg.price}
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -769,7 +766,7 @@ const BookSessionPage: React.FC = () => {
 
               {/* Tutor Info */}
               <div className="flex items-center gap-3 pb-6 mb-6 border-b border-gray-200 dark:border-gray-800">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold`}>
+                <div className={`w-12 h-12 rounded-xl bg-linear-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold`}>
                   {tutor.avatar}
                 </div>
                 <div>
@@ -845,7 +842,7 @@ const BookSessionPage: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-800">
                       <span className="text-lg font-bold text-gray-900 dark:text-white">Total:</span>
-                      <span className="text-2xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+                      <span className="text-2xl font-bold bg-linear-to-br from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
                         ${tutor.pricePerHour + 5}
                       </span>
                     </div>
@@ -867,7 +864,7 @@ const BookSessionPage: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-800">
                         <span className="text-lg font-bold text-gray-900 dark:text-white">Total:</span>
-                        <span className="text-2xl font-bold bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                        <span className="text-2xl font-bold bg-linear-to-br from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
                           ${packages.find(p => p.id === selectedPackage)?.price}
                         </span>
                       </div>
@@ -916,7 +913,7 @@ const BookSessionPage: React.FC = () => {
                   disabled={isBooking || (sessionType === 'single' ? !selectedSlot : !selectedPackage)}
                   className={`w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 ${
                     (sessionType === 'single' && selectedSlot) || (sessionType === 'package' && selectedPackage)
-                      ? 'bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40'
+                      ? 'bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40'
                       : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
                   }`}
                 >

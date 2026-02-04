@@ -80,7 +80,7 @@ const TutorDiscoveryPageContent: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/categories`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://skillbridge-server-2.onrender.com'}/api/public/categories`);
         if (response.data.success) {
           setCategories(response.data.data);
         }
@@ -90,6 +90,18 @@ const TutorDiscoveryPageContent: React.FC = () => {
     };
     fetchCategories();
   }, []);
+
+  // Debounced search query
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(filters.searchQuery);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [filters.searchQuery]);
 
   useEffect(() => {
     const fetchTutors = async () => {
@@ -105,8 +117,8 @@ const TutorDiscoveryPageContent: React.FC = () => {
           sortOrder: sortBy === 'price-low' ? 'asc' : 'desc',
         };
 
-        if (filters.searchQuery) {
-          params.searchTerm = filters.searchQuery;
+        if (debouncedSearchQuery) {
+          params.searchTerm = debouncedSearchQuery;
         }
 
         if (filters.selectedSubjects.length > 0) {
@@ -154,12 +166,14 @@ const TutorDiscoveryPageContent: React.FC = () => {
     };
 
     fetchTutors();
-  }, [filters, sortBy, currentPage]);
+  }, [debouncedSearchQuery, filters.selectedSubjects, filters.category, filters.minRating, filters.minTotalReviews, filters.priceRange, sortBy, currentPage]);
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters change (but not on every keystroke)
   useEffect(() => {
-    setCurrentPage(1);
-  }, [filters, sortBy]);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [debouncedSearchQuery, filters.selectedSubjects, filters.category, filters.minRating, filters.minTotalReviews, filters.priceRange, sortBy]);
 
   const activeFilterCount = 
     (filters.searchQuery ? 1 : 0) +
@@ -223,8 +237,8 @@ const TutorDiscoveryPageContent: React.FC = () => {
         {/* Two Column Layout */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Filter Panel - Desktop */}
-          <aside className="hidden lg:block lg:w-80 flex-shrink-0">
-            <div className="sticky top-8">
+          <aside className="hidden lg:block lg:w-80 shrink-0">
+            <div className="sticky top-8 max-h-[calc(100vh-6rem)] overflow-y-auto">
               <FilterPanel
                 filters={filters}
                 setFilters={setFilters}
@@ -279,8 +293,8 @@ const TutorDiscoveryPageContent: React.FC = () => {
             ) : tutors.length > 0 ? (
               <>
                 <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
-                  {tutors.map((tutor) => (
-                    <TutorCard key={tutor.id} tutor={tutor} />
+                  {tutors.map((tutor, index) => (
+                    <TutorCard key={index} tutor={tutor} />
                   ))}
                 </div>
                 
@@ -414,9 +428,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             Category
           </label>
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <button
-                key={category.id}
+                key={index}
                 type="button"
                 onClick={() => setFilters(prev => ({ ...prev, category: prev.category === category.name ? null : category.name }))}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -437,9 +451,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             Subject
           </label>
           <div className="flex flex-wrap gap-2">
-            {displayedSubjects.map((subject) => (
+            {displayedSubjects.map((subject, index) => (
               <button
-                key={subject}
+                key={index}
                 type="button"
                 onClick={() => toggleSubject(subject)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -491,9 +505,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 { label: 'Budget', max: 30 },
                 { label: 'Mid-range', max: 60 },
                 { label: 'Premium', max: 200 },
-              ].map((preset) => (
+              ].map((preset, index) => (
                 <button
-                  key={preset.label}
+                  key={index}
                   type="button"
                   onClick={() => setFilters(prev => ({ ...prev, priceRange: [0, preset.max] }))}
                   className="flex-1 px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -511,9 +525,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             Minimum rating
           </label>
           <div className="space-y-2">
-            {[5, 4, 3].map((rating) => (
+            {[5, 4, 3].map((rating, index) => (
               <button
-                key={rating}
+                key={index}
                 type="button"
                 onClick={() => setFilters(prev => ({ ...prev, minRating: prev.minRating === rating ? null : rating }))}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -548,9 +562,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             Minimum reviews
           </label>
           <div className="grid grid-cols-2 gap-2">
-            {[0, 10, 20, 50].map((count) => (
+            {[0, 10, 20, 50].map((count, index) => (
               <button
-                key={count}
+                key={index}
                 type="button"
                 onClick={() => setFilters(prev => ({ ...prev, minTotalReviews: count || null }))}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -681,7 +695,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onClearFilters }) => {
   return (
     <div className="flex flex-col items-center justify-center py-20 px-6">
       <div className="relative w-48 h-48 mb-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-2xl" />
+        <div className="absolute inset-0 bg-linear-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-2xl" />
         <svg
           className="relative w-full h-full text-gray-400 dark:text-gray-600"
           fill="none"
@@ -707,7 +721,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onClearFilters }) => {
       <button
         type="button"
         onClick={onClearFilters}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-0.5"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-0.5"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -772,7 +786,7 @@ const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-4 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300"
+            className="w-full py-4 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300"
           >
             Show Results
           </button>
@@ -842,7 +856,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
               onClick={() => onPageChange(page as number)}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                 currentPage === page
-                  ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg'
                   : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
               }`}
             >

@@ -1,3 +1,4 @@
+"use client"
 import React from 'react';
 
 interface Feature {
@@ -153,7 +154,7 @@ const WhySkillBridgeSection: React.FC = () => {
         {/* Section Header */}
         <div className="max-w-3xl mb-16 lg:mb-20">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               Why SkillBridge?
             </span>
           </h2>
@@ -170,7 +171,7 @@ const WhySkillBridgeSection: React.FC = () => {
               className="group relative"
             >
               {/* Icon Container */}
-              <div className="mb-6 inline-flex p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl text-white shadow-lg shadow-indigo-500/20 dark:shadow-indigo-500/40 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+              <div className="mb-6 inline-flex p-3 bg-linear-to-br from-indigo-500 to-purple-500 rounded-xl text-white shadow-lg shadow-indigo-500/20 dark:shadow-indigo-500/40 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                 {feature.icon}
               </div>
 
@@ -185,21 +186,21 @@ const WhySkillBridgeSection: React.FC = () => {
               </div>
 
               {/* Subtle Underline Effect */}
-              <div className="mt-4 h-0.5 w-0 bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300 group-hover:w-12"></div>
+              <div className="mt-4 h-0.5 w-0 bg-linear-to-r from-indigo-500 to-purple-500 transition-all duration-300 group-hover:w-12"></div>
             </div>
           ))}
         </div>
 
         {/* Bottom Statement */}
         <div className="mt-20 lg:mt-24 max-w-4xl mx-auto text-center">
-          <div className="relative p-12 lg:p-16 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
+          <div className="relative p-12 lg:p-16 bg-linear-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
             {/* Decorative Elements */}
             <div 
-              className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-full blur-3xl"
+              className="absolute top-0 right-0 w-64 h-64 bg-linear-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-full blur-3xl"
               aria-hidden="true"
             ></div>
             <div 
-              className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-br from-purple-500/10 to-pink-500/10 dark:from-purple-500/20 dark:to-pink-500/20 rounded-full blur-3xl"
+              className="absolute bottom-0 left-0 w-64 h-64 bg-linear-to-br from-purple-500/10 to-pink-500/10 dark:from-purple-500/20 dark:to-pink-500/20 rounded-full blur-3xl"
               aria-hidden="true"
             ></div>
             
@@ -219,7 +220,7 @@ const WhySkillBridgeSection: React.FC = () => {
         <div className="mt-12 text-center">
           <button 
             type="button"
-            className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40"
+            className="group inline-flex items-center gap-2 px-8 py-4 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40"
           >
             <span>Experience the Difference</span>
             <svg 

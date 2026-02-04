@@ -1,3 +1,4 @@
+"use client"
 import FeaturedTeachersSection from "@/components/layout/FeaturedTeacher";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/layout/Hero-section";

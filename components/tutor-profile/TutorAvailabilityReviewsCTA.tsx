@@ -245,6 +245,7 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
           {/* Recent Reviews */}
           <div className="space-y-6 mt-8">
             {recentReviews.map((review, index) => (
+              
               <div
                 key={index}
                 className="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300"
@@ -252,7 +253,7 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
                   <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                    {review.avatar}
+                    {""}
                   </div>
 
                   <div className="flex-1 space-y-3">
@@ -283,9 +284,11 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
                     </div>
 
                     {/* Review Text */}
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                      {review.review}
-                    </p>
+                    <div className="authClient">
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                        {review.review}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

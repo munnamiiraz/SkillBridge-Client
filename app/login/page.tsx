@@ -27,11 +27,11 @@ const LoginPage: React.FC = () => {
     try {
       await authClient.signIn.social({
         provider: 'google',
-        callbackURL: 'http://localhost:3000/complete-profile'
+        callbackURL: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/complete-profile`
       })
     } catch (err) {
       console.error('Login error:', err);
-      toast.error('An unexpected error occurred during login.');
+      toast.error('An error occurred during Google login. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +49,6 @@ const LoginPage: React.FC = () => {
       }, {
         onSuccess: (ctx) => {
           toast.success('Login successful! Welcome back.');
-          // If phone is missing, it's an incomplete profile
           if (!ctx.data.user.phone || ctx.data.user.phone === 'N/A') {
             router.push('/complete-profile');
           } else {
@@ -62,7 +61,7 @@ const LoginPage: React.FC = () => {
       });
     } catch (err) {
       console.error('Login error:', err);
-      toast.error('An unexpected error occurred during login.');
+      toast.error('An error occurred during login. Please try again.');
     } finally {
       setIsLoading(false);
     }

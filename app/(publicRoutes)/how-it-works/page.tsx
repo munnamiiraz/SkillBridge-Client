@@ -1,5 +1,3 @@
-import React from 'react';
-
 const HowItWorksPage = () => {
   const steps = [
     {
@@ -35,10 +33,10 @@ const HowItWorksPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6">
+          <h1 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6">
             How SkillBridge Works
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -53,15 +51,15 @@ const HowItWorksPage = () => {
             {steps.map((step, index) => (
               <div key={index} className="relative">
                 {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-indigo-200 to-purple-200 dark:from-indigo-800 dark:to-purple-800 z-0" />
+                  <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-linear-to-r from-indigo-200 to-purple-200 dark:from-indigo-800 dark:to-purple-800 z-0" />
                 )}
                 
                 <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-                  <div className="absolute -top-4 left-8 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                  <div className="absolute -top-4 left-8 bg-linear-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-bold">
                     {step.step}
                   </div>
                   
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6 mt-4">
+                  <div className="w-16 h-16 bg-linear-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6 mt-4">
                     {step.icon}
                   </div>
                   

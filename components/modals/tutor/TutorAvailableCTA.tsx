@@ -87,7 +87,7 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white shadow-lg">
+              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white shadow-lg">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -151,7 +151,7 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
 
             {/* Selected Day Time Slots */}
             {selectedDay && (
-              <div className="p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 animate-fade-in">
+              <div className="p-6 bg-linear-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 animate-fade-in">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                   Available Times - {selectedDay}
                 </h3>
@@ -186,9 +186,9 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
 
           {/* Right Column - Quick Booking Reminder */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-200 dark:border-green-800">
+            <div className="sticky top-24 p-6 bg-linear-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-200 dark:border-green-800">
               <div className="text-center mb-4">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-linear-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -200,7 +200,7 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
                   Popular time slots fill up fast. Secure your preferred session time today.
                 </p>
               </div>
-              <button className="w-full py-3 bg-gradient-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+              <button className="w-full py-3 bg-linear-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                 Book Now
               </button>
             </div>
@@ -210,7 +210,7 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
         {/* Reviews & Ratings Section */}
         <div className="space-y-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-linear-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white shadow-lg">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
               </svg>
@@ -228,8 +228,8 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
           {/* Rating Overview */}
           <div className="grid md:grid-cols-3 gap-8">
             {/* Overall Rating */}
-            <div className="text-center p-8 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl border border-yellow-200 dark:border-yellow-800">
-              <div className="text-6xl font-bold bg-gradient-to-br from-yellow-600 to-orange-600 dark:from-yellow-400 dark:to-orange-400 bg-clip-text text-transparent mb-2">
+            <div className="text-center p-8 bg-linear-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl border border-yellow-200 dark:border-yellow-800">
+              <div className="text-6xl font-bold bg-linear-to-br from-yellow-600 to-orange-600 dark:from-yellow-400 dark:to-orange-400 bg-clip-text text-transparent mb-2">
                 {reviewStats.averageRating}
               </div>
               <div className="flex items-center justify-center gap-1 mb-2">
@@ -256,7 +256,7 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
                   </div>
                   <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full transition-all duration-500"
+                      className="h-full bg-linear-to-r from-yellow-400 to-orange-400 rounded-full transition-all duration-500"
                       style={{ width: `${item.percentage}%` }}
                     ></div>
                   </div>
@@ -279,7 +279,7 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
               >
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
                     {review.avatar}
                   </div>
 
@@ -332,7 +332,7 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
         </div>
 
         {/* Bottom Conversion Section */}
-        <div className="relative mt-16 p-12 lg:p-16 bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 rounded-3xl shadow-2xl overflow-hidden">
+        <div className="relative mt-16 p-12 lg:p-16 bg-linear-to-br from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 rounded-3xl shadow-2xl overflow-hidden">
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl"></div>
