@@ -122,7 +122,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     {session.user.name}
                   </p>
                   <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 truncate uppercase tracking-wider">
-                    {session.user.role}
+                    {(session.user as any)?.role || 'ADMIN'}
                   </p>
                 </div>
               )}

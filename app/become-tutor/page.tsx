@@ -40,7 +40,7 @@ const BecomeTutorPage = () => {
       return;
     }
 
-    if (!isSessionLoading && session?.user.role === 'TUTOR') {
+    if (!isSessionLoading && (session?.user as any)?.role === 'TUTOR') {
       router.push('/tutor/dashboard');
       return;
     }
@@ -145,7 +145,7 @@ const BecomeTutorPage = () => {
                     id="headline"
                     name="headline"
                     required
-                    placeholder="e.g. Expert Mathematics Tutor with 5 years of experience"
+                    placeholder="e.g. Expert Mathematics Tutor with 5 years of experience. [Write atleast 10 words]"
                     value={formData.headline}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"

@@ -50,7 +50,7 @@ export const TutorSessionsService = {
           startTime: this.formatUTCTime(new Date(booking.scheduledAt)),
           // Calculate end time based on duration
           endTime: this.formatUTCTime(
-            new Date(new Date(booking.scheduledAt).getTime() + 1 * 60 * 60 * 1000)
+            new Date(new Date(booking.scheduledAt).getTime() + (booking.duration || 60) * 60 * 1000)
           ),
 
           status: booking.status.toLowerCase(),
@@ -95,6 +95,7 @@ export const TutorSessionsService = {
             return (session.status === 'confirmed' || session.status === 'pending') && isUpcoming;
         }
         if (activeTab === 'in-progress') {
+            if (session.status === 'ongoing') return true;
             const now = new Date();
             const start = new Date(session.date);
             const end = new Date(start.getTime() + session.duration * 60000);

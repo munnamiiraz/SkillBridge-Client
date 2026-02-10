@@ -2,12 +2,13 @@
 import React from 'react';
 
 interface BookingTabsProps {
-  activeTab: 'upcoming' | 'ongoing' | 'past';
-  setActiveTab: (tab: 'upcoming' | 'ongoing' | 'past') => void;
+  activeTab: 'upcoming' | 'ongoing' | 'past' | 'needs-review';
+  setActiveTab: (tab: 'upcoming' | 'ongoing' | 'past' | 'needs-review') => void;
   counts: {
     upcoming: number;
     ongoing: number;
     past: number;
+    needsReview: number;
   };
 }
 
@@ -18,6 +19,7 @@ export const BookingTabs: React.FC<BookingTabsProps> = ({ activeTab, setActiveTa
         { key: 'upcoming', label: 'Upcoming', count: counts.upcoming },
         { key: 'ongoing', label: 'Ongoing', count: counts.ongoing },
         { key: 'past', label: 'Past Sessions', count: counts.past },
+        { key: 'needs-review', label: 'Review Pending', count: counts.needsReview },
       ].map((tab) => (
         <button
           key={tab.key}

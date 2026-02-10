@@ -1,24 +1,31 @@
 'use client';
 
 import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/components/theme-provider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       <Toaster 
-        position="top-right" 
+        position="bottom-right" 
         richColors 
-        theme="dark"
+        theme="system"
+        className="toaster-group"
         toastOptions={{
-          style: {
-            background: '#1f2937',
-            color: '#f9fafb',
-            border: '1px solid #374151',
+          classNames: {
+            toast: 'group toast group-[.toaster]:bg-white dark:group-[.toaster]:bg-gray-800 group-[.toaster]:text-gray-950 dark:group-[.toaster]:text-gray-50 group-[.toaster]:border-gray-200 dark:group-[.toaster]:border-gray-700 group-[.toaster]:shadow-lg',
+            description: 'group-[.toast]:text-muted-foreground',
+            actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
+            cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
           },
-          className: 'dark:bg-gray-800 dark:text-white dark:border-gray-700',
         }}
       />
       {children}
-    </>
+    </ThemeProvider>
   );
 }

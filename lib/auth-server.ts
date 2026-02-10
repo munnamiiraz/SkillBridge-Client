@@ -1,4 +1,4 @@
-import 'server-only'; // ⬅️ IMPORTANT
+import 'server-only';
 
 import { betterAuth } from "better-auth";
 
@@ -19,12 +19,5 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: false,
     requireEmailVerification: true,
-  },
-
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    },
   },
 });

@@ -16,7 +16,7 @@ const StudentBookingsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'ongoing' | 'past'>('upcoming');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'ongoing' | 'past' | 'needs-review'>('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
   
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -85,12 +85,14 @@ const StudentBookingsPage: React.FC = () => {
   const upcomingBookings = bookings.filter((b) => b.status === 'upcoming');
   const ongoingBookings = bookings.filter((b) => b.status === 'ongoing');
   const pastBookings = bookings.filter((b) => b.status === 'completed' || b.status === 'cancelled');
+  const needsReviewBookings = bookings.filter((b) => b.status === 'completed' && !b.hasReview);
 
   const stats = {
     totalBookings: bookings.length,
     upcomingCount: upcomingBookings.length,
     ongoingCount: ongoingBookings.length,
     completedCount: bookings.filter((b) => b.status === 'completed').length,
+    needsReviewCount: needsReviewBookings.length,
     totalSpent: bookings
       .filter((b) => b.payment.status === 'paid')
       .reduce((sum, b) => sum + b.payment.amount, 0),
@@ -106,6 +108,8 @@ const StudentBookingsPage: React.FC = () => {
       filtered = upcomingBookings;
     } else if (activeTab === 'ongoing') {
       filtered = ongoingBookings;
+    } else if (activeTab === 'needs-review') {
+      filtered = needsReviewBookings;
     } else {
       filtered = pastBookings;
     }
@@ -177,7 +181,8 @@ const StudentBookingsPage: React.FC = () => {
           counts={{
             upcoming: stats.upcomingCount,
             ongoing: stats.ongoingCount,
-            past: pastBookings.length
+            past: pastBookings.length,
+            needsReview: stats.needsReviewCount
           }}
         />
 

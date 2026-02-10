@@ -7,6 +7,7 @@ export interface Category {
   status: 'active' | 'inactive';
   tutorCount: number;
   courseCount: number;
+  subjects?: { id: string; name: string }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -29,7 +30,8 @@ export const CategoryService = {
       description: c.description || '',
       status: c.status?.toLowerCase() || 'active',
       tutorCount: c._count?.tutor_profiles || 0,
-      courseCount: 0,
+      courseCount: c._count?.subject || 0,
+      subjects: c.subject?.map((s: any) => ({ id: s.id, name: s.name })) || [],
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,
     }));
@@ -47,5 +49,23 @@ export const CategoryService = {
 
   async delete(id: string) {
     return apiClient.delete(`/api/admin/categories/${id}`);
+  },
+
+  // Subject Methods
+  async createSubject(data: { name: string; categoryId: string }) {
+    return apiClient.post('/api/admin/subjects', data);
+  },
+
+  async updateSubject(id: string, data: { name?: string; categoryId?: string }) {
+    return apiClient.patch(`/api/admin/subjects/${id}`, data);
+  },
+
+  async deleteSubject(id: string) {
+    return apiClient.delete(`/api/admin/subjects/${id}`);
+  },
+
+  async getAllSubjects(categoryId?: string) {
+    const endpoint = categoryId ? `/api/admin/subjects?categoryId=${categoryId}` : '/api/admin/subjects';
+    return apiClient.fetch(endpoint);
   }
 };

@@ -1,8 +1,16 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+const getBaseUrl = () => {
+  if (typeof window === 'undefined') {
+    return process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+  }
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+};
 
 export const apiClient = {
   async fetch(endpoint: string, options: RequestInit = {}) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const baseUrl = getBaseUrl();
+    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    
+    const response = await fetch(`${baseUrl}${normalizedEndpoint}`, {
       ...options,
       credentials: "include",
       headers: {
@@ -12,8 +20,14 @@ export const apiClient = {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: "Request failed" }));
-      throw new Error(error.message || "Request failed");
+      let errorMessage = response.statusText;
+      try {
+        const error = await response.json();
+        errorMessage = error.message || error.error || response.statusText;
+      } catch (e) {
+      
+      }
+      throw new Error(errorMessage || "Request failed");
     }
 
     return response.json();

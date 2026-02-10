@@ -187,29 +187,63 @@ export const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
 
             {/* Footer Actions - Status Update */}
             <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-8 py-6 z-10">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">
-                    Current Status:
-                  </span>
-                  <div className="relative flex-1 max-w-xs">
-                    <select
-                      value={session.status.toUpperCase()}
-                      onChange={(e) => onUpdateStatus(session.id, e.target.value)}
-                      disabled={isMarkingComplete}
-                      className="w-full appearance-none px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <option value="PENDING">PENDING</option>
-                      <option value="CONFIRMED">CONFIRMED</option>
-                      <option value="ONGOING">ONGOING</option>
-                      <option value="COMPLETED">COMPLETED</option>
-                      <option value="CANCELLED">CANCELLED</option>
-                    </select>
-                     <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      Status:
+                    </span>
+                    <div className="relative flex-1 sm:w-48">
+                      <select
+                        value={session.status.toUpperCase()}
+                        onChange={(e) => onUpdateStatus(session.id, e.target.value)}
+                        disabled={isMarkingComplete}
+                        className="w-full appearance-none pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <option value="PENDING">PENDING</option>
+                        <option value="CONFIRMED">CONFIRMED</option>
+                        <option value="ONGOING">ONGOING</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                        <option value="CANCELLED">CANCELLED</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </div>
+                    </div>
                   </div>
+
+                  {(session.status === 'ongoing' || session.status === 'confirmed') && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (session.status === 'confirmed') {
+                          onUpdateStatus(session.id, 'ONGOING');
+                        } else {
+                          onMarkComplete(session.id);
+                        }
+                      }}
+                      disabled={isMarkingComplete}
+                      className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-white font-bold rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-1 disabled:hover:translate-y-0 disabled:opacity-50 ${
+                        session.status === 'confirmed'
+                          ? 'bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
+                          : 'bg-linear-to-br from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+                      }`}
+                    >
+                      {isMarkingComplete ? (
+                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={session.status === 'confirmed' ? "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" : "M5 13l4 4L19 7"} />
+                          {session.status === 'confirmed' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />}
+                        </svg>
+                      )}
+                      <span>{session.status === 'confirmed' ? 'Start Session' : 'Mark as Done'}</span>
+                    </button>
+                  )}
                 </div>
             </div>
         </div>

@@ -1,21 +1,37 @@
-// import { env } from "@/env";
 import { cookies } from "next/headers";
 
 const AUTH_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const userService = {
-  getSession: async function () {
+  getSession: async function (cookieHeader?: string | null) {
     try {
-      const cookieStore = await cookies();
+      const headers: Record<string, string> = {};
+      
+      if (cookieHeader) {
+        headers['Cookie'] = cookieHeader;
+      } else {
+        try {
+          const { cookies } = await import("next/headers");
+          const cookieStore = await cookies();
+          headers['Cookie'] = cookieStore.toString();
+        } catch (e) {
 
-      // console.log(cookieStore.toString());
+        }
+      }
 
-      const res = await fetch(`${AUTH_URL}/get-session`, {
-        headers: {
-          Cookie: cookieStore.toString(),
-        },
+      const isServer = typeof window === 'undefined';
+      const baseUrl = isServer && process.env.INTERNAL_API_URL 
+        ? process.env.INTERNAL_API_URL 
+        : AUTH_URL;
+
+      const res = await fetch(`${baseUrl}/api/auth/get-session`, {
+        headers,
         cache: "no-store",
       });
+
+      if (!res.ok) {
+        return { data: null, error: { message: "Failed to fetch session" } };
+      }
 
       const session = await res.json();
 
@@ -25,7 +41,7 @@ export const userService = {
 
       return { data: session, error: null };
     } catch (err) {
-      console.error(err);
+      console.error("Session fetch error:", err);
       return { data: null, error: { message: "Something Went Wrong" } };
     }
   },

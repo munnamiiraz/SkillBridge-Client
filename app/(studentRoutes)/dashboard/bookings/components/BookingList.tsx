@@ -100,6 +100,7 @@ export const BookingList: React.FC<BookingListProps> = ({
           {activeTab === 'upcoming' && "You don't have any upcoming sessions yet"}
           {activeTab === 'ongoing' && "No ongoing sessions at the moment"}
           {activeTab === 'past' && "You haven't completed any sessions yet"}
+          {activeTab === 'needs-review' && "You've reviewed all your completed sessions! Great job."}
         </p>
         <button
           type="button"

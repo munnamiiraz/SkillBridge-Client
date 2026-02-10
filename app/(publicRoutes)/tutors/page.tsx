@@ -80,7 +80,7 @@ const TutorDiscoveryPageContent: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://skillbridge-server-2.onrender.com'}/api/public/categories`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/categories`);
         if (response.data.success) {
           setCategories(response.data.data);
         }

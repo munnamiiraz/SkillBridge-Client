@@ -121,11 +121,11 @@ const TutorProfilePage: React.FC = () => {
 
   // Auto-create profile if missing for tutors
   useEffect(() => {
-    if (!loading && !profile && (session?.user?.role === 'TUTOR')) {
+    if (!loading && !profile && ((session?.user as any)?.role === 'TUTOR')) {
       // console.log('Auto-creating missing tutor profile...');
       handleCreateProfile();
     }
-  }, [loading, profile, session?.user?.role]);
+  }, [loading, profile, (session?.user as any)?.role]);
 
   const handleCreateProfile = async () => {
     if (!session?.user) return;

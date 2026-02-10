@@ -19,7 +19,7 @@ const CompleteProfilePage: React.FC = () => {
     }
 
     // If session is already complete (has role and phone), redirect home
-    if (session?.user?.role && session?.user?.phone && session?.user?.phone !== 'N/A') {
+    if ((session?.user as any)?.role && (session?.user as any)?.phone && (session?.user as any)?.phone !== 'N/A') {
         router.push('/');
     }
   }, [session, isPending, router]);

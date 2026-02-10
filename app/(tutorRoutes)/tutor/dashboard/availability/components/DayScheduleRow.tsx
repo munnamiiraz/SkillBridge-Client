@@ -88,29 +88,62 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                         </div>
                       )}
                       
-                      <input
-                        type="time"
-                        value={slot.startTime}
-                        disabled={slot.isBooked}
-                        onChange={(e) => onUpdateSlot(dateKey, slot.id, 'startTime', e.target.value)}
-                        className={`flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                          slot.isBooked ? 'opacity-60 cursor-not-allowed border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-900/10' : ''
-                        }`}
-                      />
+                      <div className="relative flex-1">
+                        <select
+                          value={slot.startTime}
+                          disabled={slot.isBooked}
+                          onChange={(e) => onUpdateSlot(dateKey, slot.id, 'startTime', e.target.value)}
+                          className={`w-full pl-4 pr-10 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none cursor-pointer ${
+                            slot.isBooked ? 'opacity-60 cursor-not-allowed border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-900/10' : ''
+                          }`}
+                        >
+                          {Array.from({ length: 24 }).map((_, i) => {
+                            const hour = i.toString().padStart(2, '0');
+                            const time = `${hour}:00`;
+                            const label = new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              hour12: true,
+                            });
+                            return <option key={time} value={time}>{label}</option>;
+                          })}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
                       
                       <span className="text-gray-400 dark:text-gray-600 font-medium">
                         to
                       </span>
                       
-                      <input
-                        type="time"
-                        value={slot.endTime}
-                        disabled={slot.isBooked}
-                        onChange={(e) => onUpdateSlot(dateKey, slot.id, 'endTime', e.target.value)}
-                        className={`flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                          slot.isBooked ? 'opacity-60 cursor-not-allowed border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-900/10' : ''
-                        }`}
-                      />
+                      <div className="relative flex-1">
+                        <select
+                          value={slot.endTime}
+                          disabled={slot.isBooked}
+                          onChange={(e) => onUpdateSlot(dateKey, slot.id, 'endTime', e.target.value)}
+                          className={`w-full pl-4 pr-10 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none cursor-pointer ${
+                            slot.isBooked ? 'opacity-60 cursor-not-allowed border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-900/10' : ''
+                          }`}
+                        >
+                          {Array.from({ length: 24 }).map((_, i) => {
+                            const hour = i.toString().padStart(2, '0');
+                            const time = `${hour}:00`;
+                            const label = new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              hour12: true,
+                            });
+                            return <option key={time} value={time}>{label}</option>;
+                          })}
+                          <option value="23:59">11 PM (End)</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
 

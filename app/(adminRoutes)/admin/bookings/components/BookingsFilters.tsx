@@ -34,21 +34,28 @@ const BookingsFilters = () => {
   const updateParams = (updates: Record<string, string>) => {
     if (!mounted) return;
     const params = new URLSearchParams(searchParams.toString());
+    let hasChanged = false;
     
     Object.entries(updates).forEach(([key, value]) => {
-      if (value === 'all' || !value) {
-        params.delete(key);
-      } else {
-        params.set(key, value);
+      const currentVal = params.get(key) || (['status', 'payment'].includes(key) ? 'all' : key === 'sortBy' ? 'date' : '');
+      if (currentVal !== value) {
+        if (value === 'all' || !value) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+        hasChanged = true;
       }
     });
 
-    // Reset to page 1 on filter change
-    if (!updates.page) {
+    // Reset to page 1 on filter change, but only if filters actually changed
+    if (hasChanged && !updates.page && params.has('page')) {
       params.delete('page');
     }
 
-    router.push(`?${params.toString()}`);
+    if (hasChanged) {
+      router.push(`?${params.toString()}`);
+    }
   };
 
   if (!mounted) {

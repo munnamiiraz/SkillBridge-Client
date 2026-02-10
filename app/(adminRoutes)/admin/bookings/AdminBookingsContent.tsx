@@ -49,7 +49,7 @@ export default function AdminBookingsContent() {
     fetchBookings();
   }, [searchParams]);
 
-  if (loading) {
+  if (loading && bookings.length === 0) {
     return (
       <div className="p-6 lg:p-8">
         <div className="animate-pulse">
@@ -75,10 +75,13 @@ export default function AdminBookingsContent() {
             </svg>
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold">
+            <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
               <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                 Bookings Management
               </span>
+              {loading && (
+                <div className="w-6 h-6 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+              )}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               View, manage, and track all session bookings

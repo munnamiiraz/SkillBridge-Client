@@ -6,6 +6,7 @@ interface Stats {
   upcomingCount: number;
   ongoingCount: number;
   completedCount: number;
+  needsReviewCount: number;
   totalSpent: number;
   hoursLearned: number;
 }

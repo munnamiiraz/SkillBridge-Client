@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-// import { useTheme } from '@/components/providers/ThemeProvider';
+import { useTheme } from 'next-themes';
 
 interface NavLink {
   label: string;
@@ -15,10 +15,17 @@ interface NavLink {
 const Navbar: React.FC = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // const { theme, toggleTheme } = useTheme();
-  // const isDark = theme === 'dark';
-  const isDark = false;
-  const toggleTheme = () => {};
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && (theme === 'dark' || resolvedTheme === 'dark');
+  const toggleTheme = () => {
+    setTheme(isDark ? 'light' : 'dark');
+  };
   const [scrolled, setScrolled] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const sessionResponse = authClient.useSession();
@@ -143,13 +150,6 @@ const Navbar: React.FC = () => {
             {!session ? (
               <>
                 <Link
-                  href="/register"
-                  className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
-                >
-                  Become a Teacher
-                </Link>
-
-                <Link
                   href="/login"
                   className="group relative px-6 py-2.5 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold rounded-lg shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40 overflow-hidden"
                 >
@@ -186,7 +186,7 @@ const Navbar: React.FC = () => {
                       {session?.user.name}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {session?.user.role}
+                      {(session?.user as any).role}
                     </p>
                   </div>
                   <svg 
@@ -209,9 +209,9 @@ const Navbar: React.FC = () => {
                     </div>
                     <Link
                       href={
-                        session.user.role === 'ADMIN' 
+                        (session.user as any).role === 'ADMIN' 
                           ? '/admin' 
-                          : session.user.role === 'TUTOR' 
+                          : (session.user as any).role === 'TUTOR' 
                             ? '/tutor/dashboard' 
                             : '/dashboard'
                       }
@@ -224,11 +224,11 @@ const Navbar: React.FC = () => {
                       </svg>
                       Dashboard
                     </Link>
-                    {session.user.role !== 'ADMIN' && (
+                    {(session.user as any).role !== 'ADMIN' && (
                       <>
                         <Link
                           href={
-                            session.user.role === 'TUTOR' 
+                            (session.user as any).role === 'TUTOR' 
                               ? '/tutor/dashboard/profile' 
                               : '/dashboard/profile'
                           }
@@ -242,7 +242,7 @@ const Navbar: React.FC = () => {
                         </Link>
                         <Link
                           href={
-                            session.user.role === 'TUTOR' 
+                            (session.user as any).role === 'TUTOR' 
                               ? '/tutor/dashboard/manage-profile' 
                               : '/dashboard/manage-profile'
                           }
@@ -258,7 +258,7 @@ const Navbar: React.FC = () => {
                     )}
                     
                     {/* Tutor-specific menu items */}
-                    {session.user.role === 'TUTOR' && (
+                    {(session.user as any).role === 'TUTOR' && (
                       <>
                         <Link
                           href="/tutor/dashboard/availability"
@@ -294,7 +294,7 @@ const Navbar: React.FC = () => {
                     )}
                     
                     {/* Student-specific menu items */}
-                    {session.user.role === 'STUDENT' && (
+                    {(session.user as any).role === 'STUDENT' && (
                       <>
                         <Link
                           href="/dashboard/bookings"
@@ -318,25 +318,13 @@ const Navbar: React.FC = () => {
                         </Link>
                       </>
                     )}
-                    
-                    <Link
-                      href="/settings"
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-t border-gray-100 dark:border-gray-700"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      Settings
-                    </Link>
                     <button
                       onClick={async () => {
                         await authClient.signOut({
                           fetchOptions: {
                             onSuccess: () => {
                               toast.success('Logged out successfully');
-                              router.push('/login');
+                              router.push('/');
                               setIsUserMenuOpen(false);
                             }
                           }
@@ -481,9 +469,9 @@ const Navbar: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <Link
                       href={
-                        session.user.role === 'ADMIN' 
+                        (session.user as any).role === 'ADMIN' 
                           ? '/admin' 
-                          : session.user.role === 'TUTOR' 
+                          : (session.user as any).role === 'TUTOR' 
                             ? '/tutor/dashboard' 
                             : '/dashboard'
                       }
@@ -492,11 +480,11 @@ const Navbar: React.FC = () => {
                     >
                       Dashboard
                     </Link>
-                    {session.user.role !== 'ADMIN' && (
+                    {(session.user as any).role !== 'ADMIN' && (
                       <>
                         <Link
                           href={
-                            session.user.role === 'TUTOR' 
+                            (session.user as any).role === 'TUTOR' 
                               ? '/tutor/dashboard/profile' 
                               : '/dashboard/profile'
                           }
@@ -507,7 +495,7 @@ const Navbar: React.FC = () => {
                         </Link>
                         <Link
                           href={
-                            session.user.role === 'TUTOR' 
+                            (session.user as any).role === 'TUTOR' 
                               ? '/tutor/dashboard/manage-profile' 
                               : '/dashboard/manage-profile'
                           }
@@ -520,7 +508,7 @@ const Navbar: React.FC = () => {
                     )}
                     
                     {/* Tutor-specific mobile menu items */}
-                    {session.user.role === 'TUTOR' && (
+                    {(session.user as any).role === 'TUTOR' && (
                       <>
                         <Link
                           href="/tutor/dashboard/availability"
@@ -547,7 +535,7 @@ const Navbar: React.FC = () => {
                     )}
                     
                     {/* Student-specific mobile menu items */}
-                    {session.user.role === 'STUDENT' && (
+                    {(session.user as any).role === 'STUDENT' && (
                       <Link
                         href="/dashboard/bookings"
                         className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

@@ -1,9 +1,5 @@
 import axios from 'axios';
 
-/**
- * Extracts a meaningful error message from an error object, 
- * especially from backend responses.
- */
 export const getErrorMsg = (error: any): string => {
   if (axios.isAxiosError(error)) {
     return error.response?.data?.message || error.message || "Request failed";
@@ -20,9 +16,6 @@ export const getErrorMsg = (error: any): string => {
   return "An unexpected error occurred";
 };
 
-/**
- * Formats a validation error message from the backend if available.
- */
 export const getValidationError = (error: any): string | null => {
   if (axios.isAxiosError(error)) {
     const errorData = error.response?.data;

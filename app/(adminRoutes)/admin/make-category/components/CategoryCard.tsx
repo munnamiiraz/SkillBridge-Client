@@ -6,6 +6,7 @@ import { Category, CategoryService } from '@/app/admin/categories.service';
 import { useRouter } from 'next/navigation';
 import CategoryModal from './CategoryModal';
 import DeleteModal from './DeleteModal';
+import SubjectModal from './SubjectModal';
 
 interface CategoryCardProps {
   category: Category;
@@ -16,6 +17,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, index }) => {
   const router = useRouter();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSubjectModal, setShowSubjectModal] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
 
   const handleToggleStatus = async () => {
@@ -98,50 +100,86 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, index }) => {
           <span className="text-sm font-semibold text-gray-900 dark:text-white">
             {category.courseCount}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">courses</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">subjects</span>
         </div>
       </div>
 
+      {/* Subjects Preview */}
+      {category.subjects && category.subjects.length > 0 && (
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2">
+            {category.subjects.slice(0, 3).map((subject) => (
+              <span 
+                key={subject.id}
+                className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-md border border-indigo-100 dark:border-indigo-800/50"
+              >
+                {subject.name}
+              </span>
+            ))}
+            {category.subjects.length > 3 && (
+              <span className="text-[10px] font-bold text-gray-400 self-center">
+                +{category.subjects.length - 3} more
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleToggleStatus}
+            disabled={isToggling}
+            className={`flex-1 px-4 py-2 font-semibold rounded-lg transition-all duration-200 ${
+              category.status === 'active'
+                ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                : 'bg-linear-to-br from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+            }`}
+          >
+            {isToggling ? 'Wait...' : category.status === 'active' ? 'Deactivate' : 'Activate'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowEditModal(true)}
+            className="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-all"
+            title="Edit"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowDeleteModal(true)}
+            className="p-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-all"
+            title="Delete"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+        
         <button
           type="button"
-          onClick={handleToggleStatus}
-          disabled={isToggling}
-          className={`flex-1 px-4 py-2 font-semibold rounded-lg transition-all duration-200 ${
-            category.status === 'active'
-              ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              : 'bg-linear-to-br from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-          }`}
+          onClick={() => setShowSubjectModal(true)}
+          className="w-full px-4 py-2.5 bg-linear-to-br from-purple-500/10 to-pink-500/10 hover:from-purple-500 hover:to-pink-500 text-purple-600 dark:text-purple-400 hover:text-white border border-purple-200 dark:border-purple-800/50 hover:border-transparent font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn shadow-sm hover:shadow-purple-500/25"
         >
-          {isToggling ? 'Wait...' : category.status === 'active' ? 'Deactivate' : 'Activate'}
-        </button>
-        <button
-          type="button"
-          onClick={() => setShowEditModal(true)}
-          className="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-all"
-          title="Edit"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          <svg className="w-5 h-5 transition-transform duration-300 group-hover/btn:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => setShowDeleteModal(true)}
-          className="p-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-all"
-          title="Delete"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
+          Add Subject
         </button>
       </div>
 
       {/* Last Updated */}
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-        Updated {formatDate(category.updatedAt)}
-      </p>
+      <div className="flex items-center justify-between mt-4">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Updated {formatDate(category.updatedAt)}
+        </p>
+      </div>
 
       {/* Modals */}
       {showEditModal && (
@@ -155,6 +193,12 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, index }) => {
         <DeleteModal 
           category={category} 
           onClose={() => setShowDeleteModal(false)} 
+        />
+      )}
+      {showSubjectModal && (
+        <SubjectModal 
+          category={category} 
+          onClose={() => setShowSubjectModal(false)} 
         />
       )}
     </div>
