@@ -7,7 +7,6 @@ interface ReviewsTabProps {
 }
 
 export const ReviewsTab: React.FC<ReviewsTabProps> = ({ bookings }) => {
-  // Extract reviews from bookings
   const reviews = bookings
     .filter(b => b.review)
     .map(b => ({ ...b.review!, booking: b }));
@@ -38,7 +37,7 @@ export const ReviewsTab: React.FC<ReviewsTabProps> = ({ bookings }) => {
                     {review.booking.tutor_profile.user.name}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'Asia/Dhaka' })}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">

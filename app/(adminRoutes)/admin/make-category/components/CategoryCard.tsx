@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { Category, CategoryService } from '@/app/admin/categories.service';
+import { Category, updateCategory } from '@/app/admin/categories.service';
 import { useRouter } from 'next/navigation';
 import CategoryModal from './CategoryModal';
 import DeleteModal from './DeleteModal';
@@ -24,12 +24,12 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, index }) => {
     setIsToggling(true);
     const newStatus = category.status === 'active' ? 'INACTIVE' : 'ACTIVE';
     try {
-      const result = await CategoryService.update(category.id, { status: newStatus });
-      if (result.success) {
+      const result = await updateCategory(category.id, { status: newStatus }, document.cookie);
+      if (result.data.success) {
         toast.success(`Category ${newStatus.toLowerCase()} successfully`);
         router.refresh();
       } else {
-        toast.error(result.message || 'Failed to toggle status');
+        toast.error(result.data.message || 'Failed to toggle status');
       }
     } catch (error: any) {
       toast.error(error.message || 'An error occurred');
@@ -43,6 +43,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, index }) => {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      timeZone: 'Asia/Dhaka'
     });
   };
 

@@ -1,4 +1,7 @@
-import { apiClient } from '@/lib/api-client';
+'use server';
+
+import { cookies } from 'next/headers';
+import { env } from '@/env';
 
 export interface StudentProfile {
   id: string;
@@ -9,12 +12,26 @@ export interface StudentProfile {
   image: string;
 }
 
-export const StudentProfileService = {
-  async getProfile(): Promise<StudentProfile> {
-    const response = await apiClient.get('/api/student/profile');
-    const userData = response.data;
-    
-    return {
+export async function getStudentProfileData(providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/student/profile`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      cache: 'no-store',
+    });
+
+    const result = await res.json();
+    if (!result.success) {
+      return { data: null, error: { message: result.message || 'Failed to fetch profile' } };
+    }
+
+    const userData = result.data;
+    const transformedProfile: StudentProfile = {
       id: userData.id,
       name: userData.name || '',
       email: userData.email || '',
@@ -22,19 +39,34 @@ export const StudentProfileService = {
       address: userData.address || '',
       image: userData.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.name || 'User'}`,
     };
-  },
 
-  async updateProfile(data: Partial<StudentProfile>): Promise<void> {
-    await apiClient.patch('/api/student/profile', {
-      name: data.name,
-      phone: data.phone,
-      address: data.address
-    });
-  },
-
-  async deleteAccount(): Promise<void> {
-    // Implementing placeholder for delete logic consistent with existing UI
-    // In a real app, this would hit an endpoint like DELETE /api/student/profile
-    // throw new Error('Delete functionality not yet implemented on backend');
+    return { data: transformedProfile, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Something Went Wrong' } };
   }
-};
+}
+
+export async function updateStudentProfile(data: Partial<StudentProfile>, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/student/profile`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      body: JSON.stringify({
+        name: data.name,
+        phone: data.phone,
+        address: data.address
+      }),
+    });
+
+    const result = await res.json();
+    return { data: result, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to update profile' } };
+  }
+}

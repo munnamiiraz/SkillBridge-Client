@@ -1,4 +1,7 @@
-import { apiClient } from '@/lib/api-client';
+'use server';
+
+import { cookies } from 'next/headers';
+import { env } from '@/env';
 
 export interface StudentProfile {
   id: string;
@@ -43,32 +46,68 @@ export interface DashboardStats {
   averageRating: string;
 }
 
-export const StudentDashboardService = {
-  async getProfile(): Promise<StudentProfile> {
-    const response = await apiClient.get('/api/student/profile');
-    return response.data;
-  },
+export async function getStudentProfile(providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
 
-  async getBookings(): Promise<Booking[]> {
-    const response = await apiClient.get('/api/student/bookings?limit=100');
-    return response.data;
-  },
+    const res = await fetch(`${env.API_URL}/api/student/profile`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      cache: 'no-store',
+    });
 
-  calculateStats(bookings: Booking[]): DashboardStats {
-    const reviews = bookings
-      .filter(b => b.review)
-      .map(b => b.review!);
+    const result = await res.json();
+    if (!result.success) {
+      return { data: null, error: { message: result.message || 'Failed to fetch profile' } };
+    }
 
-    return {
-      totalBookings: bookings.length,
-      completedSessions: bookings.filter(b => b.status === 'COMPLETED').length,
-      upcomingSessions: bookings.filter(b => b.status === 'CONFIRMED' || b.status === 'PENDING').length,
-      totalSpent: bookings
-        .filter(b => b.status !== 'CANCELLED')
-        .reduce((sum, b) => sum + b.price, 0),
-      averageRating: reviews.length > 0 
-        ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-        : '0.0',
-    };
+    return { data: result.data as StudentProfile, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Something Went Wrong' } };
   }
-};
+}
+
+export async function getStudentBookings(limit = 10, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/student/bookings?limit=${limit}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      cache: 'no-store',
+    });
+
+    const result = await res.json();
+    if (!result.success) {
+      return { data: null, error: { message: result.message || 'Failed to fetch bookings' } };
+    }
+
+    return { data: result.data as Booking[], error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Something Went Wrong' } };
+  }
+}
+
+export async function calculateDashboardStats(bookings: Booking[]): Promise<DashboardStats> {
+  const reviews = bookings
+    .filter(b => b.review)
+    .map(b => b.review!);
+
+  return {
+    totalBookings: bookings.length,
+    completedSessions: bookings.filter(b => b.status === 'COMPLETED').length,
+    upcomingSessions: bookings.filter(b => b.status === 'CONFIRMED' || b.status === 'PENDING').length,
+    totalSpent: bookings
+      .filter(b => b.status !== 'CANCELLED')
+      .reduce((sum, b) => sum + b.price, 0),
+    averageRating: reviews.length > 0 
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      : '0.0',
+  };
+}

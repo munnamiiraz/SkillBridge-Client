@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import { Booking, AdminBookings } from '@/app/admin/bookings.service';
+import { Booking, cancelBooking } from '@/app/admin/bookings.service';
 import { useRouter } from 'next/navigation';
 
 interface CancelBookingModalProps {
@@ -25,18 +25,19 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({ booking, onClos
   const confirmCancelBooking = async () => {
     setIsSubmitting(true);
     try {
-      const result = await AdminBookings.cancel(
+      const result = await cancelBooking(
         booking.id,
         cancelReason,
-        parseFloat(refundAmount)
+        parseFloat(refundAmount),
+        document.cookie
       );
       
-      if (result.success) {
+      if (result.data.success) {
         toast.success('Booking cancelled successfully');
         onClose();
         router.refresh(); 
       } else {
-        toast.error(result.message || 'Failed to cancel booking');
+        toast.error(result.data.message || 'Failed to cancel booking');
       }
     } catch (error: any) {
       console.error('Error cancelling booking:', error);
@@ -51,6 +52,7 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({ booking, onClos
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      timeZone: 'Asia/Dhaka'
     });
   };
 

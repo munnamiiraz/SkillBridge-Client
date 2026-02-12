@@ -13,7 +13,6 @@ const BookingsFilters = () => {
   const [sortBy, setSortBy] = useState('date');
   const [mounted, setMounted] = useState(false);
 
-  // Handle hydration
   useEffect(() => {
     setMounted(true);
     setSearchQuery(searchParams.get('search') || '');

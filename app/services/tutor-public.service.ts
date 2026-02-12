@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api-client';
+import { env } from '@/env';
 
 export interface Tutor {
   id: string;
@@ -37,13 +37,20 @@ const gradients = [
   'from-slate-600 to-zinc-700',
 ];
 
-export const TutorPublicService = {
-  async getCategories() {
-    const result = await apiClient.get('/api/public/categories');
-    return result.data;
-  },
+export async function getPublicCategories() {
+  try {
+    const response = await fetch(`${env.API_URL}/api/public/categories`, {
+      next: { revalidate: 3600 } // Cache for 1 hour
+    });
+    const result = await response.json();
+    return { data: result.data, error: null };
+  } catch (error: any) {
+    return { data: null, error: { message: error.message || 'Failed to fetch categories' } };
+  }
+}
 
-  async searchTutors(filters: TutorFilters) {
+export async function searchTutors(filters: TutorFilters) {
+  try {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -51,7 +58,10 @@ export const TutorPublicService = {
       }
     });
 
-    const result = await apiClient.get(`/api/public/tutors/search?${params.toString()}`);
+    const response = await fetch(`${env.API_URL}/api/public/tutors/search?${params.toString()}`, {
+      next: { revalidate: 300 } // Cache for 5 minutes
+    });
+    const result = await response.json();
     
     if (result.success) {
       const mappedTutors = result.data.map((t: any, index: number) => ({
@@ -70,11 +80,22 @@ export const TutorPublicService = {
       }));
 
       return {
-        tutors: mappedTutors,
-        meta: result.meta
+        data: {
+          tutors: mappedTutors,
+          meta: result.meta
+        },
+        error: null
       };
     }
     
-    throw new Error(result.message || 'Failed to fetch tutors');
+    return { data: null, error: { message: result.message || 'Failed to fetch tutors' } };
+  } catch (error: any) {
+    return { data: null, error: { message: error.message || 'An unexpected error occurred' } };
   }
+}
+
+// Deprecated: Keeping for compatibility while transitioning
+export const TutorPublicService = {
+  getCategories: getPublicCategories,
+  searchTutors: searchTutors
 };

@@ -18,7 +18,6 @@ const CompleteProfilePage: React.FC = () => {
       return;
     }
 
-    // If session is already complete (has role and phone), redirect home
     if ((session?.user as any)?.role && (session?.user as any)?.phone && (session?.user as any)?.phone !== 'N/A') {
         router.push('/');
     }
@@ -39,8 +38,6 @@ const CompleteProfilePage: React.FC = () => {
 
     setIsUpdating(true);
     try {
-      // Step 1: Update basic profile (including role if student)
-      // Actually we keep role as STUDENT here. If they chose TUTOR, we'll redirect.
       await authClient.updateUser({
         phone: phone,
       } as any, {

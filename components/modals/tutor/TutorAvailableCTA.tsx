@@ -7,7 +7,7 @@ const TutorAvailabilityReviewsCTA: React.FC = () => {
 
   // Sample availability data
   const availability = {
-    timezone: 'EST (UTC-5)',
+    timezone: 'EST (UTC+6)',
     weekSchedule: [
       { day: 'Mon', slots: ['9:00 AM', '2:00 PM', '4:00 PM'], available: true },
       { day: 'Tue', slots: ['10:00 AM', '3:00 PM'], available: true },

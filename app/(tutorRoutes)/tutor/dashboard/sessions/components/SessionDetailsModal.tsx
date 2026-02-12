@@ -23,7 +23,8 @@ export const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
       weekday: 'long', 
       month: 'long', 
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'Asia/Dhaka'
     });
   };
 
@@ -32,6 +33,7 @@ export const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
+      timeZone: 'Asia/Dhaka'
     });
   };
 

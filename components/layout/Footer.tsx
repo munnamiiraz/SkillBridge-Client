@@ -18,37 +18,37 @@ const Footer: React.FC = () => {
     {
       title: 'Platform',
       links: [
-        { label: 'Find Teachers', href: '/teachers' },
-        { label: 'Become a Teacher', href: '/teach' },
-        { label: 'How It Works', href: '/how-it-works' },
-        { label: 'Pricing', href: '/pricing' },
+        { label: 'Find Teachers', href: '/' },
+        { label: 'Become a Teacher', href: '/' },
+        { label: 'How It Works', href: '/' },
+        { label: 'Pricing', href: '/' },
       ],
     },
     {
       title: 'Company',
       links: [
-        { label: 'About Us', href: '/about' },
-        { label: 'Careers', href: '/careers' },
-        { label: 'Blog', href: '/blog' },
-        { label: 'Press Kit', href: '/press' },
+        { label: 'About Us', href: '/' },
+        { label: 'Careers', href: '/' },
+        { label: 'Blog', href: '/' },
+        { label: 'Press Kit', href: '/' },
       ],
     },
     {
       title: 'Resources',
       links: [
-        { label: 'Help Center', href: '/help' },
-        { label: 'Safety Guidelines', href: '/safety' },
-        { label: 'Community', href: '/community' },
-        { label: 'Success Stories', href: '/stories' },
+        { label: 'Help Center', href: '/' },
+        { label: 'Safety Guidelines', href: '/' },
+        { label: 'Community', href: '/' },
+        { label: 'Success Stories', href: '/' },
       ],
     },
     {
       title: 'Legal',
       links: [
-        { label: 'Privacy Policy', href: '/privacy' },
-        { label: 'Terms of Service', href: '/terms' },
-        { label: 'Cookie Policy', href: '/cookies' },
-        { label: 'Accessibility', href: '/accessibility' },
+        { label: 'Privacy Policy', href: '/' },
+        { label: 'Terms of Service', href: '/' },
+        { label: 'Cookie Policy', href: '/' },
+        { label: 'Accessibility', href: '/' },
       ],
     },
   ];

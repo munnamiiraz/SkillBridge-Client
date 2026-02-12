@@ -22,7 +22,7 @@ const TutorProfilePage: React.FC = () => {
         const fetchTutorProfile = async () => {
             try {
                 // Fetch public tutor profile info
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/${tutorId}`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/public/tutors/${tutorId}`);
                 if (response.data.success) {
                     const data = response.data.data;
                     
@@ -37,9 +37,7 @@ const TutorProfilePage: React.FC = () => {
                     }));
                     let statsRes;
                     try {
-                        // Fetch rating statistics
                         statsRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/${tutorId}/rating-stats`);
-                        //  console.log(statsRes);
                         
                         if (statsRes.data.success) {
                             ratingBreakdown = statsRes.data.data.distribution.map((d: any) => ({
@@ -61,7 +59,7 @@ const TutorProfilePage: React.FC = () => {
                                 name: r.user.name,
                                 avatar: r.user.image || r.user.name.charAt(0).toUpperCase(),
                                 rating: r.rating,
-                                date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                                date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Dhaka' }),
                                 subject: r.booking?.subject || 'Learning Session',
                                 review: r.comment,
                                 verified: true
@@ -137,7 +135,7 @@ const TutorProfilePage: React.FC = () => {
                             }
                         ],
                         availability: {
-                            timezone: 'EST (UTC-5)',
+                            timezone: 'EST (UTC+6)',
                             weekSchedule: (() => {
                                 const schedule = [];
                                 const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

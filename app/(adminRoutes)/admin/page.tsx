@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { StatsService } from '@/app/admin/stats.service';
-import { UserService } from '@/app/admin/users.service';
-import { AdminBookings } from '@/app/admin/bookings.service';
+import { getPlatformStats } from '@/app/admin/stats.service';
+import { getAllUsers } from '@/app/admin/users.service';
+import { getAllBookings } from '@/app/admin/bookings.service';
 import MainStatCard from './components/MainStatCard';
 import RoleStatCard from './components/RoleStatCard';
 import StatusStatCard from './components/StatusStatCard';
@@ -16,19 +16,24 @@ export default async function AdminDashboardPage() {
   const cookieStore = await cookies();
   const cookieString = cookieStore.toString();
 
-  // Fetch all necessary data for a comprehensive dashboard
-  const [stats, recentUsersData, recentBookingsData] = await Promise.all([
-    StatsService.getPlatformStats(cookieString).catch(() => null),
-    UserService.getAll({ limit: 5 }, cookieString).catch(() => ({ users: [] })),
-    AdminBookings.getAll({ limit: 5 }, cookieString).catch(() => ({ bookings: [] })),
+  const [statsResult, usersResult, bookingsResult] = await Promise.all([
+    getPlatformStats(cookieString),
+    getAllUsers({ limit: 5 }, cookieString),
+    getAllBookings({ limit: 5 }, cookieString),
   ]);
 
-  if (!stats) {
+  const stats = statsResult.data;
+  const recentUsersData = usersResult.data || { users: [] };
+  const recentBookingsData = bookingsResult.data || { bookings: [] };
+
+  if (!stats || statsResult.error) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 mb-4">
-             <p className="text-red-600 dark:text-red-400 font-semibold">Failed to load platform statistics.</p>
+             <p className="text-red-600 dark:text-red-400 font-semibold">
+               {statsResult.error?.message || 'Failed to load platform statistics.'}
+             </p>
           </div>
           <RefreshButton />
         </div>

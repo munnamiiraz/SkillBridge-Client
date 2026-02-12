@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import { Category, CategoryService } from '@/app/admin/categories.service';
+import { Category, createSubject } from '@/app/admin/categories.service';
 import { useRouter } from 'next/navigation';
 
 interface SubjectModalProps {
@@ -26,17 +26,17 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ category, onClose }) => {
     
     setIsSubmitting(true);
     try {
-      const result = await CategoryService.createSubject({
+      const result = await createSubject({
         name: name.trim(),
         categoryId: category.id,
-      });
+      }, document.cookie);
 
-      if (result.success) {
+      if (result.data.success) {
         toast.success(`Subject "${name}" added to ${category.name}`);
         onClose();
         router.refresh();
       } else {
-        toast.error(result.message || 'Failed to create subject');
+        toast.error(result.data.message || 'Failed to create subject');
       }
     } catch (error: any) {
       toast.error(error.message || 'An error occurred');

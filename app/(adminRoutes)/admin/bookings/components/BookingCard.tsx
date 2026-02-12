@@ -84,6 +84,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, index }) => {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      timeZone: 'Asia/Dhaka'
     });
   };
 

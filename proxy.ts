@@ -6,8 +6,7 @@ import { UserRole } from "./constants/roles";
 export async function proxy(request: NextRequest) {
   const pathName = request.nextUrl.pathname;
 
-  // Get session data for role-based access
-  const { data } = await userService.getSession(request.headers.get("cookie"));
+  const { data } = await userService.getSession();
   
   const isAuthenticated = !!data?.session; 
   const role = data?.user?.role;
@@ -26,15 +25,12 @@ export async function proxy(request: NextRequest) {
   const isTutorRoute = pathName.startsWith("/tutor");
   const isStudentRoute = pathName.startsWith("/dashboard");
 
-  // 1. Unauthenticated users trying to access protected routes
   if (!isAuthenticated && !isPublicRoute) {
     if (isAdminRoute || isTutorRoute || isStudentRoute) {
        return NextResponse.redirect(new URL("/login", request.url));
     }
   }
 
-  // 2. Authenticated users Logic
-  // Only check roles if we successfully fetched session data
   if (isAuthenticated && role) {
     // ADMIN
     if (role === UserRole.ADMIN) {
@@ -66,11 +62,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Be specific to avoid running on static files/images
   matcher: [
     '/dashboard/:path*', 
     '/tutor/:path*', 
     '/admin/:path*',
-    // We also want to protect "root" access if needed, but for now match paths
   ],
 };

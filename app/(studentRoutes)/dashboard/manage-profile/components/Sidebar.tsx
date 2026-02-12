@@ -21,17 +21,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
         <User size={20} />
         Profile
       </button>
-      <button
-        onClick={() => setActiveTab('security')}
-        className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-semibold transition-all duration-200 ${
-          activeTab === 'security'
-            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-            : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm'
-        }`}
-      >
-        <Trash2 size={20} />
-        Danger Zone
-      </button>
 
       {/* Account Status Card */}
       <div className="mt-8 p-6 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">

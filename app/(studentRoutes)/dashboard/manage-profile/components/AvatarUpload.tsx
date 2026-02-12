@@ -22,10 +22,8 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // For now, we'll use a local preview. In a real app, upload to Cloudinary/S3
     setIsUploading(true);
     try {
-      // Simulating upload delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       const imageUrl = URL.createObjectURL(file);
       onImageChange(imageUrl);

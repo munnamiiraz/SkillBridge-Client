@@ -26,7 +26,8 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       weekday: 'long', 
       month: 'short', 
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'Asia/Dhaka'
     });
   };
 
@@ -35,6 +36,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
+      timeZone: 'Asia/Dhaka'
     });
   };
 

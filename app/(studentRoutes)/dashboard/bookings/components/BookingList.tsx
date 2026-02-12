@@ -38,6 +38,7 @@ export const BookingList: React.FC<BookingListProps> = ({
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      timeZone: 'Asia/Dhaka'
     });
   };
 

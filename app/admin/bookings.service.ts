@@ -1,4 +1,7 @@
-import { apiClient } from '@/lib/api-client';
+'use server';
+
+import { cookies } from 'next/headers';
+import { env } from '@/env';
 
 export interface Booking {
   id: string;
@@ -36,22 +39,33 @@ export interface Booking {
   notes?: string;
 }
 
-export const AdminBookings = {
-  async getAll(params: Record<string, any> = {}, cookies?: string) {
-    const cleanParams = Object.fromEntries(
-      Object.entries(params).filter(([_, v]) => v !== undefined && v !== null)
-    );
-    const queryString = new URLSearchParams(cleanParams).toString();
-    const endpoint = `/api/admin/bookings?${queryString}`;
+export async function getAllBookings(params: Record<string, any> = {}, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+    console.log('Fetching bookings with params:', params, 'and cookies:', cookieString);
+
+    const url = new URL(`${env.API_URL}/api/admin/bookings`);
     
-    const result = await apiClient.fetch(endpoint, {
-      headers: {
-        ...(cookies ? { 'Cookie': cookies } : {}),
-      },
+    // Clean and append params
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        url.searchParams.append(key, String(value));
+      }
     });
+
+    const res = await fetch(url.toString(), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      cache: 'no-store',
+    });
+
+    const result = await res.json();
     
     if (!result.success) {
-      throw new Error(result.message || 'Failed to fetch bookings');
+      return { data: null, error: { message: result.message || 'Failed to fetch bookings' } };
     }
 
     const { data, meta } = result;
@@ -93,17 +107,40 @@ export const AdminBookings = {
     }));
 
     return {
-      bookings: mappedBookings,
-      pagination: {
-        page: meta.page,
-        limit: meta.limit,
-        total: meta.total,
-        totalPages: meta.totalPages
-      }
+      data: {
+        bookings: mappedBookings,
+        pagination: {
+          page: meta.page,
+          limit: meta.limit,
+          total: meta.total,
+          totalPages: meta.totalPages
+        }
+      },
+      error: null
     };
-  },
+  } catch (err) {
+    console.error('Fetch error:', err);
+    return { data: null, error: { message: 'Something Went Wrong' } };
+  }
+}
 
-  async cancel(id: string, reason: string, refundAmount: number) {
-    return apiClient.patch(`/api/admin/bookings/${id}/cancel`, { reason, refundAmount });
+export async function cancelBooking(id: string, reason: string, refundAmount: number, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/bookings/${id}/cancel`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      body: JSON.stringify({ reason, refundAmount }),
+    });
+
+    const data = await res.json();
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to cancel booking' } };
   }
 }

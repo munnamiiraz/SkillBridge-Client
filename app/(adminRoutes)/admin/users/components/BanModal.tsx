@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import { User, UserService } from '@/app/admin/users.service';
+import { User, banUser } from '@/app/admin/users.service';
 import { useRouter } from 'next/navigation';
 
 interface BanModalProps {
@@ -25,13 +25,13 @@ const BanModal: React.FC<BanModalProps> = ({ user, onClose }) => {
     if (!banReason.trim()) return;
     setIsSubmitting(true);
     try {
-      const result = await UserService.ban(user.id, banReason);
-      if (result.success) {
+      const result = await banUser(user.id, banReason, document.cookie);
+      if (result.data.success) {
         toast.success('User banned successfully');
         onClose();
         router.refresh();
       } else {
-        toast.error(result.message || 'Failed to ban user');
+        toast.error(result.data.message || 'Failed to ban user');
       }
     } catch (error: any) {
       toast.error(error.message || 'An error occurred');
@@ -78,7 +78,7 @@ const BanModal: React.FC<BanModalProps> = ({ user, onClose }) => {
 
           <div className="mb-6">
             <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2 ml-1">
-              Reason for ban <span className="text-red-500">*</span>
+              Reason for ban (write at least 10 words) <span className="text-red-500">*</span>
             </label>
             <textarea
               autoFocus

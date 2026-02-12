@@ -1,73 +1,40 @@
-"use client"
-import React, { useState, useEffect } from 'react';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { 
-  TutorSessionsService, 
-  Session 
+  getTutorSessions,
 } from '@/app/services/tutor-sessions.service';
-
+import {calculateTutorSessionStats} from "@/app/services/tutor-sessions.helpers"
 import { StatCard } from './components/StatCard';
-import { TabButton } from './components/TabButton';
-import { SessionCard } from './components/SessionCard';
-import { EmptyState } from './components/EmptyState';
-import { SessionDetailsModal } from './components/SessionDetailsModal';
+import { TutorSessionsClient } from './components/TutorSessionsClient';
 
-type TabType = 'upcoming' | 'in-progress' | 'past';
+export const dynamic = 'force-dynamic';
 
-const TutorSessionsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('upcoming');
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-  const [isMarkingComplete, setIsMarkingComplete] = useState(false);
+const TutorSessionsPage = async () => {
+  const cookieStore = await cookies();
+  const cookieString = cookieStore.toString();
 
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: sessions, error } = await getTutorSessions(cookieString);
 
-  useEffect(() => {
-    fetchSessions();
-  }, []);
-
-  const fetchSessions = async () => {
-    setLoading(true);
-    const data = await TutorSessionsService.getSessions();
-    setSessions(data);
-    setLoading(false);
-  };
+  if (error || !sessions) {
+    if (error?.message?.includes('401')) {
+      redirect('/');
+    }
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl max-w-md mx-auto relative z-10">
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 text-red-600 mb-6 font-medium">
+            {error?.message || 'Failed to load sessions'}
+          </div>
+          <a href="/tutor/dashboard/sessions" className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20">
+            Retry Loading
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   // Derived state for stats
-  const stats = TutorSessionsService.calculateStats(sessions);
-
-  // Derived state for filtered sessions
-  const filteredSessions = TutorSessionsService.filterSessions(sessions, activeTab);
-
-  const handleUpdateStatus = async (sessionId: string, newStatus: string) => {
-    if (isMarkingComplete) return;
-    
-    setIsMarkingComplete(true);
-    const success = await TutorSessionsService.updateSessionStatus(sessionId, newStatus);
-    
-    if (success) {
-      await fetchSessions(); // Refresh list
-      if (selectedSession && selectedSession.id === sessionId) {
-          // Update modal as well
-          setSelectedSession(prev => prev ? { ...prev, status: newStatus.toLowerCase() as any } : null);
-      }
-    }
-    setIsMarkingComplete(false);
-  };
-
-  const handleMarkAsComplete = async (sessionId: string) => {
-      await handleUpdateStatus(sessionId, 'COMPLETED');
-  };
-
-  if (loading) {
-     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-            <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 dark:text-gray-400">Loading sessions...</p>
-            </div>
-        </div>
-     )
-  }
+  const stats = calculateTutorSessionStats(sessions);
 
   return (
     <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -97,13 +64,13 @@ const TutorSessionsPage: React.FC = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
         {/* Page Header */}
         <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4">
+            <span className="bg-linear-to-r from-gray-900 via-indigo-900 to-purple-900 dark:from-white dark:via-indigo-200 dark:to-purple-200 bg-clip-text text-transparent">
               Teaching Sessions
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed">
-            Manage your current, upcoming, and past tutoring sessions.
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium max-w-3xl">
+            Manage your current, upcoming, and past tutoring sessions with ease.
           </p>
         </div>
 
@@ -116,7 +83,7 @@ const TutorSessionsPage: React.FC = () => {
               </svg>
             }
             label="Completed Sessions"
-            value={stats.totalSessions.toString()}
+            value={(await stats).totalSessions.toString()}
             trend="+12% this month"
           />
           <StatCard
@@ -126,7 +93,7 @@ const TutorSessionsPage: React.FC = () => {
               </svg>
             }
             label="Upcoming Sessions"
-            value={stats.upcomingSessions.toString()}
+            value={(await stats).upcomingSessions.toString()}
             trend="Next in 2 hours"
           />
           <StatCard
@@ -136,7 +103,7 @@ const TutorSessionsPage: React.FC = () => {
               </svg>
             }
             label="Total Earnings"
-            value={`$${stats.totalEarnings}`}
+            value={`$${(await stats).totalEarnings}`}
             trend="This month"
           />
           <StatCard
@@ -146,80 +113,13 @@ const TutorSessionsPage: React.FC = () => {
               </svg>
             }
             label="Average Rating"
-            value={stats.avgRating.toFixed(1)}
+            value={(await stats).avgRating.toFixed(1)}
             trend="From students"
           />
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm mb-8 overflow-hidden">
-          <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-            <TabButton
-              active={activeTab === 'in-progress'}
-              onClick={() => setActiveTab('in-progress')}
-              label="In Progress"
-              count={TutorSessionsService.filterSessions(sessions, 'in-progress').length}
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              }
-            />
-            <TabButton
-              active={activeTab === 'upcoming'}
-              onClick={() => setActiveTab('upcoming')}
-              label="Upcoming"
-              count={TutorSessionsService.filterSessions(sessions, 'upcoming').length}
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              }
-            />
-            <TabButton
-              active={activeTab === 'past'}
-              onClick={() => setActiveTab('past')}
-              label="Past Sessions"
-              count={TutorSessionsService.filterSessions(sessions, 'past').length}
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              }
-            />
-          </div>
-        </div>
-
-        {/* Sessions List */}
-        <div className="space-y-6">
-          {filteredSessions.length > 0 ? (
-            filteredSessions.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                onMarkComplete={handleMarkAsComplete}
-                onUpdateStatus={handleUpdateStatus}
-                onViewDetails={setSelectedSession}
-                isMarkingComplete={isMarkingComplete}
-              />
-            ))
-          ) : (
-            <EmptyState activeTab={activeTab} />
-          )}
-        </div>
+        <TutorSessionsClient initialSessions={sessions} activeTab="upcoming" />
       </div>
-
-      {/* Session Details Modal */}
-      {selectedSession && (
-        <SessionDetailsModal
-          session={selectedSession}
-          onClose={() => setSelectedSession(null)}
-          onMarkComplete={handleMarkAsComplete}
-          onUpdateStatus={handleUpdateStatus}
-          isMarkingComplete={isMarkingComplete}
-        />
-      )}
     </div>
   );
 };

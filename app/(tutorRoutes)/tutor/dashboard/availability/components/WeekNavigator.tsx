@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { TutorAvailabilityService } from '@/app/services/tutor-availability.service';
+import { formatDisplayDateString } from '@/app/services/tutor-availability.helpers';
 
 interface WeekNavigatorProps {
   currentWeekStart: Date;
@@ -23,10 +23,10 @@ export const WeekNavigator: React.FC<WeekNavigatorProps> = ({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-center sm:text-left">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {TutorAvailabilityService.formatDisplayDate(currentWeekStart)} - {TutorAvailabilityService.formatDisplayDate(weekEndDate)}
+            {formatDisplayDateString(currentWeekStart)} - {formatDisplayDateString(weekEndDate)}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Week of {currentWeekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            Week of {currentWeekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'Asia/Dhaka' })}
           </p>
         </div>
         

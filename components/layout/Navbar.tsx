@@ -572,11 +572,11 @@ const Navbar: React.FC = () => {
                     Become a Teacher
                   </Link>
                   <Link
-                    href="/signup"
+                    href="/login"
                     className="group flex items-center justify-center gap-2 px-4 py-3 text-base font-semibold text-white bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <span>Get Started</span>
+                    <span>Login</span>
                     <svg 
                       className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" 
                       fill="none" 

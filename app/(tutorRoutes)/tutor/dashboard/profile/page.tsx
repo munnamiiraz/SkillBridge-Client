@@ -1,54 +1,28 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { getTutorProfileDetail } from '@/app/services/tutor-profile.service';
 import { TutorProfileInfo, TutorBookingCard } from '../../../../../components/tutor-profile/TutorProfileHeader';
 import { TutorAboutContent, TutorQuickStatsSidebar } from '../../../../../components/tutor-profile/TutorAboutAndSubjects';
 import TutorAvailabilityReviewsCTA from '../../../../../components/tutor-profile/TutorAvailabilityReviewsCTA';
 
-const TutorProfilePage: React.FC = () => {
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const dynamic = 'force-dynamic';
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/tutor/profile`,
-          { withCredentials: true }
-        );
-        if (response.data.success) {
-          setProfile(response.data.data);
-        } else {
-          setError('Failed to load profile');
-        }
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-        setError('An error occurred while fetching your profile');
-      } finally {
-        setLoading(false);
-      }
-    };
+const TutorProfilePage = async () => {
+  const cookieStore = await cookies();
+  const cookieString = cookieStore.toString();
 
-    fetchProfile();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+  const { data: profile, error } = await getTutorProfileDetail(cookieString);
 
   if (error || !profile) {
+    if (error?.message?.includes('401')) {
+      redirect('/');
+    }
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center p-4 text-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Error Loading Profile</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">{error || 'Profile could not be found.'}</p>
-          <a href="/login" className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold">Go to Login</a>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{error?.message || 'Profile could not be found.'}</p>
+          <a href="/tutor/dashboard/profile" className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold">Retry</a>
         </div>
       </div>
     );
@@ -56,12 +30,12 @@ const TutorProfilePage: React.FC = () => {
 
   // Map business subjects to categories
   const categoryMap: Record<string, any[]> = {};
-  profile.tutor_subject?.forEach((ts: any) => {
+  profile.tutor_subject?.forEach((ts) => {
     const catName = ts.subject.category.name;
     if (!categoryMap[catName]) {
       categoryMap[catName] = [];
     }
-    categoryMap[catName].push({ name: ts.subject.name, level: 'Advanced' }); // Default level
+    categoryMap[catName].push({ name: ts.subject.name, level: 'Advanced' }); 
   });
 
   const subjects = Object.entries(categoryMap).map(([category, skills]) => ({
@@ -69,7 +43,7 @@ const TutorProfilePage: React.FC = () => {
     skills,
   }));
 
-  const initials = profile.user.name
+  const initials = (profile.user.name || 'T')
     .split(' ')
     .map((n: string) => n[0])
     .join('')
@@ -80,8 +54,8 @@ const TutorProfilePage: React.FC = () => {
   const weekSchedule = dayNames.map((day, index) => {
     const dayInt = index + 1; // 1 = Monday, ..., 7 = Sunday
     const slots = profile.availability_slot
-      ?.filter((s: any) => s.dayOfWeek === dayInt)
-      .map((s: any) => s.startTime) || [];
+      ?.filter((s) => s.dayOfWeek === dayInt)
+      .map((s) => s.startTime) || [];
     return {
       day,
       slots,
@@ -94,7 +68,7 @@ const TutorProfilePage: React.FC = () => {
       id: profile.id,
       name: profile.user.name,
       avatar: profile.user.image || initials,
-      primarySubjects: profile.tutor_subject?.slice(0, 2).map((ts: any) => ts.subject.name) || [],
+      primarySubjects: profile.tutor_subject?.slice(0, 2).map((ts) => ts.subject.name) || [],
       tagline: profile.headline || 'SkillBridge Tutor',
       rating: profile.ratingStats?.averageRating || profile.averageRating || 0,
       reviewCount: profile.ratingStats?.totalReviews || profile.totalReviews || 0,
@@ -159,30 +133,26 @@ const TutorProfilePage: React.FC = () => {
     },
     reviews: {
       stats: {
-        averageRating: profile.ratingStats?.averageRating || 0,
-        totalReviews: profile.ratingStats?.totalReviews || 0,
-        breakdown: profile.ratingStats?.distribution || [
-          { stars: 5, count: 0, percentage: 0 },
-          { stars: 4, count: 0, percentage: 0 },
-          { stars: 3, count: 0, percentage: 0 },
-          { stars: 2, count: 0, percentage: 0 },
-          { stars: 1, count: 0, percentage: 0 },
-        ],
+        averageRating: profile.ratingStats?.averageRating || profile.averageRating || 0,
+        totalReviews: profile.ratingStats?.totalReviews || profile.totalReviews || 0,
+        breakdown: Array.isArray(profile.ratingStats?.distribution) 
+          ? profile.ratingStats?.distribution 
+          : [
+            { stars: 5, count: 0, percentage: 0 },
+            { stars: 4, count: 0, percentage: 0 },
+            { stars: 3, count: 0, percentage: 0 },
+            { stars: 2, count: 0, percentage: 0 },
+            { stars: 1, count: 0, percentage: 0 },
+          ],
       },
-      recent: profile.recentReviews?.map((r: any) => ({
-        name: r.user?.name || 'Anonymous Student',
-        avatar: (r.user?.name || 'A').split(' ').map((n: string) => n[0]).join('').toUpperCase(),
-        rating: r.rating,
-        date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        subject: r.booking?.subject || 'Learning',
-        review: r.comment || '',
-        verified: true,
-      })) || [],
+      recent: [],
     },
     summary: {
       id: profile.id,
       name: profile.user.name,
-      subjects: profile.tutor_subject?.length > 0 ? profile.tutor_subject[0].subject.name : 'Various',
+      subjects: profile.tutor_subject && profile.tutor_subject.length > 0 
+        ? profile.tutor_subject[0].subject.name 
+        : 'Various',
       experience: `${profile.experience} years`,
       students: profile.totalSessions || 0,
       rating: profile.ratingStats?.averageRating || profile.averageRating || 0,

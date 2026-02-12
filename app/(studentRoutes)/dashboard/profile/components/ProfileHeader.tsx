@@ -69,7 +69,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ student }) => {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400">
-                Member since {new Date(student.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                Member since {new Date(student.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'Asia/Dhaka' })}
               </p>
             </div>
           </div>

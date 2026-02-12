@@ -51,8 +51,8 @@ const FeaturedTeachersSection: React.FC = () => {
       try {
         setIsLoading(true);
         const [tutorsRes, categoriesRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/featured`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/categories`)
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/tutors/featured`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/categories`)
         ]);
 
         const tutorsResult = await tutorsRes.json();

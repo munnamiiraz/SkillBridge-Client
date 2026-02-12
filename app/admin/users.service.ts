@@ -1,4 +1,7 @@
-import { apiClient } from '@/lib/api-client';
+'use server';
+
+import { cookies } from 'next/headers';
+import { env } from '@/env';
 
 export interface User {
   id: string;
@@ -24,25 +27,31 @@ export interface User {
   };
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+export async function getAllUsers(params: Record<string, any> = {}, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
 
-export const UserService = {
-  async getAll(params: Record<string, any> = {}, cookies?: string) {
-    // Clean params: remove undefined or null values to prevent "?param=undefined" strings in URL
-    const cleanParams = Object.fromEntries(
-      Object.entries(params).filter(([_, v]) => v !== undefined && v !== null)
-    );
-    const queryString = new URLSearchParams(cleanParams).toString();
-    const endpoint = `/api/admin/users?${queryString}`;
+    const url = new URL(`${env.API_URL}/api/admin/users`);
     
-    const result = await apiClient.fetch(endpoint, {
-      headers: {
-        ...(cookies ? { 'Cookie': cookies } : {}),
-      },
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        url.searchParams.append(key, String(value));
+      }
     });
 
+    const res = await fetch(url.toString(), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      cache: 'no-store',
+    });
+
+    const result = await res.json();
+
     if (!result.success) {
-      throw new Error(result.message || 'Failed to fetch users');
+      return { data: null, error: { message: result.message || 'Failed to fetch users' } };
     }
 
     const { data, meta } = result;
@@ -73,21 +82,61 @@ export const UserService = {
     }));
 
     return {
-      users: mappedUsers,
-      pagination: {
-        page: meta.page,
-        limit: meta.limit,
-        total: meta.total,
-        totalPages: meta.totalPages
-      }
+      data: {
+        users: mappedUsers,
+        pagination: {
+          page: meta.page,
+          limit: meta.limit,
+          total: meta.total,
+          totalPages: meta.totalPages
+        }
+      },
+      error: null
     };
-  },
-
-  async ban(id: string, reason: string) {
-    return apiClient.patch(`/api/admin/users/${id}/ban`, { banReason: reason });
-  },
-
-  async unban(id: string) {
-    return apiClient.patch(`/api/admin/users/${id}/unban`, {});
+  } catch (err) {
+    console.error('Fetch error:', err);
+    return { data: null, error: { message: 'Something Went Wrong' } };
   }
-};
+}
+
+export async function banUser(id: string, reason: string, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/users/${id}/ban`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      body: JSON.stringify({ banReason: reason }),
+    });
+
+    const data = await res.json();
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to ban user' } };
+  }
+}
+
+export async function unbanUser(id: string, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/users/${id}/unban`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      body: JSON.stringify({}),
+    });
+
+    const data = await res.json();
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to unban user' } };
+  }
+}

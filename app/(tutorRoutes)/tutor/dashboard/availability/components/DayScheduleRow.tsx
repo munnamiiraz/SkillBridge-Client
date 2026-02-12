@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DayAvailability } from '@/app/services/tutor-availability.service';
 
 interface DayScheduleRowProps {
@@ -103,6 +103,7 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                             const label = new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
                               hour: 'numeric',
                               hour12: true,
+                              timeZone: 'Asia/Dhaka'
                             });
                             return <option key={time} value={time}>{label}</option>;
                           })}
@@ -133,6 +134,7 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                             const label = new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
                               hour: 'numeric',
                               hour12: true,
+                              timeZone: 'Asia/Dhaka'
                             });
                             return <option key={time} value={time}>{label}</option>;
                           })}

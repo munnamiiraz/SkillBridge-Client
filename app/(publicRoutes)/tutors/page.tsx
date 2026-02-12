@@ -134,7 +134,6 @@ const TutorDiscoveryPageContent: React.FC = () => {
         if (filters.priceRange[0] > 0) params.minPrice = filters.priceRange[0];
         if (filters.priceRange[1] < 200) params.maxPrice = filters.priceRange[1];
 
-        // Construct query string
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/search`, { params });
         
         if (response.data.success) {
@@ -358,7 +357,6 @@ const TutorDiscoveryPage: React.FC = () => {
   );
 };
 
-// Filter Panel Component
 interface FilterPanelProps {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
@@ -796,7 +794,6 @@ const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   );
 };
 
-// Pagination Component
 interface PaginationProps {
   currentPage: number;
   totalPages: number;

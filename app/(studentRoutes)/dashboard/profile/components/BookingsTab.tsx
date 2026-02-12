@@ -38,6 +38,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({ bookings }) => {
       year: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
+      timeZone: 'Asia/Dhaka'
     });
   };
 

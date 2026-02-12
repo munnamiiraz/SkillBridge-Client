@@ -1,4 +1,6 @@
-import { apiClient } from '@/lib/api-client';
+"use server"
+import { env } from '@/env';
+import { cookies } from 'next/headers';
 
 export interface Review {
   id: string;
@@ -33,11 +35,20 @@ export interface ReviewsResponse {
   };
 }
 
-export const TutorReviewsService = {
-  async getRatingStats(): Promise<RatingStats | null> {
-    const response = await apiClient.get('/api/tutor/rating-stats');
-    if (response.success) {
-      const data = response.data;
+export async function getTutorRatingStats(providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+    const response = await fetch(`${env.API_URL}/api/tutor/rating-stats`, {
+      headers: {
+        'Cookie': cookieString,
+      },
+      cache: 'no-store'
+    });
+    const result = await response.json();
+    
+    if (result.success) {
+      const data = result.data;
       const distMap: any = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
       if (data.distribution) {
         data.distribution.forEach((d: any) => {
@@ -45,16 +56,21 @@ export const TutorReviewsService = {
         });
       }
       
-      return {
+      const stats: RatingStats = {
         average: Number(data.averageRating) || 0,
         total: Number(data.totalReviews) || 0,
         distribution: distMap
       };
+      return { data: stats, error: null };
     }
-    return null;
-  },
+    return { data: null, error: { message: result.message || 'Failed to fetch rating stats' } };
+  } catch (error: any) {
+    return { data: null, error: { message: error.message || 'An unexpected error occurred' } };
+  }
+}
 
-  async getReviews(page = 1, limit = 5, rating?: number | null, sortBy?: string): Promise<ReviewsResponse | null> {
+export async function getTutorReviews(page = 1, limit = 5, rating: number | null = null, sortBy: string | null = null, providedCookies?: string) {
+  try {
     const params: any = {
       page: page.toString(),
       limit: limit.toString(),
@@ -64,17 +80,24 @@ export const TutorReviewsService = {
       params.rating = rating.toString();
     }
     
-    // Note: The original code had sortBy in state but didn't pass it to API.
-    // We include it here for future proofing if the backend supports it.
     if (sortBy) {
         params.sortBy = sortBy;
     }
 
-    const queryString = new URLSearchParams(params).toString();
-    const response = await apiClient.get(`/api/tutor/reviews?${queryString}`);
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
 
-    if (response.success) {
-      const reviews = response.data.map((r: any) => ({
+    const queryString = new URLSearchParams(params).toString();
+    const response = await fetch(`${env.API_URL}/api/tutor/reviews?${queryString}`, {
+      headers: {
+        'Cookie': cookieString,
+      },
+      cache: 'no-store'
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      const reviews = result.data.map((r: any) => ({
         id: r.id,
         studentName: r.user?.name || 'Anonymous',
         studentAvatar: r.user?.image || (r.user?.name || 'A').toUpperCase().charAt(0),
@@ -82,29 +105,20 @@ export const TutorReviewsService = {
         date: r.createdAt,
         courseName: r.booking?.subject || 'Session',
         comment: r.comment,
-        helpful: 0 // Backend doesn't seem to return helpful count yet
+        helpful: 0 
       }));
 
       return {
-        reviews,
-        meta: response.meta
+        data: {
+          reviews,
+          meta: result.meta
+        } as ReviewsResponse,
+        error: null
       };
     }
     
-    return null;
-  },
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    return { data: null, error: { message: result.message || 'Failed to fetch reviews' } };
+  } catch (error: any) {
+    return { data: null, error: { message: error.message || 'An unexpected error occurred' } };
   }
-};
+}

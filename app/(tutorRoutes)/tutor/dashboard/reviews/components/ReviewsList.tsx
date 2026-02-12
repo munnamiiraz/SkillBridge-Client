@@ -1,5 +1,4 @@
 "use client"
-import React from 'react';
 import { Review } from '@/app/services/tutor-reviews.service';
 import { ReviewCard } from './ReviewCard';
 

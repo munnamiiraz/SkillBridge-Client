@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import { Category, CategoryService } from '@/app/admin/categories.service';
+import { Category, createCategory, updateCategory } from '@/app/admin/categories.service';
 import { useRouter } from 'next/navigation';
 
 interface CategoryModalProps {
@@ -36,15 +36,15 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ category, onClose, mode }
       };
 
       const result = mode === 'create' 
-        ? await CategoryService.create(payload)
-        : await CategoryService.update(category!.id, payload);
+        ? await createCategory(payload, document.cookie)
+        : await updateCategory(category!.id, payload, document.cookie);
 
-      if (result.success) {
+      if (result.data.success) {
         toast.success(`Category ${mode === 'create' ? 'created' : 'updated'} successfully`);
         onClose();
         router.refresh();
       } else {
-        toast.error(result.message || 'Action failed');
+        toast.error(result.data.message || 'Action failed');
       }
     } catch (error: any) {
       toast.error(error.message || 'An error occurred');

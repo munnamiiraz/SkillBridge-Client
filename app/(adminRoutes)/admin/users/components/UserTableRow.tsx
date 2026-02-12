@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { User, UserService } from '@/app/admin/users.service';
+import { User, unbanUser } from '@/app/admin/users.service';
 import { useRouter } from 'next/navigation';
 import BanModal from './BanModal';
 
@@ -21,12 +21,12 @@ const UserTableRow: React.FC<UserTableRowProps> = ({ user, isSelected, onSelect 
     if (!confirm('Are you sure you want to unban this user?')) return;
     setIsUnbanning(true);
     try {
-      const result = await UserService.unban(user.id);
-      if (result.success) {
+      const result = await unbanUser(user.id, document.cookie);
+      if (result.data.success) {
         toast.success('User unbanned successfully');
         router.refresh();
       } else {
-        toast.error(result.message || 'Failed to unban');
+        toast.error(result.data.message || 'Failed to unban');
       }
     } catch (error: any) {
       toast.error(error.message || 'Error');
@@ -40,6 +40,7 @@ const UserTableRow: React.FC<UserTableRowProps> = ({ user, isSelected, onSelect 
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      timeZone: 'Asia/Dhaka'
     });
   };
 

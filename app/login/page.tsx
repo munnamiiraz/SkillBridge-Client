@@ -34,7 +34,6 @@ const LoginPage: React.FC = () => {
         rememberMe: rememberMe,
       }, {
         onSuccess: (ctx) => {
-          // console.log('Login successful! Session established via HTTP-only cookies.');
           toast.success('Login successful! Welcome back.');
           if (!ctx.data.user.phone || ctx.data.user.phone === 'N/A') {
             router.push('/');

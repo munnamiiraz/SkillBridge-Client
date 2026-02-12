@@ -1,86 +1,40 @@
-"use client"
-
-import React, { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { 
-  TutorReviewsService, 
-  Review, 
+  getTutorRatingStats, 
+  getTutorReviews,
   RatingStats 
 } from '@/app/services/tutor-reviews.service';
-
 import { PageHeader } from './components/PageHeader';
 import { RatingOverview } from './components/RatingOverview';
-import { ReviewsFilter } from './components/ReviewsFilter';
-import { ReviewsList } from './components/ReviewsList';
+import { TutorReviewsClient } from './components/TutorReviewsClient';
 
-const TutorReviewsPage: React.FC = () => {
-  const [filterRating, setFilterRating] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<'recent' | 'highest' | 'lowest'>('recent');
+export const dynamic = 'force-dynamic';
 
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [ratingStats, setRatingStats] = useState<RatingStats>({
+const TutorReviewsPage = async () => {
+  const cookieStore = await cookies();
+  const cookieString = cookieStore.toString();
+
+  const [statsResult, reviewsResult] = await Promise.all([
+    getTutorRatingStats(cookieString),
+    getTutorReviews(1, 5, null, 'recent', cookieString)
+  ]);
+
+  if (statsResult.error || reviewsResult.error) {
+    if (statsResult.error?.message?.includes('401') || reviewsResult.error?.message?.includes('401')) {
+      redirect('/login');
+    }
+  }
+
+  const ratingStats: RatingStats = statsResult.data || {
     average: 0,
     total: 0,
     distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
-  });
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
-  useEffect(() => {
-    fetchData();
-  }, [sortBy, filterRating]);
-
-  const fetchData = async () => {
-      // Reset reviews when filter/sort changes
-      setPage(1);
-      setLoading(true);
-      await Promise.all([
-          fetchRatingStats(),
-          fetchReviews(1)
-      ]);
-      setLoading(false);
-  }
-
-  const loadMore = () => {
-    if (hasMore && !loading) {
-        fetchReviews(page + 1);
-    }
   };
 
-  const fetchRatingStats = async () => {
-    try {
-      const stats = await TutorReviewsService.getRatingStats();
-      if (stats) {
-        setRatingStats(stats);
-      }
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
-  };
-
-  const fetchReviews = async (pageNum: number) => {
-    try {
-      if (pageNum === 1) setLoading(true); // Only show full loader on first page/filter change
-
-      const response = await TutorReviewsService.getReviews(pageNum, 5, filterRating, sortBy);
-
-      if (response) {
-        if (pageNum === 1) {
-            setReviews(response.reviews);
-        } else {
-            setReviews(prev => [...prev, ...response.reviews]);
-        }
-        
-        setHasMore(response.meta.page < response.meta.totalPages);
-        setPage(pageNum);
-      }
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-      toast.error('Failed to load reviews');
-    } finally {
-      if (pageNum === 1) setLoading(false);
-    }
+  const reviewsData = reviewsResult.data || {
+    reviews: [],
+    meta: { page: 1, limit: 5, total: 0, totalPages: 1 }
   };
 
   return (
@@ -112,18 +66,9 @@ const TutorReviewsPage: React.FC = () => {
 
         <RatingOverview stats={ratingStats} />
 
-        <ReviewsFilter 
-          filterRating={filterRating} 
-          setFilterRating={setFilterRating}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-        />
-
-        <ReviewsList 
-          reviews={reviews} 
-          loading={loading && page === 1} // Only show skeleton/loading state if refreshing list
-          hasMore={hasMore} 
-          onLoadMore={loadMore} 
+        <TutorReviewsClient 
+          initialReviews={reviewsData.reviews} 
+          initialMeta={reviewsData.meta} 
         />
       </div>
     </section>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import { Category, CategoryService } from '@/app/admin/categories.service';
+import { Category, deleteCategory } from '@/app/admin/categories.service';
 import { useRouter } from 'next/navigation';
 
 interface DeleteModalProps {
@@ -23,13 +23,13 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ category, onClose }) => {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const result = await CategoryService.delete(category.id);
-      if (result.success) {
+      const result = await deleteCategory(category.id, document.cookie);
+      if (result.data.success) {
         toast.success('Category deleted successfully');
         onClose();
         router.refresh();
       } else {
-        toast.error(result.message || 'Failed to delete');
+        toast.error(result.data.message || 'Failed to delete');
       }
     } catch (error: any) {
       toast.error(error.message || 'An error occurred');

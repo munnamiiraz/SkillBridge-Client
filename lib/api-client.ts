@@ -1,16 +1,19 @@
 const getBaseUrl = () => {
-  if (typeof window === 'undefined') {
-    return process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+  if (typeof window === "undefined") {
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
   }
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
+  return "";
 };
 
 export const apiClient = {
   async fetch(endpoint: string, options: RequestInit = {}) {
+    const normalizedEndpoint = endpoint.startsWith("/")
+      ? endpoint
+      : `/${endpoint}`;
     const baseUrl = getBaseUrl();
-    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    
-    const response = await fetch(`${baseUrl}${normalizedEndpoint}`, {
+    const url = baseUrl ? `${baseUrl}${normalizedEndpoint}` : normalizedEndpoint;
+
+    const response = await fetch(url, {
       ...options,
       credentials: "include",
       headers: {
@@ -21,45 +24,58 @@ export const apiClient = {
 
     if (!response.ok) {
       let errorMessage = response.statusText;
+      let errorDetails = null;
+      
       try {
         const error = await response.json();
         errorMessage = error.message || error.error || response.statusText;
-      } catch (e) {
-      
+        errorDetails = error.details || null;
+      } catch (_) {}
+
+      const err = new Error(errorMessage || "Request failed") as any;
+      if (errorDetails) {
+        err.details = errorDetails;
       }
-      throw new Error(errorMessage || "Request failed");
+      throw err;
     }
 
     return response.json();
   },
 
-  get(endpoint: string) {
-    return this.fetch(endpoint);
+  get(endpoint: string, options: RequestInit = {}) {
+    return this.fetch(endpoint, {
+      ...options,
+      method: "GET",
+    });
   },
 
-  post(endpoint: string, data: any) {
+  post(endpoint: string, data: any, options: RequestInit = {}) {
     return this.fetch(endpoint, {
+      ...options,
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  patch(endpoint: string, data: any) {
+  patch(endpoint: string, data: any, options: RequestInit = {}) {
     return this.fetch(endpoint, {
+      ...options,
       method: "PATCH",
       body: JSON.stringify(data),
     });
   },
 
-  put(endpoint: string, data: any) {
+  put(endpoint: string, data: any, options: RequestInit = {}) {
     return this.fetch(endpoint, {
+      ...options,
       method: "PUT",
       body: JSON.stringify(data),
     });
   },
 
-  delete(endpoint: string) {
+  delete(endpoint: string, options: RequestInit = {}) {
     return this.fetch(endpoint, {
+      ...options,
       method: "DELETE",
     });
   },

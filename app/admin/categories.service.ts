@@ -1,4 +1,7 @@
-import { apiClient } from '@/lib/api-client';
+'use server';
+
+import { cookies } from 'next/headers';
+import { env } from '@/env';
 
 export interface Category {
   id: string;
@@ -12,16 +15,23 @@ export interface Category {
   updatedAt: string;
 }
 
-export const CategoryService = {
-  async getAll(cookies?: string) {
-    const result = await apiClient.fetch('/api/admin/categories', {
+export async function getAllCategories(providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/categories`, {
       headers: {
-        ...(cookies ? { 'Cookie': cookies } : {}),
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
       },
+      cache: 'no-store',
     });
 
+    const result = await res.json();
+
     if (!result.success) {
-      throw new Error(result.message || 'Failed to fetch categories');
+      return { data: null, error: { message: result.message || 'Failed to fetch categories' } };
     }
 
     const mappedCategories: Category[] = result.data.map((c: any) => ({
@@ -36,36 +46,157 @@ export const CategoryService = {
       updatedAt: c.updatedAt,
     }));
 
-    return mappedCategories;
-  },
-
-  async create(data: { name: string; description: string; status: string }) {
-    return apiClient.post('/api/admin/categories', data);
-  },
-
-  async update(id: string, data: { name?: string; description?: string; status?: string }) {
-    return apiClient.patch(`/api/admin/categories/${id}`, data);
-  },
-
-  async delete(id: string) {
-    return apiClient.delete(`/api/admin/categories/${id}`);
-  },
-
-  // Subject Methods
-  async createSubject(data: { name: string; categoryId: string }) {
-    return apiClient.post('/api/admin/subjects', data);
-  },
-
-  async updateSubject(id: string, data: { name?: string; categoryId?: string }) {
-    return apiClient.patch(`/api/admin/subjects/${id}`, data);
-  },
-
-  async deleteSubject(id: string) {
-    return apiClient.delete(`/api/admin/subjects/${id}`);
-  },
-
-  async getAllSubjects(categoryId?: string) {
-    const endpoint = categoryId ? `/api/admin/subjects?categoryId=${categoryId}` : '/api/admin/subjects';
-    return apiClient.fetch(endpoint);
+    return { data: mappedCategories, error: null };
+  } catch (err) {
+    console.error('Fetch error:', err);
+    return { data: null, error: { message: 'Something Went Wrong' } };
   }
-};
+}
+
+export async function createCategory(data: { name: string; description: string; status: string }, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/categories`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+    return { data: result, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to create category' } };
+  }
+}
+
+export async function updateCategory(id: string, data: { name?: string; description?: string; status?: string }, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/categories/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+    return { data: result, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to update category' } };
+  }
+}
+
+export async function deleteCategory(id: string, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/categories/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+    });
+
+    const result = await res.json();
+    return { data: result, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to delete category' } };
+  }
+}
+
+// Subject Methods
+export async function createSubject(data: { name: string; categoryId: string }, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/subjects`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+    return { data: result, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to create subject' } };
+  }
+}
+
+export async function updateSubject(id: string, data: { name?: string; categoryId?: string }, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/subjects/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+    return { data: result, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to update subject' } };
+  }
+}
+
+export async function deleteSubject(id: string, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/subjects/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+    });
+
+    const result = await res.json();
+    return { data: result, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to delete subject' } };
+  }
+}
+
+export async function getAllSubjects(categoryId?: string, providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const url = new URL(`${env.API_URL}/api/admin/subjects`);
+    if (categoryId) url.searchParams.append('categoryId', categoryId);
+
+    const res = await fetch(url.toString(), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      cache: 'no-store',
+    });
+
+    const result = await res.json();
+    return { data: result.data, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Failed to fetch subjects' } };
+  }
+}

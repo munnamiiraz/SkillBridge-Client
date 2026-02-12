@@ -1,20 +1,37 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { AdminBookings, Booking } from '@/app/admin/bookings.service';
-import StatsOverview from './components/StatsOverview';
-import BookingsFilters from './components/BookingsFilters';
-import BookingCard from './components/BookingCard';
-import Pagination from './components/Pagination';
+import { getAllBookings, Booking } from '@/app/admin/bookings.service';
+import StatsOverview from './StatsOverview';
+import BookingsFilters from './BookingsFilters';
+import BookingCard from './BookingCard';
+import Pagination from './Pagination';
 
-export default function AdminBookingsContent() {
+interface AdminBookingsContentProps {
+  initialData?: {
+    bookings: Booking[];
+    pagination: {
+      page: number;
+      totalPages: number;
+      total: number;
+    };
+  } | null;
+}
+
+export default function AdminBookingsContent({ initialData }: AdminBookingsContentProps) {
   const searchParams = useSearchParams();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
-  const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState<Booking[]>(initialData?.bookings || []);
+  const [pagination, setPagination] = useState(initialData?.pagination || { page: 1, totalPages: 1, total: 0 });
+  const [loading, setLoading] = useState(!initialData);
+  const isInitialRender = useRef(true);
 
   useEffect(() => {
+    if (isInitialRender.current && initialData) {
+      isInitialRender.current = false;
+      return;
+    }
+
     const fetchBookings = async () => {
       try {
         setLoading(true);
@@ -24,18 +41,18 @@ export default function AdminBookingsContent() {
         const searchQuery = searchParams.get('search') || '';
         const sortBy = searchParams.get('sortBy') || 'date';
 
-        const result = await AdminBookings.getAll({
+        const result = await getAllBookings({
           page: currentPage,
           limit: 10,
           status: statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined,
           payment: paymentFilter !== 'all' ? paymentFilter.toUpperCase() : undefined,
           search: searchQuery,
           sortBy,
-        });
+        }, document.cookie);
 
-        if (result && result.bookings) {
-          setBookings(result.bookings as Booking[]);
-          setPagination(result.pagination);
+        if (result && result.data?.bookings) {
+          setBookings(result.data.bookings as Booking[]);
+          setPagination(result.data.pagination);
         }
       } catch (error) {
         console.error('Failed to fetch bookings:', error);
@@ -47,7 +64,7 @@ export default function AdminBookingsContent() {
     };
 
     fetchBookings();
-  }, [searchParams]);
+  }, [searchParams, initialData]);
 
   if (loading && bookings.length === 0) {
     return (

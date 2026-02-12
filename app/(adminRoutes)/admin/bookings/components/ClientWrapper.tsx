@@ -19,7 +19,7 @@ const AdminBookingsContent = dynamic(() => import('./AdminBookingsContent'), {
   )
 });
 
-export default function ClientWrapper() {
+export default function ClientWrapper({ initialData }: { initialData: any }) {
   return (
     <React.Suspense fallback={
        <div className="p-6 lg:p-8">
@@ -33,7 +33,7 @@ export default function ClientWrapper() {
        </div>
      </div>
     }>
-      <AdminBookingsContent />
+      <AdminBookingsContent initialData={initialData} />
     </React.Suspense>
   );
 }

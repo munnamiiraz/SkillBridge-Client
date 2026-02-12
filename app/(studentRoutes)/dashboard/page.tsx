@@ -1,83 +1,28 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { apiClient } from '@/lib/api-client';
-import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { getStudentBookings, calculateDashboardStats } from '@/app/services/student-dashboard.service';
 
-interface DashboardStats {
-  totalBookings: number;
-  upcomingBookings: number;
-  completedBookings: number;
-  totalSpent: number;
-  totalHours: number;
-  averageRating: number;
-}
+export const dynamic = 'force-dynamic';
 
-interface RecentBooking {
-  id: string;
-  subject: string;
-  scheduledAt: string;
-  duration: number;
-  status: string;
-  tutor_profile: {
-    user: {
-      name: string;
-    };
-  };
-}
+const StudentDashboard = async () => {
+  const cookieStore = await cookies();
+  const cookieString = cookieStore.toString();
 
-const StudentDashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalBookings: 0,
-    upcomingBookings: 0,
-    completedBookings: 0,
-    totalSpent: 0,
-    totalHours: 0,
-    averageRating: 0,
-  });
-  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: bookings, error } = await getStudentBookings(10, cookieString);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  if (error || !bookings) {
+    return (
+      <div className="p-6 lg:p-8 text-center min-h-[50vh] flex flex-col items-center justify-center">
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 text-red-600 mb-4">
+          {error?.message || 'Failed to load dashboard data'}
+        </div>
+        <Link href="/dashboard" className="text-indigo-600 hover:underline">Retry</Link>
+      </div>
+    );
+  }
 
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const response = await apiClient.get('/api/student/bookings?limit=5');
-      const bookings = response.data;
-
-      // Calculate stats
-      const totalBookings = bookings.length;
-      const upcomingBookings = bookings.filter((b: any) => 
-        b.status === 'PENDING' || b.status === 'CONFIRMED'
-      ).length;
-      const completedBookings = bookings.filter((b: any) => 
-        b.status === 'COMPLETED'
-      ).length;
-      const totalSpent = bookings.reduce((sum: number, b: any) => sum + b.price, 0);
-      const totalHours = bookings.reduce((sum: number, b: any) => sum + (b.duration / 60), 0);
-
-      setStats({
-        totalBookings,
-        upcomingBookings,
-        completedBookings,
-        totalSpent,
-        totalHours,
-        averageRating: 4.5, // This would come from reviews
-      });
-
-      setRecentBookings(bookings.slice(0, 5));
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      toast.error('Failed to load dashboard data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const stats = calculateDashboardStats(bookings);
+  const recentBookings = bookings.slice(0, 5);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -86,6 +31,7 @@ const StudentDashboard: React.FC = () => {
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
+      timeZone: 'Asia/Dhaka'
     });
   };
 
@@ -103,14 +49,6 @@ const StudentDashboard: React.FC = () => {
         return 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400';
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">
@@ -135,7 +73,7 @@ const StudentDashboard: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.totalBookings}
+                {(await stats).totalBookings}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Total Bookings
@@ -153,7 +91,7 @@ const StudentDashboard: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.upcomingBookings}
+                {(await stats).upcomingSessions}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Upcoming Sessions
@@ -171,7 +109,7 @@ const StudentDashboard: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.completedBookings}
+                {(await stats).completedSessions}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Completed Sessions
@@ -189,28 +127,10 @@ const StudentDashboard: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${stats.totalSpent.toFixed(0)}
+                ${(await stats).totalSpent.toFixed(0)}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Total Spent
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center">
-              <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.totalHours.toFixed(1)}h
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Learning Hours
               </p>
             </div>
           </div>
@@ -225,7 +145,7 @@ const StudentDashboard: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.averageRating.toFixed(1)}
+                {(await stats).averageRating}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Avg. Rating Given
@@ -266,20 +186,20 @@ const StudentDashboard: React.FC = () => {
                   className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                      {booking.tutor_profile.user.name[0]}
+                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">
+                      {booking.tutor_profile?.user?.name[0]}
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 dark:text-white truncate">
                         {booking.subject || 'Session'}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        with {booking.tutor_profile.user.name}
+                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        with {booking.tutor_profile?.user?.name}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className={`inline-block px-3 py-1 ${getStatusColor(booking.status)} text-xs font-semibold rounded-full mb-1`}>
+                  <div className="text-right shrink-0">
+                    <span className={`inline-block px-3 py-1 ${getStatusColor(booking.status)} text-[10px] font-bold uppercase rounded-full mb-1`}>
                       {booking.status}
                     </span>
                     <p className="text-sm text-gray-600 dark:text-gray-400">

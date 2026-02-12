@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { UserService } from '@/app/admin/users.service';
+import { getAllUsers } from '@/app/admin/users.service';
 import UserStats from './components/UserStats';
 import UserTabs from './components/UserTabs';
 import UserFilters from './components/UserFilters';
@@ -30,14 +30,26 @@ export default async function AdminUserManagementPage({ searchParams }: PageProp
   const searchQuery = resolvedParams.search || '';
 
   // Fetch data
-  const { data } = await userService.getSession();
-  const { users, pagination } = await UserService.getAll({
+  const { data: result, error } = await getAllUsers({
     page: currentPage,
     limit: 10,
     role: roleFilter !== 'all' ? roleFilter.toUpperCase() : undefined,
     status: statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined,
     search: searchQuery,
   }, cookieString);
+
+  if (error) {
+    return (
+      <div className="p-6 lg:p-8 text-center">
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 text-red-600">
+          {error.message}
+        </div>
+      </div>
+    );
+  }
+
+  const users = result?.users || [];
+  const pagination = result?.pagination || { page: 1, totalPages: 1, total: 0 };
 
   return (
     <div className="p-6 lg:p-8">

@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { CategoryService } from '@/app/admin/categories.service';
+import { getAllCategories } from '@/app/admin/categories.service';
 import CategoryToolbar from './components/CategoryToolbar';
 import CategoryStats from './components/CategoryStats';
 import CategoryFilters from './components/CategoryFilters';
@@ -25,9 +25,21 @@ export default async function AdminCategoryManagement({ searchParams }: PageProp
   const statusFilter = resolvedParams.status || 'all';
 
   // Fetch data
-  let categories = await CategoryService.getAll(cookieString);
+  const { data: categoriesResult, error } = await getAllCategories(cookieString);
 
-  // Server-side filtering (Service can be updated later to support params)
+  if (error || !categoriesResult) {
+    return (
+      <div className="p-6 lg:p-8 text-center mt-24">
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 text-red-600">
+          {error?.message || 'Failed to load categories.'}
+        </div>
+      </div>
+    );
+  }
+
+  const categories = categoriesResult;
+
+  // Server-side filtering
   const filteredCategories = categories.filter((category) => {
     const matchesSearch =
       category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

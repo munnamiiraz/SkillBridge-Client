@@ -1,4 +1,7 @@
-import { apiClient } from '@/lib/api-client';
+'use server';
+
+import { cookies } from 'next/headers';
+import { env } from '@/env';
 
 export interface UserStats {
   total: number;
@@ -32,19 +35,28 @@ export interface PlatformStats {
   revenue: RevenueStats;
 }
 
-export const StatsService = {
-  async getPlatformStats(cookies?: string) {
-    const result = await apiClient.fetch('/api/admin/stats', {
+export async function getPlatformStats(providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/admin/stats`, {
       headers: {
-        ...(cookies ? { 'Cookie': cookies } : {}),
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
       },
       next: { revalidate: 60 } // Cache for 1 minute
     });
 
+    const result = await res.json();
+
     if (!result.success) {
-      throw new Error(result.message || 'Failed to fetch stats');
+      return { data: null, error: { message: result.message || 'Failed to fetch platform stats' } };
     }
 
-    return result.data as PlatformStats;
+    return { data: result.data as PlatformStats, error: null };
+  } catch (err) {
+    console.error('Fetch error:', err);
+    return { data: null, error: { message: 'Something Went Wrong' } };
   }
-};
+}
