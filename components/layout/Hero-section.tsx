@@ -2,8 +2,13 @@
 
 import Link from 'next/link';
 import React from 'react';
+import { authClient } from '@/lib/auth-client';
 
 const HeroSection: React.FC = () => {
+  const sessionResponse = authClient.useSession();
+  const session = sessionResponse?.data;
+  const userRole = (session?.user as any)?.role;
+
   return (
     <section className="relative w-full min-h-[calc(100vh-80px)] flex items-center bg-linear-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 overflow-hidden">
       {/* Background Glow Effects */}
@@ -48,17 +53,20 @@ const HeroSection: React.FC = () => {
                 <div className="absolute inset-0 bg-linear-to-br from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Link>
               
-              <Link href="/become-tutor">
-                <button className="group px-8 py-4 bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 text-gray-900 dark:text-white font-semibold rounded-xl border border-gray-200 dark:border-white/10 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5">
-                  <span className="flex items-center gap-2">
-                    Become a Teacher
-                    <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 20 20">
-                      <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </span>
-                </button>
-              </Link>
+              {(!session || userRole === 'STUDENT') && (
+                <Link href="/become-tutor">
+                  <button className="group px-8 py-4 bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 text-gray-900 dark:text-white font-semibold rounded-xl border border-gray-200 dark:border-white/10 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5">
+                    <span className="flex items-center gap-2">
+                      Become a Teacher
+                      <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 20 20">
+                        <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
+                  </button>
+                </Link>
+              )}
             </div>
+
 
             {/* Stats */}
             <div className="flex items-center gap-8 pt-4 animate-fade-in-up-delay-4">

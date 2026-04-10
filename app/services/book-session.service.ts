@@ -74,3 +74,36 @@ export async function createBooking(bookingData: {
     return { data: null, error: { message: 'Something Went Wrong' } };
   }
 }
+
+export async function createCheckoutSession(bookingData: {
+  tutorProfileId: string;
+  scheduledAt: string;
+  duration: number;
+  subject: string;
+  notes: string;
+}) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/payment/create-checkout-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      body: JSON.stringify(bookingData),
+    });
+
+    const result = await res.json();
+
+    if (!result.success) {
+      return { data: null, error: { message: result.message || 'Failed to initiate payment' } };
+    }
+
+    return { data: result.data, error: null };
+  } catch (err) {
+    console.error('Payment error:', err);
+    return { data: null, error: { message: 'Something Went Wrong' } };
+  }
+}

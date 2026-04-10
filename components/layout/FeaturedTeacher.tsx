@@ -16,6 +16,7 @@ interface Tutor {
   skills: string[];
   available: boolean;
   bgGradient: string;
+  banner?: string;
 }
 
 const FeaturedTeachersSection: React.FC = () => {
@@ -72,8 +73,9 @@ const FeaturedTeachersSection: React.FC = () => {
             skills: t.tutor_subject?.map((ts: any) => ts.subject.name) || [],
             available: t.isAvailable,
             bgGradient: gradients[index % gradients.length],
+            banner: t.banner || '',
           }));
-          setTeachers(mappedTutors);
+          setTeachers(mappedTutors.slice(0, 6));
         }
 
         if (categoriesResult.success) {
@@ -172,12 +174,22 @@ const FeaturedTeachersSection: React.FC = () => {
                   <Link
                     key={teacher.id}
                     href={`/tutors/${teacher.id}`}
-                    className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-2 animate-fade-in-up block"
+                    className={`group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-2 animate-fade-in-up ${index >= 3 ? 'hidden md:block' : 'block'}`}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    {/* Card Header with Avatar */}
-                    <div className="relative h-32 bg-linear-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 overflow-visible">
-                      <div className="absolute inset-0 bg-linear-to-br opacity-10 dark:opacity-20 group-hover:opacity-20 dark:group-hover:opacity-30 transition-opacity duration-300"></div>
+                    {/* Card Header with Banner or Gradient */}
+                    <div className="relative h-32 overflow-hidden">
+                      {teacher.banner ? (
+                        <img 
+                          src={teacher.banner} 
+                          alt="Banner" 
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                        />
+                      ) : (
+                        <div className={`absolute inset-0 bg-linear-to-br ${teacher.bgGradient} opacity-20 group-hover:opacity-30 transition-opacity duration-300`} />
+                      )}
+                      <div className="absolute inset-0 bg-linear-to-b from-black/10 to-transparent" />
+                      
                       <div className={`absolute -bottom-10 -right-10 w-40 h-40 bg-linear-to-br ${teacher.bgGradient} rounded-full blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`}></div>
                       
                       {/* Avatar */}
@@ -335,10 +347,10 @@ const FeaturedTeachersSection: React.FC = () => {
             href={activeTab === 'teachers' ? '/tutors' : '/categories'}
             className="group inline-flex items-center gap-2 px-8 py-4 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-white font-semibold rounded-xl border border-gray-200 dark:border-gray-800 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
           >
-            {activeTab === 'teachers' ? 'View All Teachers' : 'View All Categories'}
-            <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+            {activeTab === 'teachers' ? 'View All Teachers' : ''}
+            {activeTab === "teachers" ? <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 20 20" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 10H16M16 10L11 5M16 10L11 15" />
-            </svg>
+            </svg> : ""}
           </Link>
         </div>
       </div>

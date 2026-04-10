@@ -16,6 +16,8 @@ export interface TutorProfile {
   totalReviews: number;
   totalSessions: number;
   isFeatured: boolean;
+  isVerified: boolean;
+  banner?: string;
   user: {
     id: string;
     name: string;
@@ -44,7 +46,7 @@ export interface TutorProfile {
 export async function getTutorProfileDetail(providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
     const response = await fetch(`${env.API_URL}/api/tutor/profile`, {
       headers: {
         'Content-Type': 'application/json',
@@ -66,7 +68,7 @@ export async function getTutorProfileDetail(providedCookies?: string) {
 export async function updateTutorProfile(data: any, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
     const response = await fetch(`${env.API_URL}/api/tutor/profile`, {
       method: 'PATCH',
       headers: {
@@ -89,7 +91,7 @@ export async function updateTutorProfile(data: any, providedCookies?: string) {
 export async function createTutorProfile(data: any, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
     const response = await fetch(`${env.API_URL}/api/tutor/profile`, {
       method: 'POST',
       headers: {
@@ -104,6 +106,28 @@ export async function createTutorProfile(data: any, providedCookies?: string) {
       return { data: result.data as TutorProfile, error: null };
     }
     return { data: null, error: { message: result.message || 'Failed to create tutor profile' } };
+  } catch (error: any) {
+    return { data: null, error: { message: error.message || 'An unexpected error occurred' } };
+  }
+}
+
+export async function requestVerification() {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = cookieStore.toString();
+    const response = await fetch(`${env.API_URL}/api/tutor/request-verification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': cookieString,
+      },
+    });
+    const result = await response.json();
+    
+    if (result.success) {
+      return { data: result.data, error: null };
+    }
+    return { data: null, error: { message: result.message || 'Failed to request verification' } };
   } catch (error: any) {
     return { data: null, error: { message: error.message || 'An unexpected error occurred' } };
   }

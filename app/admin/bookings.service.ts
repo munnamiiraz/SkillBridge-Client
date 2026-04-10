@@ -42,7 +42,7 @@ export interface Booking {
 export async function getAllBookings(params: Record<string, any> = {}, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
     console.log('Fetching bookings with params:', params, 'and cookies:', cookieString);
 
     const url = new URL(`${env.API_URL}/api/admin/bookings`);
@@ -127,7 +127,7 @@ export async function getAllBookings(params: Record<string, any> = {}, providedC
 export async function cancelBooking(id: string, reason: string, refundAmount: number, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/bookings/${id}/cancel`, {
       method: 'PATCH',

@@ -16,10 +16,18 @@ const TutorAvailabilityPage = async () => {
   const cookieStore = await cookies();
   const cookieString = cookieStore.toString();
 
+  const getDhakaDate = () => {
+    return new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Dhaka",
+      // Customize date/time format here if needed
+      dateStyle: "full", // "medium", "short", etc.
+      timeStyle: "medium",
+    });
+  };
+
+
   // Get current date in Dhaka timezone (UTC+6)
-  const now = new Date();
-  const dhakaOffset = 6 * 60; // UTC+6 in minutes
-  const nowInDhaka = new Date(now.getTime() + (dhakaOffset + now.getTimezoneOffset()) * 60000);
+  const nowInDhaka = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
   const currentWeekStart = getMonday(nowInDhaka);
   const weekStartDate = formatDateString(currentWeekStart);
 

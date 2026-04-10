@@ -7,6 +7,8 @@ import {
   createTutorProfile,
   TutorProfile 
 } from '@/app/services/tutor-profile.service';
+import { ImageUpload } from '@/components/common/ImageUpload';
+import { authClient } from '@/lib/auth-client';
 
 interface TutorManageProfileClientProps {
   initialProfile: TutorProfile | null;
@@ -46,13 +48,24 @@ export const TutorManageProfileClient: React.FC<TutorManageProfileClientProps> =
       if (profile.education && profile.education.trim().length >= 5) {
         updateData.education = profile.education.trim();
       }
+      if (profile.user.image) {
+        updateData.image = profile.user.image;
+      }
+      if (profile.banner) {
+        updateData.banner = profile.banner;
+      }
+      if (profile.user.name) {
+        updateData.name = profile.user.name;
+      }
       updateData.isAvailable = profile.isAvailable;
 
-      const result = await updateTutorProfile(updateData, document.cookie);
+      const result = await updateTutorProfile(updateData);
 
       if (result.data) {
         setSaveSuccess(true);
         toast.success('Profile updated successfully!');
+        // Refresh session to update UI/Navbar immediately
+        await authClient.getSession({ force: true });
         setTimeout(() => setSaveSuccess(false), 3000);
       } else {
         toast.error(result.error?.message || 'Failed to update profile');
@@ -204,6 +217,31 @@ export const TutorManageProfileClient: React.FC<TutorManageProfileClientProps> =
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 lg:p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Profile Info</h2>
               <div className="space-y-6">
+                <ImageUpload 
+                  defaultValue={profile.user.image || ''}
+                  onUploadSuccess={(url) => setProfile(prev => prev ? { ...prev, user: { ...prev.user, image: url } } : null)}
+                  label="Profile Picture"
+                  className="mb-8"
+                />
+
+                <ImageUpload 
+                  defaultValue={profile.banner || ''}
+                  onUploadSuccess={(url) => setProfile(prev => prev ? { ...prev, banner: url } : null)}
+                  label="Profile Banner (Shows on Find Teacher page)"
+                  className="mb-8 aspect-video"
+                />
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Display Name</label>
+                  <input
+                    type="text"
+                    value={profile.user.name || ''}
+                    onChange={(e) => setProfile(prev => prev ? { ...prev, user: { ...prev.user, name: e.target.value } } : null)}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white"
+                    placeholder="Your public name"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Headline</label>
                   <input

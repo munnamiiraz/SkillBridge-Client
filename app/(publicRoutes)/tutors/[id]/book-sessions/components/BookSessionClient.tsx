@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
-import { getTutorAvailability, createBooking } from '@/app/services/book-session.service';
+import { getTutorAvailability, createCheckoutSession } from '@/app/services/book-session.service';
 import { getMonday, getDayNameString, formatDateString } from '@/app/services/tutor-availability.helpers';
 import { Header } from './Header';
 import { SessionTypeSelector } from './SessionTypeSelector';
@@ -155,7 +155,7 @@ export const BookSessionClient: React.FC<BookSessionClientProps> = ({ tutorId, i
           return;
         }
 
-        const result = await createBooking({
+        const result = await createCheckoutSession({
           tutorProfileId: initialTutorData.id,
           scheduledAt: datePart.toISOString(),
           duration: 60,
@@ -163,11 +163,11 @@ export const BookSessionClient: React.FC<BookSessionClientProps> = ({ tutorId, i
           notes: 'Session booked via SkillBridge profile'
         });
 
-        if (result.data) {
-          toast.success('Booking confirmed successfully!');
-          router.push('/dashboard/bookings');
+        if (result.data?.checkoutUrl) {
+          toast.success('Redirecting to secure payment...');
+          window.location.href = result.data.checkoutUrl;
         } else {
-          toast.error(result.error?.message || 'Booking failed');
+          toast.error(result.error?.message || 'Failed to initiate payment');
         }
       } catch (err: any) {
         toast.error(err.message || 'Booking failed');

@@ -161,18 +161,18 @@ export const TutorAvailabilityClient: React.FC<TutorAvailabilityClientProps> = (
       
       slotsToSave = splitSlotsIntoHourlyChunks(slotsToSave);
 
-      const getNowInDhaka = () => new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
+      const nowInDhaka = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
       
-      const isEveryDateInFuture = slotsToSave.every(slot => {
-          const slotDate = new Date(slot.date);
-          slotDate.setTime(slotDate.getTime() + 6 * 60 * 60 * 1000); // UTC+6
-          const today = getNowInDhaka();
-          today.setHours(0, 0, 0, 0);
-          return slotDate >= today; 
+      const hasPastSlots = slotsToSave.some(slot => {
+          const [h, m] = slot.startTime.split(':').map(Number);
+          const [year, month, day] = slot.date.split('-').map(Number);
+          // Create a date object representing the slot time in Dhaka numbers
+          const slotInDhakaContext = new Date(year, month - 1, day, h, m);
+          return slotInDhakaContext < nowInDhaka;
       });
 
-      if (!isEveryDateInFuture) {
-        toast.error("All dates must be in the future.");
+      if (hasPastSlots) {
+        toast.error("please dont set past dates");
         setIsSaving(false);
         return;
       }
@@ -246,7 +246,8 @@ export const TutorAvailabilityClient: React.FC<TutorAvailabilityClientProps> = (
   };
 
   const goToCurrentWeek = () => {
-    setCurrentWeekStart(getMonday(new Date()));
+    const nowInDhaka = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
+    setCurrentWeekStart(getMonday(nowInDhaka));
   };
 
   const totalHoursPerWeek = Object.values(schedule).reduce((total, day) => {

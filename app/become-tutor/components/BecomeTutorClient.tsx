@@ -55,8 +55,7 @@ export const BecomeTutorClient = ({ categories }: BecomeTutorClientProps) => {
         toast.error(error.message);
       } else {
         toast.success('Your tutor profile has been created successfully!');
-        router.push('/');
-        setTimeout(() => window.location.reload(), 500);
+        window.location.href = '/tutor/dashboard';
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to create profile');

@@ -28,8 +28,7 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({ booking, onClos
       const result = await cancelBooking(
         booking.id,
         cancelReason,
-        parseFloat(refundAmount),
-        document.cookie
+        parseFloat(refundAmount)
       );
       
       if (result.data.success) {

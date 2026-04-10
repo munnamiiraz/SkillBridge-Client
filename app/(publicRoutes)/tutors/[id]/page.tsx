@@ -21,10 +21,16 @@ const TutorProfilePage: React.FC = () => {
 
         const fetchTutorProfile = async () => {
             try {
-                // Fetch public tutor profile info
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/public/tutors/${tutorId}`);
+                const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+                // Fetch public tutor profile info and availability in parallel
+                const [response, availabilityRes] = await Promise.all([
+                    axios.get(`${baseUrl}/api/public/tutors/${tutorId}`),
+                    axios.get(`${baseUrl}/api/public/tutors/${tutorId}/availability`)
+                ]);
+
                 if (response.data.success) {
                     const data = response.data.data;
+                    const availabilityData = availabilityRes.data.success ? availabilityRes.data.data : { slots: [] };
                     
                     const user = data.user;
                     
@@ -37,7 +43,7 @@ const TutorProfilePage: React.FC = () => {
                     }));
                     let statsRes;
                     try {
-                        statsRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/tutors/${tutorId}/rating-stats`);
+                        statsRes = await axios.get(`${baseUrl || 'http://localhost:9000'}/api/public/tutors/${tutorId}/rating-stats`);
                         
                         if (statsRes.data.success) {
                             ratingBreakdown = statsRes.data.data.distribution.map((d: any) => ({
@@ -45,19 +51,17 @@ const TutorProfilePage: React.FC = () => {
                                 count: d.count,
                                 percentage: d.percentage,
                             }));
-
-                            
                         }
                     } catch (statsErr) {
                         console.error('Error fetching rating stats:', statsErr);
                     }
                     
                     try {
-                        const reviewsRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/reviews?tutorProfileId=${data.id}&limit=5`);
+                        const reviewsRes = await axios.get(`${baseUrl || 'http://localhost:9000'}/api/public/reviews?tutorProfileId=${data.id}&limit=5`);
                         if (reviewsRes.data.success) {
                             recentReviews = reviewsRes.data.data.map((r: any) => ({
                                 name: r.user.name,
-                                avatar: r.user.image || r.user.name.charAt(0).toUpperCase(),
+                                avatar: r.user.image || (r.user.name ? r.user.name.charAt(0).toUpperCase() : '?'),
                                 rating: r.rating,
                                 date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Dhaka' }),
                                 subject: r.booking?.subject || 'Learning Session',
@@ -80,14 +84,15 @@ const TutorProfilePage: React.FC = () => {
                             tagline: data.headline || 'Experienced Tutor',
                             rating: statsRes?.data.data.averageRating || 0,
                             reviewCount: statsRes?.data.data.totalReviews || 0,
-                            totalStudents: 0, // Not typically active field yet
-                            responseTime: '< 2 hours', // Placeholder or calculated if available
+                            totalStudents: data.totalSessions || 0,
+                            responseTime: '< 2 hours', 
                             pricePerSession: data.hourlyRate,
                             sessionDuration: '60 min',
                             availability: data.isAvailable ? 'Available Today' : 'Unavailable',
                             isAvailable: data.isAvailable,
                             verified: user.emailVerified,
                             bgGradient: 'from-indigo-500 to-purple-500',
+                            banner: data.banner || '',
                         },
                         about: {
                             bio: data.bio || 'No bio available.',
@@ -105,7 +110,7 @@ const TutorProfilePage: React.FC = () => {
                             experience: [
                                 {
                                     role: 'Education',
-                                    organization: data.education || 'University Name',
+                                    organization: data.education || 'University Degree',
                                     year: 'Graduate',
                                     icon: (
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,7 +123,7 @@ const TutorProfilePage: React.FC = () => {
                                 {
                                     role: 'Experience',
                                     organization: `${data.experience || 0} Years`,
-                                    year: 'Total',
+                                    year: 'Professional',
                                     icon: (
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -128,34 +133,41 @@ const TutorProfilePage: React.FC = () => {
                             ],
                         },
                         subjects: [
-                            // Mock categories if backend doesn't return structured skills yet or map flat list
                             {
                                 category: 'Expertise',
                                 skills: (data.tutor_subject || []).map((ts: any) => ({ name: ts.subject.name, level: 'Expert' }))
                             }
                         ],
                         availability: {
-                            timezone: 'EST (UTC+6)',
+                            timezone: 'BST (UTC+6)',
                             weekSchedule: (() => {
                                 const schedule = [];
                                 const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                                
+                                // Current week logic from Dhaka timezone perspective
                                 const today = new Date();
+                                const dhakaToday = new Date(today.toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
+                                dhakaToday.setHours(0, 0, 0, 0);
+
+                                const apiSlots = availabilityData.slots || [];
                                 
                                 for (let i = 0; i < 7; i++) {
-                                    const date = new Date(today);
-                                    date.setDate(today.getDate() + i);
+                                    const date = new Date(dhakaToday);
+                                    date.setDate(dhakaToday.getDate() + i);
                                     
+                                    const dateKey = date.toISOString().split('T')[0];
                                     const dayIdx = date.getDay();
-                                    const dayOfWeekInt = dayIdx === 0 ? 7 : dayIdx;
                                     
-                                    const slots = (data.availability_slot || [])
-                                        .filter((s: any) => s.dayOfWeek === dayOfWeekInt && !s.isBooked)
-                                        .map((s: any) => s.startTime);
+                                    // Filter slots from the availability endpoint for this specific date
+                                    const daySlots = apiSlots
+                                        .filter((s: any) => s.date === dateKey && !s.isBooked)
+                                        .map((s: any) => s.startTime)
+                                        .sort();
                                         
                                     schedule.push({
                                         day: `${shortDays[dayIdx]} ${date.getDate()}`,
-                                        slots,
-                                        available: slots.length > 0,
+                                        slots: daySlots,
+                                        available: daySlots.length > 0,
                                     });
                                 }
                                 return schedule;
@@ -175,7 +187,7 @@ const TutorProfilePage: React.FC = () => {
                             subjects: data.tutor_subject?.map((ts: any) => ts.subject.name).join(' & ') || 'Tutor',
                             experience: `${data.experience} years`,
                             students: data.totalSessions || 0,
-                            rating: data.averageRating,
+                            rating: data.averageRating || 0,
                         },
                     };
                     setTutorData(mappedData);
@@ -207,9 +219,26 @@ const TutorProfilePage: React.FC = () => {
     }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      <section className="relative w-full">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* Premium Banner Section */}
+      <section className="relative h-[250px] lg:h-[350px] w-full overflow-hidden">
+        {tutorData.header.banner ? (
+          <img 
+            src={tutorData.header.banner} 
+            alt="Profile Banner" 
+            className="w-full h-full object-cover" 
+          />
+        ) : (
+          <div className={`w-full h-full bg-linear-to-br ${tutorData.header.bgGradient}`} />
+        )}
+        
+        {/* Overlays for depth */}
+        <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-white dark:to-gray-950" />
+        <div className="absolute inset-0 backdrop-blur-[1px] opacity-10" />
+      </section>
+
+      <section className="relative w-full -mt-20 lg:-mt-28 z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 lg:py-12">
           <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
             
             {/* Left Column - Core Information */}

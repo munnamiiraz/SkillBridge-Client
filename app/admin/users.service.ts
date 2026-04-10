@@ -30,7 +30,7 @@ export interface User {
 export async function getAllUsers(params: Record<string, any> = {}, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const url = new URL(`${env.API_URL}/api/admin/users`);
     
@@ -102,7 +102,7 @@ export async function getAllUsers(params: Record<string, any> = {}, providedCook
 export async function banUser(id: string, reason: string, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/users/${id}/ban`, {
       method: 'PATCH',
@@ -123,7 +123,7 @@ export async function banUser(id: string, reason: string, providedCookies?: stri
 export async function unbanUser(id: string, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/users/${id}/unban`, {
       method: 'PATCH',

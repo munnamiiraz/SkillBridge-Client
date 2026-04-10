@@ -38,7 +38,7 @@ export interface ReviewsResponse {
 export async function getTutorRatingStats(providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
     const response = await fetch(`${env.API_URL}/api/tutor/rating-stats`, {
       headers: {
         'Cookie': cookieString,
@@ -85,7 +85,7 @@ export async function getTutorReviews(page = 1, limit = 5, rating: number | null
     }
 
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const queryString = new URLSearchParams(params).toString();
     const response = await fetch(`${env.API_URL}/api/tutor/reviews?${queryString}`, {

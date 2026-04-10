@@ -6,6 +6,7 @@ import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+import { ShieldCheck, Award } from 'lucide-react';
 
 interface NavLink {
   label: string;
@@ -178,15 +179,25 @@ const Navbar: React.FC = () => {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-3 p-1 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                 >
-                  <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md">
-                    {session?.user.name?.[0].toUpperCase() || 'U'}
+                  <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md overflow-hidden">
+                    {sessionResponse.isPending ? (
+                      <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    ) : session?.user.image ? (
+                      <img 
+                        src={session.user.image} 
+                        alt={session.user.name || 'User'} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      (session?.user.name?.trim() || 'User')[0].toUpperCase()
+                    )}
                   </div>
                   <div className="hidden md:block text-left">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
-                      {session?.user.name}
+                      {sessionResponse.isPending ? 'Loading...' : (session?.user.name?.trim() || 'SkillBridge User')}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {(session?.user as any).role}
+                      {sessionResponse.isPending ? 'Please wait' : ((session?.user as any).role || 'Student').replace('_', ' ')}
                     </p>
                   </div>
                   <svg 
@@ -211,24 +222,30 @@ const Navbar: React.FC = () => {
                       href={
                         (session.user as any).role === 'ADMIN' 
                           ? '/admin' 
-                          : (session.user as any).role === 'TUTOR' 
+                          : ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
                             ? '/tutor/dashboard' 
                             : '/dashboard'
                       }
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z" />
-                      </svg>
                       Dashboard
                     </Link>
+                    {(session.user as any).role === 'ADMIN' && (
+                       <Link
+                        href="/admin/verifications"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <ShieldCheck className="w-4 h-4" />
+                        Tutor Verifications
+                      </Link>
+                    )}
                     {(session.user as any).role !== 'ADMIN' && (
                       <>
                         <Link
                           href={
-                            (session.user as any).role === 'TUTOR' 
+                            ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
                               ? '/tutor/dashboard/profile' 
                               : '/dashboard/profile'
                           }
@@ -242,7 +259,7 @@ const Navbar: React.FC = () => {
                         </Link>
                         <Link
                           href={
-                            (session.user as any).role === 'TUTOR' 
+                            ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
                               ? '/tutor/dashboard/manage-profile' 
                               : '/dashboard/manage-profile'
                           }
@@ -258,7 +275,7 @@ const Navbar: React.FC = () => {
                     )}
                     
                     {/* Tutor-specific menu items */}
-                    {(session.user as any).role === 'TUTOR' && (
+                    {['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role) && (
                       <>
                         <Link
                           href="/tutor/dashboard/availability"
@@ -285,10 +302,15 @@ const Navbar: React.FC = () => {
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                          </svg>
                           Reviews
+                        </Link>
+                        <Link
+                          href="/tutor/dashboard/verification"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-indigo-600 dark:text-indigo-400 font-bold hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <Award className="w-4 h-4" />
+                          Get Verified
                         </Link>
                       </>
                     )}
@@ -471,7 +493,7 @@ const Navbar: React.FC = () => {
                       href={
                         (session.user as any).role === 'ADMIN' 
                           ? '/admin' 
-                          : (session.user as any).role === 'TUTOR' 
+                          : ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
                             ? '/tutor/dashboard' 
                             : '/dashboard'
                       }
@@ -480,11 +502,21 @@ const Navbar: React.FC = () => {
                     >
                       Dashboard
                     </Link>
+                    {(session.user as any).role === 'ADMIN' && (
+                        <Link
+                         href="/admin/verifications"
+                         className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                         onClick={() => setIsMobileMenuOpen(false)}
+                       >
+                         <ShieldCheck className="w-4 h-4" />
+                         Verifications
+                       </Link>
+                    )}
                     {(session.user as any).role !== 'ADMIN' && (
                       <>
                         <Link
                           href={
-                            (session.user as any).role === 'TUTOR' 
+                            ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
                               ? '/tutor/dashboard/profile' 
                               : '/dashboard/profile'
                           }
@@ -495,7 +527,7 @@ const Navbar: React.FC = () => {
                         </Link>
                         <Link
                           href={
-                            (session.user as any).role === 'TUTOR' 
+                            ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
                               ? '/tutor/dashboard/manage-profile' 
                               : '/dashboard/manage-profile'
                           }
@@ -508,7 +540,7 @@ const Navbar: React.FC = () => {
                     )}
                     
                     {/* Tutor-specific mobile menu items */}
-                    {(session.user as any).role === 'TUTOR' && (
+                    {['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role) && (
                       <>
                         <Link
                           href="/tutor/dashboard/availability"
@@ -530,6 +562,14 @@ const Navbar: React.FC = () => {
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           Reviews
+                        </Link>
+                        <Link
+                          href="/tutor/dashboard/verification"
+                          className="flex items-center justify-center gap-2 p-3 text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/10 rounded-lg transition-colors col-span-2"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Award className="w-4 h-4" />
+                          Get Verified
                         </Link>
                       </>
                     )}

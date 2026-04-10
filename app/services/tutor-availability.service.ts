@@ -25,7 +25,7 @@ export interface WeeklySchedule {
 export async function getTutorAvailability(weekStartDate: string, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
     const response = await fetch(`${env.API_URL}/api/tutor/availability-slots?weekStartDate=${weekStartDate}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export async function getTutorAvailability(weekStartDate: string, providedCookie
 export async function saveTutorAvailability(weekStartDate: string, slots: any[], providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
     const response = await fetch(`${env.API_URL}/api/tutor/availability-slots`, {
       method: 'PUT',
       headers: {

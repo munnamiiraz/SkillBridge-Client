@@ -38,7 +38,7 @@ export interface PlatformStats {
 export async function getPlatformStats(providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/stats`, {
       headers: {

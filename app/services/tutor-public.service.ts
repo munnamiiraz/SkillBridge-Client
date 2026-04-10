@@ -77,6 +77,7 @@ export async function searchTutors(filters: TutorFilters) {
         bgGradient: gradients[index % gradients.length],
         totalStudents: t.totalSessions || 0,
         bio: t.bio || 'No bio available',
+        banner: t.banner || '',
       }));
 
       return {

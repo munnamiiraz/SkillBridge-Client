@@ -38,7 +38,7 @@ export const TutorReviewsClient: React.FC<TutorReviewsClientProps> = ({ initialR
       setPage(1);
       setLoading(true);
       try {
-          const result = await getTutorReviews(1, 5, filterRating, sortBy, document.cookie);
+          const result = await getTutorReviews(1, 5, filterRating, sortBy);
           if (result.data) {
               setReviews(result.data.reviews);
               setHasMore(result.data.meta.page < result.data.meta.totalPages);
@@ -56,7 +56,7 @@ export const TutorReviewsClient: React.FC<TutorReviewsClientProps> = ({ initialR
     if (hasMore && !loading) {
         try {
             const nextPage = page + 1;
-            const result = await getTutorReviews(nextPage, 5, filterRating, sortBy, document.cookie);
+            const result = await getTutorReviews(nextPage, 5, filterRating, sortBy);
             if (result.data) {
                 setReviews(prev => [...prev, ...result.data!.reviews]);
                 setHasMore(result.data.meta.page < result.data.meta.totalPages);

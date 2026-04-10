@@ -29,7 +29,7 @@ const SubjectModal: React.FC<SubjectModalProps> = ({ category, onClose }) => {
       const result = await createSubject({
         name: name.trim(),
         categoryId: category.id,
-      }, document.cookie);
+      },);
 
       if (result.data.success) {
         toast.success(`Subject "${name}" added to ${category.name}`);

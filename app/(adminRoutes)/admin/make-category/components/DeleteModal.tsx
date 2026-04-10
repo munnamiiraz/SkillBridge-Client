@@ -23,7 +23,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ category, onClose }) => {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const result = await deleteCategory(category.id, document.cookie);
+      const result = await deleteCategory(category.id);
       if (result.data.success) {
         toast.success('Category deleted successfully');
         onClose();

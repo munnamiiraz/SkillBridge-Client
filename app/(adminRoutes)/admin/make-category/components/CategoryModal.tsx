@@ -36,8 +36,8 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ category, onClose, mode }
       };
 
       const result = mode === 'create' 
-        ? await createCategory(payload, document.cookie)
-        : await updateCategory(category!.id, payload, document.cookie);
+        ? await createCategory(payload)
+        : await updateCategory(category!.id, payload);
 
       if (result.data.success) {
         toast.success(`Category ${mode === 'create' ? 'created' : 'updated'} successfully`);

@@ -190,32 +190,6 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Newsletter Section */}
-        <div className="py-12 border-t border-gray-200 dark:border-gray-800">
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              Stay Updated
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Get the latest learning tips, teacher spotlights, and platform updates delivered to your inbox.
-            </p>
-            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-shadow duration-200"
-                aria-label="Email address"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
-        </div>
-
         {/* Bottom Bar */}
         <div className="py-8 border-t border-gray-200 dark:border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -223,24 +197,21 @@ const Footer: React.FC = () => {
               &copy; {new Date().getFullYear()} SkillBridge. All rights reserved.
             </p>
             <div className="flex items-center gap-6">
-              <Link
-                href="/privacy"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+              <div
+                className="text-sm cursor-pointer text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
               >
                 Privacy
-              </Link>
-              <Link
-                href="/terms"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+              </div>
+              <div
+                className="text-sm cursor-pointer text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
               >
                 Terms
-              </Link>
-              <Link
-                href="/cookies"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+              </div>
+              <div
+                className="text-sm cursor-pointer text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
               >
                 Cookies
-              </Link>
+              </div>
             </div>
           </div>
         </div>

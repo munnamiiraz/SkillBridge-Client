@@ -25,7 +25,7 @@ const BanModal: React.FC<BanModalProps> = ({ user, onClose }) => {
     if (!banReason.trim()) return;
     setIsSubmitting(true);
     try {
-      const result = await banUser(user.id, banReason, document.cookie);
+      const result = await banUser(user.id, banReason);
       if (result.data.success) {
         toast.success('User banned successfully');
         onClose();

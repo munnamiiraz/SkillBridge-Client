@@ -11,19 +11,34 @@ export const BookingFilters: React.FC<BookingFiltersProps> = ({ searchQuery }) =
   const searchParams = useSearchParams();
   const [internalSearch, setInternalSearch] = useState(searchQuery);
 
+  // Sync internal search with prop (URL) when it changes externally (like back button)
   useEffect(() => {
+    setInternalSearch(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    // If the internal search is already what's in the URL, don't do anything
+    if (internalSearch === searchQuery) return;
+
     const timer = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
+      
       if (internalSearch) {
         params.set('search', internalSearch);
       } else {
         params.delete('search');
       }
-      router.push(`?${params.toString()}`);
+
+      // Final check: if the generated string is same as current string, don't push
+      const newQuery = params.toString();
+      const currentQuery = searchParams.toString();
+      if (newQuery === currentQuery) return;
+
+      router.push(`?${newQuery}`);
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [internalSearch, router, searchParams]);
+  }, [internalSearch, router, searchParams, searchQuery]);
 
   return (
     <div className="mb-8">

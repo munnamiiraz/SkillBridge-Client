@@ -80,6 +80,7 @@ const TutorProfilePage = async () => {
       isAvailable: profile.isAvailable,
       verified: true,
       bgGradient: 'from-indigo-500 to-purple-500',
+      banner: (profile as any).banner || '',
     },
     about: {
       bio: profile.bio || 'Welcome to my profile! I am looking forward to helping you learn.',
@@ -160,9 +161,26 @@ const TutorProfilePage = async () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      <section className="relative w-full">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      {/* Premium Banner Section */}
+      <section className="relative h-[250px] lg:h-[350px] w-full overflow-hidden">
+        {tutorData.header.banner ? (
+          <img 
+            src={tutorData.header.banner} 
+            alt="Profile Banner" 
+            className="w-full h-full object-cover" 
+          />
+        ) : (
+          <div className={`w-full h-full bg-linear-to-br ${tutorData.header.bgGradient}`} />
+        )}
+        
+        {/* Overlays for depth */}
+        <div className="absolute inset-0 bg-linear-to-b from-black/30 via-transparent to-white dark:to-gray-950" />
+        <div className="absolute inset-0 backdrop-blur-[1px] opacity-20" />
+      </section>
+
+      <section className="relative w-full -mt-20 lg:-mt-28 z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 lg:py-12">
           <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
             
             {/* Left Column - Core Information */}

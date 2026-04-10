@@ -139,18 +139,6 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
               </div>
             )}
 
-            {/* View Full Calendar Button */}
-            <div className="flex justify-center pt-4">
-              <button className="group inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-2 border-gray-200 dark:border-gray-700 rounded-xl font-semibold text-gray-900 dark:text-white transition-all duration-300 hover:shadow-lg">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                View Full Schedule
-                <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 20 20" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 10H16M16 10L11 5M16 10L11 15" />
-                </svg>
-              </button>
-            </div>
           </div>
 
           {/* Right Column - Quick Booking Reminder */}
@@ -360,12 +348,7 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
                 </svg>
                 Book Your First Session
               </Link>
-              <button className="w-full py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl border-2 border-white/30 transition-all duration-300 flex items-center justify-center gap-2">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                Send a Message
-              </button>
+
               <p className="text-center text-white/80 text-sm">
                 💡 First session is 50% off for new students
               </p>

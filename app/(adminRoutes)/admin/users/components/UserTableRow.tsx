@@ -21,7 +21,7 @@ const UserTableRow: React.FC<UserTableRowProps> = ({ user, isSelected, onSelect 
     if (!confirm('Are you sure you want to unban this user?')) return;
     setIsUnbanning(true);
     try {
-      const result = await unbanUser(user.id, document.cookie);
+      const result = await unbanUser(user.id);
       if (result.data.success) {
         toast.success('User unbanned successfully');
         router.refresh();

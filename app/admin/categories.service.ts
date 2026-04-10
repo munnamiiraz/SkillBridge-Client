@@ -18,7 +18,7 @@ export interface Category {
 export async function getAllCategories(providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/categories`, {
       headers: {
@@ -56,7 +56,7 @@ export async function getAllCategories(providedCookies?: string) {
 export async function createCategory(data: { name: string; description: string; status: string }, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/categories`, {
       method: 'POST',
@@ -77,7 +77,7 @@ export async function createCategory(data: { name: string; description: string; 
 export async function updateCategory(id: string, data: { name?: string; description?: string; status?: string }, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/categories/${id}`, {
       method: 'PATCH',
@@ -98,7 +98,7 @@ export async function updateCategory(id: string, data: { name?: string; descript
 export async function deleteCategory(id: string, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/categories/${id}`, {
       method: 'DELETE',
@@ -119,7 +119,7 @@ export async function deleteCategory(id: string, providedCookies?: string) {
 export async function createSubject(data: { name: string; categoryId: string }, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/subjects`, {
       method: 'POST',
@@ -140,7 +140,7 @@ export async function createSubject(data: { name: string; categoryId: string }, 
 export async function updateSubject(id: string, data: { name?: string; categoryId?: string }, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/subjects/${id}`, {
       method: 'PATCH',
@@ -161,7 +161,7 @@ export async function updateSubject(id: string, data: { name?: string; categoryI
 export async function deleteSubject(id: string, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/admin/subjects/${id}`, {
       method: 'DELETE',
@@ -181,7 +181,7 @@ export async function deleteSubject(id: string, providedCookies?: string) {
 export async function getAllSubjects(categoryId?: string, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const url = new URL(`${env.API_URL}/api/admin/subjects`);
     if (categoryId) url.searchParams.append('categoryId', categoryId);

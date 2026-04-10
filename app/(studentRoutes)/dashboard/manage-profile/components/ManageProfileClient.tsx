@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { updateStudentProfile, StudentProfile } from '@/app/services/student-profile.service';
+import { authClient } from '@/lib/auth-client';
 import { Sidebar } from './Sidebar';
 import { AvatarUpload } from './AvatarUpload';
 import { ProfileForm } from './ProfileForm';
@@ -31,12 +32,15 @@ export const ManageProfileClient: React.FC<ManageProfileClientProps> = ({ initia
       const result = await updateStudentProfile({
         name: profile.name,
         phone: profile.phone,
-        address: profile.address
-      }, document.cookie);
+        address: profile.address,
+        image: profile.image
+      });
       
       if (result.data?.success) {
         toast.success('Profile updated successfully!');
         setSavedProfile(profile);
+        // Sync Navbar session
+        await authClient.getSession({ force: true });
       } else {
         toast.error(result.error?.message || result.data?.message || 'Failed to update profile');
       }

@@ -12,11 +12,22 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor }) => {
   return (
     <Link href={`/tutors/${tutor.id}`} className="block">
       <article className="group relative bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(79,70,229,0.15)] dark:hover:shadow-[0_20px_50px_rgba(79,70,229,0.2)] h-full">
-        {/* Card Header with Gradient Background */}
-        <div className={`h-24 bg-linear-to-br ${tutor.bgGradient} relative overflow-hidden`}>
-          {/* Abstract Pattern Overlay */}
-          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '16px 16px' }} />
-          <div className="absolute inset-0 bg-linear-to-b from-black/10 to-transparent" />
+        {/* Card Header with Banner or Gradient */}
+        <div className={`h-28 relative overflow-hidden`}>
+          {tutor.banner ? (
+            <img 
+              src={tutor.banner} 
+              alt={`${tutor.name}'s banner`} 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+            />
+          ) : (
+            <>
+              <div className={`absolute inset-0 bg-linear-to-br ${tutor.bgGradient}`} />
+              {/* Abstract Pattern Overlay */}
+              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '16px 16px' }} />
+            </>
+          )}
+          <div className="absolute inset-0 bg-linear-to-b from-black/20 to-transparent" />
         </div>
 
         <div className="relative px-6 pb-6 -mt-12">

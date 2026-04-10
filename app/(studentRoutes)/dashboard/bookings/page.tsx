@@ -82,6 +82,18 @@ const StudentBookingsPage = async ({ searchParams }: PageProps) => {
       );
     }
 
+    // Sort the bookings
+    filtered.sort((a, b) => {
+      const dateA = new Date(`${a.session.date}T${a.session.time}:00Z`).getTime();
+      const dateB = new Date(`${b.session.date}T${b.session.time}:00Z`).getTime();
+      
+      if (activeTab === 'upcoming' || activeTab === 'ongoing') {
+        return dateA - dateB; // Ascending: soonest first
+      } else {
+        return dateB - dateA; // Descending: most recent first
+      }
+    });
+
     return filtered;
   };
 

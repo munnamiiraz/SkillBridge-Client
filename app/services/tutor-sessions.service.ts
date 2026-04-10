@@ -34,7 +34,7 @@ function formatUTCTime(date: Date): string {
 export async function getTutorSessions(providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
     const response = await fetch(`${env.API_URL}/api/tutor/sessions`, {
       headers: {
         'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ export async function getTutorSessions(providedCookies?: string) {
 export async function updateTutorSessionStatus(sessionId: string, newStatus: string, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
     const response = await fetch(`${env.API_URL}/api/tutor/sessions/${sessionId}/status`, {
       method: 'PATCH',
       headers: {

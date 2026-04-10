@@ -31,7 +31,7 @@ export const TutorSessionsClient: React.FC<TutorSessionsClientProps> = ({ initia
     
     setIsMarkingComplete(true);
     try {
-      const result = await updateTutorSessionStatus(sessionId, newStatus, document.cookie);
+      const result = await updateTutorSessionStatus(sessionId, newStatus);
       
       if (result.data) {
         toast.success(`Session status updated to ${newStatus}`);

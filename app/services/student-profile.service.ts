@@ -15,7 +15,7 @@ export interface StudentProfile {
 export async function getStudentProfileData(providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/student/profile`, {
       headers: {
@@ -49,7 +49,7 @@ export async function getStudentProfileData(providedCookies?: string) {
 export async function updateStudentProfile(data: Partial<StudentProfile>, providedCookies?: string) {
   try {
     const cookieStore = await cookies();
-    const cookieString = providedCookies || cookieStore.toString();
+    const cookieString = cookieStore.toString() || providedCookies || "";
 
     const res = await fetch(`${env.API_URL}/api/student/profile`, {
       method: 'PATCH',
@@ -60,7 +60,8 @@ export async function updateStudentProfile(data: Partial<StudentProfile>, provid
       body: JSON.stringify({
         name: data.name,
         phone: data.phone,
-        address: data.address
+        address: data.address,
+        image: data.image
       }),
     });
 

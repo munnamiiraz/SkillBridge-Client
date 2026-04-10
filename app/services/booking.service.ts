@@ -131,7 +131,7 @@ function transformBookingData(booking: any): Booking {
     status = 'cancelled';
   } else if (booking.status === 'COMPLETED') {
     status = 'completed';
-  } else if (scheduledDate <= now && now <= sessionEndTime) {
+  } else if (booking.status === 'ONGOING' || (scheduledDate <= now && now <= sessionEndTime)) {
     status = 'ongoing';
   } else if (scheduledDate > now) {
     status = 'upcoming';
