@@ -90,7 +90,7 @@ const TutorProfilePage: React.FC = () => {
                             sessionDuration: '60 min',
                             availability: data.isAvailable ? 'Available Today' : 'Unavailable',
                             isAvailable: data.isAvailable,
-                            verified: user.emailVerified,
+                            verified: data.isVerified,
                             bgGradient: 'from-indigo-500 to-purple-500',
                             banner: data.banner || '',
                         },

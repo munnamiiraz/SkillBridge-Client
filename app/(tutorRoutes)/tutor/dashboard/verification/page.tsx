@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { getTutorProfileDetail, requestVerification } from '@/app/services/tutor-profile.service';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle2, AlertCircle, Award, Star, BookOpen, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/Button';
 
 const VerificationPage = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -44,8 +43,9 @@ const VerificationPage = () => {
   }
 
   const sessionGoal = 10;
+  const ratingGoal = 4.5;
   const progress = Math.min((profile.totalSessions / sessionGoal) * 100, 100);
-  const isEligible = profile.totalSessions >= sessionGoal;
+  const isEligible = profile.totalSessions >= sessionGoal && profile.averageRating >= ratingGoal;
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
@@ -129,9 +129,14 @@ const VerificationPage = () => {
                 Gain experience by completing at least 10 sessions with students.
               </p>
             </div>
-            <div className="space-y-2">
-              <Progress value={progress} className="h-2" />
-              <p className="text-xs text-right text-gray-500">{Math.round(progress)}% Complete</p>
+            <div className="space-y-3">
+              <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-linear-to-r from-indigo-600 to-purple-600 shadow-sm transition-all duration-1000 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-xs text-right font-black text-indigo-500 uppercase tracking-widest">{Math.round(progress)}% Mastery</p>
             </div>
           </div>
 
@@ -141,13 +146,15 @@ const VerificationPage = () => {
               <span className="p-3 rounded-xl bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
                 <Star className="w-6 h-6" />
               </span>
-              <span className="text-sm font-bold px-3 py-1 rounded-full bg-orange-100 text-orange-700">
-                Min 4.5 Rating
+              <span className={`text-sm font-bold px-3 py-1 rounded-full ${
+                profile.averageRating >= 4.5 ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
+              }`}>
+                {profile.averageRating >= 4.5 ? 'Requirement Met' : `Min 4.5 Rating`}
               </span>
             </div>
             <h3 className="font-bold text-gray-900 dark:text-white mb-2">Quality Performance</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Maintain a high average rating. Your current rating is <span className="font-bold text-gray-900 dark:text-white">{profile.averageRating}</span>.
+              Maintain a high average rating. Your current rating is <span className="font-bold text-gray-900 dark:text-white">{profile.averageRating || 0}</span>.
             </p>
           </div>
         </div>

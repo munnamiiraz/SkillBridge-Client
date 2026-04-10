@@ -131,80 +131,85 @@ export const TutorManageProfileClient: React.FC<TutorManageProfileClientProps> =
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Sidebar Navigation */}
-      <aside className="lg:w-64 shrink-0">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-          <nav className="p-2">
+      <aside className="lg:w-72 shrink-0 space-y-6">
+        <div className="relative overflow-hidden bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl rounded-[2.5rem] border border-gray-200/50 dark:border-gray-800/50 shadow-xl shadow-gray-200/20 dark:shadow-none transition-all duration-300">
+          {/* Background Accent */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          
+          <nav className="p-3 space-y-2">
             <button
               type="button"
               onClick={() => setActiveTab('profile')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
+              className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-bold text-sm transition-all duration-300 group ${
                 activeTab === 'profile'
-                  ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/30'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-900 hover:shadow-md'
               }`}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span>Basic Info</span>
+              <div className={`transition-transform duration-300 ${activeTab === 'profile' ? 'scale-110' : 'text-indigo-500 group-hover:scale-110'}`}>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <span className="tracking-tight">Basic Profile</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('professional')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 mt-2 ${
+              className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl font-bold text-sm transition-all duration-300 group ${
                 activeTab === 'professional'
-                  ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/30'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-900 hover:shadow-md'
               }`}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span>Professional</span>
+              <div className={`transition-transform duration-300 ${activeTab === 'professional' ? 'scale-110' : 'text-purple-500 group-hover:scale-110'}`}>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="tracking-tight">Professional</span>
             </button>
           </nav>
 
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700 mt-4">
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-              Performance
-            </p>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Total Sessions</span>
-                <span className="font-bold text-gray-900 dark:text-white">{profile.totalSessions}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Avg Rating</span>
-                <span className="font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                  {profile.averageRating}
-                  <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                </span>
+          <div className="p-6 pt-2 border-t border-gray-200/50 dark:border-gray-800/50 mt-2 space-y-6">
+            <div>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em] mb-4">
+                Teaching Stats
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between group">
+                  <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Total Sessions</span>
+                  <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-black group-hover:scale-110 transition-transform">{profile.totalSessions}</span>
+                </div>
+                <div className="flex items-center justify-between group">
+                  <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Avg Rating</span>
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 rounded-full text-xs font-black group-hover:scale-110 transition-transform">
+                    {profile.averageRating.toFixed(1)}
+                    <svg className="w-3 h-3 text-yellow-500 fill-current" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Available for Booking
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Students can book sessions
-                </p>
+            <div className="pt-6 border-t border-gray-200/50 dark:border-gray-800/50">
+              <div className="flex items-center justify-between gap-4 p-4 rounded-3xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 group hover:shadow-md transition-all">
+                <div className="min-w-0">
+                  <p className="text-xs font-black text-gray-900 dark:text-white truncate">Availability</p>
+                  <p className="text-[10px] font-bold text-gray-400 tracking-tight leading-none mt-0.5">Allow bookings</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setProfile(prev => prev ? { ...prev, isAvailable: !prev.isAvailable } : null)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none ${
+                    profile.isAvailable ? 'bg-indigo-600 shadow-lg shadow-indigo-500/30' : 'bg-gray-300 dark:bg-gray-700'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all duration-300 shadow-sm ${profile.isAvailable ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setProfile(prev => prev ? { ...prev, isAvailable: !prev.isAvailable } : null)}
-                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 ${
-                  profile.isAvailable ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'
-                }`}
-              >
-                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 ${profile.isAvailable ? 'translate-x-6' : 'translate-x-1'}`} />
-              </button>
             </div>
           </div>
         </div>

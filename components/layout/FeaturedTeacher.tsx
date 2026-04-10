@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Tutor {
   id: string;
@@ -154,9 +155,28 @@ const FeaturedTeachersSection: React.FC = () => {
         {activeTab === 'teachers' && (
           <div className="min-h-[400px]">
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-gray-600 dark:text-gray-400 font-medium">Loading featured teachers...</p>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden h-full">
+                    <Skeleton className="h-32 w-full rounded-none" />
+                    <div className="pt-14 p-6 space-y-4">
+                      <div className="space-y-2">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </div>
+                      <Skeleton className="h-10 w-full" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-6 w-16 rounded-full" />
+                        <Skeleton className="h-6 w-16 rounded-full" />
+                      </div>
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex justify-between">
+                        <Skeleton className="h-10 w-24" />
+                        <Skeleton className="h-10 w-16" />
+                      </div>
+                      <Skeleton className="h-12 w-full rounded-xl" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : error ? (
               <div className="text-center py-20 bg-red-50 dark:bg-red-900/10 rounded-3xl border border-red-100 dark:border-red-900/20">

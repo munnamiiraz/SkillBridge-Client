@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Tutor {
   id: string;
@@ -146,7 +147,7 @@ const TutorDiscoveryPageContent: React.FC = () => {
             reviewCount: t.totalReviews || 0,
             pricePerSession: t.hourlyRate,
             isOnline: t.isAvailable,
-            verified: t.user.emailVerified,
+            verified: t.isVerified,
             bgGradient: gradients[index % gradients.length],
             totalStudents: t.totalSessions || 0,
             bio: t.bio || 'No bio available',
@@ -233,6 +234,44 @@ const TutorDiscoveryPageContent: React.FC = () => {
           </p>
         </div>
 
+        {/* AI "Perfect Match" Banner */}
+        <div className="mb-12 group relative">
+          <div className="absolute -inset-1 bg-linear-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative px-8 py-10 bg-white dark:bg-gray-800 rounded-3xl border border-indigo-100 dark:border-indigo-500/20 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden shadow-xl">
+            {/* Animated Background Blob */}
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-colors"></div>
+            
+            <div className="flex-1 space-y-4 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full text-sm font-bold border border-indigo-100 dark:border-indigo-500/20">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                </span>
+                NEW: AI PERFECT MATCH
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                Don't browse. Just <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Match.</span>
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 max-w-xl text-lg">
+                Tell our Smart Assistant your goals, and we'll analyze 100+ tutor profiles to find your top 3 absolute best matches with personalized notes.
+              </p>
+            </div>
+
+            <Link 
+              href="/match-assistant"
+              className="relative px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 group/btn overflow-hidden block"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                🤖 Start Smart Matching
+                <svg className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
+              <div className="absolute inset-0 bg-linear-to-r from-indigo-500 to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+            </Link>
+          </div>
+        </div>
+
         {/* Two Column Layout */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Filter Panel - Desktop */}
@@ -286,8 +325,30 @@ const TutorDiscoveryPageContent: React.FC = () => {
 
             {/* Tutor Grid */}
             {loading ? (
-              <div className="flex justify-center items-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 overflow-hidden h-full">
+                    <Skeleton className="h-24 w-full rounded-none" />
+                    <div className="p-6 -mt-12 space-y-4">
+                      <div className="flex justify-between items-end">
+                        <Skeleton className="w-24 h-24 rounded-2xl border-4 border-white dark:border-gray-800" />
+                        <Skeleton className="w-20 h-8 rounded-full" />
+                      </div>
+                      <div className="space-y-2">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </div>
+                      <Skeleton className="h-16 w-full" />
+                      <div className="pt-2 flex justify-between border-t border-gray-100 dark:border-gray-700/50">
+                        <div className="space-y-1">
+                          <Skeleton className="h-3 w-12" />
+                          <Skeleton className="h-6 w-16" />
+                        </div>
+                        <Skeleton className="w-28 h-10 rounded-xl" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : tutors.length > 0 ? (
               <>

@@ -1,18 +1,7 @@
-import Footer from "@/components/layout/Footer";
-import Navbar from "@/components/layout/Navbar";
-
-export default function PublicLayout({
+export default function TutorRootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-      <Navbar />
-      <main className="pt-20">
-        {children}
-      </main>
-      <Footer />
-    </>
-  );
+  return <>{children}</>;
 }

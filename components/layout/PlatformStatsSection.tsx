@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { getPlatformStats, PlatformStats } from '@/app/services/public-stats.service';
 import { Users, GraduationCap, CheckCircle } from 'lucide-react';
+import { Skeleton } from '../ui/Skeleton';
 
 const PlatformStatsSection: React.FC = () => {
   const [stats, setStats] = useState<PlatformStats | null>(null);
@@ -26,7 +27,29 @@ const PlatformStatsSection: React.FC = () => {
     fetchStats();
   }, []);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <section className="relative w-full py-24 bg-white dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <Skeleton className="h-12 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+              </div>
+              <div className="grid sm:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-32 rounded-3xl" />
+                ))}
+              </div>
+            </div>
+            <Skeleton className="h-[400px] w-full rounded-[2.5rem]" />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const statCards = [
     { 

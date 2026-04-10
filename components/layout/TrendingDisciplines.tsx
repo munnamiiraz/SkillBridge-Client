@@ -63,13 +63,13 @@ const TrendingDisciplines: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-black rounded-full border border-orange-100 dark:border-orange-800 tracking-tighter uppercase">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-black rounded-full border border-indigo-100 dark:border-indigo-800 tracking-tighter uppercase">
               <Sparkles className="w-3 h-3" />
               Hot Right Now
             </div>
             <h2 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight">
               Trending <br />
-              <span className="italic bg-linear-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Disciplines.</span>
+              <span className="italic bg-linear-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">Disciplines.</span>
             </h2>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-sm mb-2">
@@ -83,7 +83,7 @@ const TrendingDisciplines: React.FC = () => {
             <Link 
               key={i} 
               href={`/tutors?query=${encodeURIComponent(item.name)}`}
-              className="group relative p-8 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 transition-all duration-300 hover:bg-white dark:hover:bg-gray-800 hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1 block overflow-hidden"
+              className="group relative p-8 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 transition-all duration-300 hover:bg-white dark:hover:bg-gray-800 hover:shadow-2xl hover:shadow-indigo-500/5 hover:-translate-y-1 block overflow-hidden"
             >
               {/* Card Aura */}
               <div className={`absolute top-0 right-0 w-24 h-24 bg-${item.color}-500 opacity-[0.03] group-hover:opacity-[0.08] rounded-full -mr-12 -mt-12 transition-opacity`} />
@@ -103,7 +103,7 @@ const TrendingDisciplines: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-orange-500 transition-colors">
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-indigo-500 transition-colors">
                     {item.name}
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">{item.desc}</p>
@@ -122,9 +122,9 @@ const TrendingDisciplines: React.FC = () => {
 
         {/* Bottom Explorer CTA */}
         <div className="mt-12 text-center">
-          <Link href="/tutors" className="text-sm font-black uppercase tracking-[0.2em] text-gray-400 hover:text-orange-500 transition-colors flex items-center justify-center gap-2 group">
+          <Link href="/tutors" className="text-sm font-black uppercase tracking-[0.2em] text-gray-400 hover:text-indigo-500 transition-colors flex items-center justify-center gap-2 group">
             Explore All 50+ Disciplines
-            <div className="w-6 h-px bg-gray-300 dark:bg-gray-700 group-hover:w-12 group-hover:bg-orange-500 transition-all" />
+            <div className="w-6 h-px bg-gray-300 dark:bg-gray-700 group-hover:w-12 group-hover:bg-indigo-500 transition-all" />
           </Link>
         </div>
       </div>

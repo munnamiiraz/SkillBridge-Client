@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Target, ArrowRight, Check, Loader2, Star, Users } from 'lucide-react';
+import { Target, ArrowRight, Check, Loader2, Star, Users, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 const FindMatchQuiz: React.FC = () => {
@@ -61,6 +61,10 @@ const FindMatchQuiz: React.FC = () => {
                 <Target className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
                 <h2 className="text-3xl font-black text-gray-900 dark:text-white">Find Your Perfect Match</h2>
                 <p className="text-gray-500 dark:text-gray-400">Answer 2 quick questions to find the top mentors for your goals.</p>
+                <Link href="/match-assistant" className="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors group">
+                  <Sparkles size={14} className="group-hover:rotate-12 transition-transform" />
+                  Try our specialized AI Smart Matcher
+                </Link>
               </div>
 
               {/* Step Progress */}
@@ -160,9 +164,17 @@ const FindMatchQuiz: React.FC = () => {
                 ))}
               </div>
 
-              <button onClick={handleReset} className="w-full text-sm font-semibold text-gray-500 hover:text-indigo-600 transition-colors">
-                ← Start Over
-              </button>
+              <div className="flex flex-col gap-4 mt-8">
+                <button onClick={handleReset} className="w-full text-sm font-semibold text-gray-500 hover:text-indigo-600 transition-colors">
+                  ← Start Over
+                </button>
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
+                   <Link href="/match-assistant" className="text-sm font-bold text-indigo-600 group inline-flex items-center gap-2">
+                     Want a deeper AI analysis? Try the Match Assistant
+                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                   </Link>
+                </div>
+              </div>
             </div>
           )}
 

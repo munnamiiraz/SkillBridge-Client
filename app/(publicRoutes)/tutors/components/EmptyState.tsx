@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { SearchX, RotateCcw, Sparkles } from 'lucide-react';
 
 interface EmptyStateProps {
   onClearFilters: () => void;
@@ -8,40 +9,39 @@ interface EmptyStateProps {
 
 const EmptyState: React.FC<EmptyStateProps> = ({ onClearFilters }) => {
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-6">
-      <div className="relative w-48 h-48 mb-8">
-        <div className="absolute inset-0 bg-linear-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-2xl" />
-        <svg
-          className="relative w-full h-full text-gray-400 dark:text-gray-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+    <div className="flex flex-col items-center justify-center py-24 px-6 animate-in fade-in zoom-in duration-700">
+      <div className="relative w-56 h-56 mb-10 flex items-center justify-center">
+        {/* Animated Glow Rings */}
+        <div className="absolute inset-0 bg-linear-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute inset-10 bg-indigo-500/10 rounded-full blur-2xl animate-pulse delay-700" />
+        
+        <div className="relative p-10 bg-white/50 dark:bg-gray-900/50 backdrop-blur-3xl rounded-[3rem] border border-gray-200/50 dark:border-gray-800/50 shadow-2xl">
+          <SearchX size={80} className="text-gray-300 dark:text-gray-700" />
+          <div className="absolute -top-2 -right-2 p-2 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-500/20">
+            <Sparkles size={16} className="text-white" />
+          </div>
+        </div>
       </div>
       
-      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-        No tutors found
-      </h3>
-      <p className="text-gray-600 dark:text-gray-400 text-center mb-8 max-w-md">
-        We couldn't find any tutors matching your current filters. Try adjusting your search criteria.
-      </p>
+      <div className="text-center space-y-3 mb-10">
+        <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">
+          No matches found
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 max-w-sm leading-relaxed font-medium">
+          We couldn&apos;t find any tutors matching your specific criteria. Try widening your search for more results.
+        </p>
+      </div>
       
       <button
         type="button"
         onClick={onClearFilters}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-0.5"
+        className="group relative h-14 px-8 flex items-center gap-3 bg-linear-to-br from-indigo-600 to-purple-600 font-black text-sm text-white rounded-[1.25rem] shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 active:scale-95 transition-all duration-300 overflow-hidden"
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        <span>Clear all filters</span>
+        <span className="relative z-10 flex items-center gap-2">
+          <RotateCcw size={18} className="group-hover:-rotate-45 transition-transform duration-500" />
+          Reset All Filters
+        </span>
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
       </button>
     </div>
   );

@@ -10,6 +10,7 @@ export interface Tutor {
   pricePerSession: number;
   isOnline: boolean;
   verified: boolean;
+  role: string;
   bgGradient: string;
   totalStudents: number;
   bio: string;
@@ -74,6 +75,7 @@ export async function searchTutors(filters: TutorFilters) {
         pricePerSession: t.hourlyRate,
         isOnline: t.isAvailable,
         verified: t.user.emailVerified,
+        role: t.user.role || "TUTOR",
         bgGradient: gradients[index % gradients.length],
         totalStudents: t.totalSessions || 0,
         bio: t.bio || 'No bio available',

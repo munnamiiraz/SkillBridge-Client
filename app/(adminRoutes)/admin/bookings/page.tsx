@@ -1,121 +1,230 @@
-import { cookies } from 'next/headers';
-import { getAllBookings } from '@/app/admin/bookings.service';
-import StatsOverview from './components/StatsOverview';
-import BookingsFilters from './components/BookingsFilters';
-import BookingCard from './components/BookingCard';
-import Pagination from './components/Pagination';
+'use client';
 
-export const dynamic = 'force-dynamic';
+import React, { useEffect, useState, useCallback } from 'react';
+import { 
+  ClipboardList, 
+  Search, 
+  Calendar, 
+  Clock, 
+  User, 
+  ChevronLeft, 
+  ChevronRight, 
+  XCircle, 
+  CheckCircle2, 
+  AlertCircle,
+  Hash,
+  Filter,
+  ArrowRight
+} from 'lucide-react';
+import { adminService } from '@/app/services/admin.service';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { toast } from 'sonner';
+import Skeleton from '@/components/ui/Skeleton';
+import { authClient } from '@/lib/auth-client';
 
-interface PageProps {
-  searchParams: Promise<{
-    page?: string;
-    status?: string;
-    payment?: string;
-    search?: string;
-    sortBy?: string;
-  }>;
-}
+export default function BookingManagementPage() {
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [meta, setMeta] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const { data: session } = authClient.useSession();
 
-export default async function AdminBookingsPage({ searchParams }: PageProps) {
-  const resolvedParams = await searchParams;
-  const cookieStore = await cookies();
-  const cookieString = cookieStore.toString();
+  const fetchBookings = useCallback(async () => {
+    setLoading(true);
+    const result = await adminService.getBookings(page, 10, search, statusFilter);
+    if (result) {
+      setBookings(result.data);
+      setMeta(result.meta);
+    }
+    setLoading(false);
+  }, [page, search, statusFilter]);
 
-  const currentPage = parseInt(resolvedParams.page || '1');
-  const statusFilter = resolvedParams.status || 'all';
-  const paymentFilter = resolvedParams.payment || 'all';
-  const searchQuery = resolvedParams.search || '';
-  const sortBy = resolvedParams.sortBy || 'date';
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
 
-  const { data: result, error } = await getAllBookings({
-    page: currentPage,
-    limit: 10,
-    status: statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined,
-    payment: paymentFilter !== 'all' ? paymentFilter.toUpperCase() : undefined,
-    search: searchQuery,
-    sortBy,
-  }, cookieString);
+  const handleCancel = async (bookingId: string, subject: string) => {
+    const reason = prompt(`Reason for cancelling session "${subject}":`);
+    if (reason === null) return;
+    if (!reason) {
+        toast.error('Cancellation reason is required');
+        return;
+    }
+    
+    const res = await adminService.cancelBooking(bookingId, reason);
+    if (res) {
+      toast.success('Session has been cancelled and student notified');
+      fetchBookings();
+    }
+  };
 
-  if (error) {
+  const isSuper = session?.user.role === 'SUPER_ADMIN';
+
+  const getStatusBadge = (status: string) => {
+    const styles: any = {
+      COMPLETED: "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
+      CANCELLED: "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
+      PENDING: "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
+      CONFIRMED: "bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20",
+      ONGOING: "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20"
+    };
     return (
-      <div className="p-6 lg:p-8 text-center">
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 text-red-600">
-          {error.message}
-        </div>
-      </div>
+      <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${styles[status] || styles.PENDING}`}>
+        {status}
+      </span>
     );
-  }
-
-  const bookings = result?.bookings || [];
-  const pagination = result?.pagination || { page: 1, totalPages: 1, total: 0 };
+  };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="space-y-10 animate-in fade-in duration-700 pb-20">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 bg-linear-to-br from-indigo-500 to-purple-500 rounded-xl">
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold">
-              <span className="bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                Bookings Management
-              </span>
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              View, manage, and track all session bookings
-            </p>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+           <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Pedagogical Logistics</h2>
+           <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">Global oversight of educational sessions and fulfillment cycles</p>
+        </div>
+        <div className="flex bg-white dark:bg-gray-900 rounded-[1.5rem] p-1.5 border border-gray-100 dark:border-gray-800 shadow-sm">
+           {['', 'PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'].map((s) => (
+              <button 
+                key={s}
+                onClick={() => { setStatusFilter(s); setPage(1); }}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === s ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                {s || 'All Sessions'}
+              </button>
+           ))}
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <StatsOverview totalBookings={pagination.total} bookings={bookings} />
-
-      {/* Filters */}
-      <BookingsFilters />
+      {/* Control Area */}
+      <Card className="rounded-[2.5rem] border-none shadow-sm overflow-hidden bg-white/50 dark:bg-gray-900/50 backdrop-blur-md">
+        <CardContent className="p-6">
+           <div className="relative group">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-all" size={20} />
+              <Input 
+                value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                placeholder="Search by subject, student, or session ID..."
+                className="pl-14 h-16 rounded-3xl bg-white dark:bg-gray-950 border-gray-100 dark:border-gray-800 text-lg shadow-inner"
+              />
+           </div>
+        </CardContent>
+      </Card>
 
       {/* Bookings List */}
-      <div className="grid gap-6">
-        {bookings.length > 0 ? (
-          bookings.map((booking, index) => (
-            <BookingCard key={booking.bookingNumber || index} booking={booking} index={index} />
-          ))
-        ) : (
-          /* Empty State */
-          <div className="py-20 text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-            <svg
-              className="w-20 h-20 mx-auto text-gray-400 dark:text-gray-600 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">No bookings found</h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Try adjusting your search or filter criteria
-            </p>
-          </div>
-        )}
+      <div className="space-y-4">
+         {loading ? (
+            [1,2,3].map(i => <Skeleton key={i} className="h-32 rounded-[2rem]" />)
+         ) : bookings.length === 0 ? (
+            <div className="p-20 text-center font-black uppercase text-gray-400 tracking-widest bg-white dark:bg-gray-900 rounded-[3rem]">No sessions match your search criteria</div>
+         ) : (
+            bookings.map((booking) => (
+               <div key={booking.id} className="group relative bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all duration-300">
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-8">
+                     {/* Status & ID */}
+                     <div className="flex flex-row lg:flex-col items-center lg:items-start gap-4 lg:w-32 shrink-0">
+                        {getStatusBadge(booking.status)}
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter flex items-center gap-1">
+                           <Hash size={10} /> {booking.id.slice(0, 8)}
+                        </p>
+                     </div>
+
+                     {/* Participants Info */}
+                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
+                        <div>
+                           <h4 className="text-lg font-black text-gray-900 dark:text-white tracking-tight mb-2 truncate">{booking.subject}</h4>
+                           <div className="flex items-center gap-3">
+                              <Calendar size={14} className="text-gray-400" />
+                              <span className="text-xs font-bold text-gray-500">{new Date(booking.scheduledAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                              <Clock size={14} className="text-gray-400 ml-2" />
+                              <span className="text-xs font-bold text-gray-500">{booking.duration} Min</span>
+                           </div>
+                        </div>
+
+                        <div className="flex items-center gap-6">
+                           <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center font-black text-xs text-indigo-600">
+                                 {booking.user.name[0]}
+                              </div>
+                              <div className="min-w-0">
+                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Student</p>
+                                 <p className="text-xs font-black text-gray-900 dark:text-white truncate">{booking.user.name}</p>
+                              </div>
+                           </div>
+                           <ArrowRight className="text-gray-300 hidden md:block" size={16} />
+                           <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-500 to-purple-500 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center font-black text-xs text-white">
+                                 {booking.tutor_profile.user.name[0]}
+                              </div>
+                              <div className="min-w-0">
+                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Expert</p>
+                                 <p className="text-xs font-black text-gray-900 dark:text-white truncate">{booking.tutor_profile.user.name}</p>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div className="flex items-center justify-between lg:justify-end gap-8">
+                           <div className="text-right">
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Investment</p>
+                              <p className="text-lg font-black text-gray-900 dark:text-white tracking-tighter">${booking.price.toFixed(2)}</p>
+                           </div>
+                           
+                           {isSuper && booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
+                              <button 
+                                onClick={() => handleCancel(booking.id, booking.subject)}
+                                className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-95 group/btn"
+                                title="Force Cancel Session"
+                              >
+                                 <XCircle size={18} className="group-hover/btn:rotate-90 transition-transform" />
+                              </button>
+                           )}
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            ))
+         )}
       </div>
 
-      {/* Pagination */}
-      <Pagination 
-        currentPage={pagination.page}
-        totalPages={pagination.totalPages}
-        totalItems={pagination.total}
-        itemsPerPage={bookings.length}
-      />
+      {/* Pagination Footer */}
+      {meta && meta.totalPages > 1 && (
+         <div className="flex items-center justify-center gap-3 pt-6">
+            <button 
+              disabled={page === 1}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              className="px-5 py-2.5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-xs font-black uppercase text-gray-500 hover:text-indigo-600 disabled:opacity-50 transition-all shadow-sm active:scale-95"
+            >Previous Page</button>
+            <div className="flex items-center gap-1.5">
+               {[...Array(meta.totalPages)].map((_, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => setPage(i + 1)}
+                    className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${page === i + 1 ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                  >
+                     {i + 1}
+                  </button>
+               ))}
+            </div>
+            <button 
+              disabled={page === meta.totalPages}
+              onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+              className="px-5 py-2.5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-xs font-black uppercase text-gray-500 hover:text-indigo-600 disabled:opacity-50 transition-all shadow-sm active:scale-95"
+            >Next Page</button>
+         </div>
+      )}
+
+      {!isSuper && (
+         <div className="p-10 rounded-[2.5rem] bg-indigo-500/5 border border-indigo-500/20 text-center space-y-4">
+            <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 text-indigo-500 mx-auto flex items-center justify-center">
+               <AlertCircle size={32} />
+            </div>
+            <h4 className="text-xl font-black text-indigo-600 uppercase tracking-tighter">Limited Logistical Control</h4>
+            <p className="text-sm text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed">Standard Administrative users can monitor global session flows but are restricted from forceful logistical cancellations. This safeguard prevents accidental disruption of established learning paths. Direct session overrides are exclusive to the <span className="font-black text-indigo-700">Super Admin</span> portal.</p>
+         </div>
+      )}
     </div>
   );
 }
