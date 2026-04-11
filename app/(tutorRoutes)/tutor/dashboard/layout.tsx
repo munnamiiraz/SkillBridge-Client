@@ -17,7 +17,10 @@ import {
   ClipboardList,
   Clock,
   ShieldCheck,
-  Search
+  Search,
+  BarChart3,
+  Lock,
+  TrendingUp
 } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
@@ -70,7 +73,25 @@ export default function TutorDashboardLayout({
       href: '/tutor/dashboard/verification',
       icon: <ShieldCheck size={20} />,
     },
+    {
+      label: 'Advanced Analytics',
+      href: '/tutor/dashboard/analytics',
+      icon: <BarChart3 size={20} />,
+      roles: ['VERIFIED_TUTOR']
+    },
+    {
+      label: 'Market Intel',
+      href: '/tutor/dashboard/market-intelligence',
+      icon: <TrendingUp size={20} />,
+      roles: ['VERIFIED_TUTOR']
+    },
   ];
+
+  const visibleSidebarItems = sidebarItems.filter(item => 
+    !(item as any).roles || (item as any).roles.includes(session?.user?.role)
+  );
+
+  const isVerified = session?.user?.role === 'VERIFIED_TUTOR';
 
   const isActive = (href: string) => {
     if (href === '/tutor/dashboard') return pathname === href;
@@ -78,8 +99,7 @@ export default function TutorDashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 font-sans selection:bg-indigo-500/30">
-      <Navbar />
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 font-poppins selection:bg-indigo-500/30" style={{ zoom: 0.75 }}>
       
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
@@ -91,7 +111,7 @@ export default function TutorDashboardLayout({
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-[80px] left-0 z-50 w-72 bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-r border-gray-200/50 dark:border-gray-800/50 transform transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border-r border-gray-200/50 dark:border-gray-800/50 transform transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0 shadow-2xl shadow-indigo-500/10' : '-translate-x-full'
         }`}
       >
@@ -102,34 +122,20 @@ export default function TutorDashboardLayout({
         </div>
 
         <div className="relative flex flex-col h-full z-10">
-          {/* Tutor Info Header */}
-          {session && (
-            <div className="p-6 border-b border-gray-200/50 dark:border-gray-800/50 bg-indigo-50/30 dark:bg-indigo-900/10">
-              <div className="flex items-center gap-4">
-                <div className="relative group">
-                  <div className="absolute -inset-1 bg-linear-to-tr from-indigo-500 to-purple-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity blur-sm" />
-                  <div className="relative w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black shadow-lg shadow-indigo-500/20 overflow-hidden shrink-0">
-                    {session.user.image ? (
-                      <img src={session.user.image} alt={session.user.name || ''} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-xl">{session.user.name?.[0]?.toUpperCase() || 'T'}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-black text-gray-900 dark:text-white truncate tracking-tight">
-                    {session.user.name || 'Tutor User'}
-                  </p>
-                  <p className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 ${
-                    session.user.role === 'VERIFIED_TUTOR' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-600'
-                  }`}>
-                    <ShieldCheck size={10} className={session.user.role === 'VERIFIED_TUTOR' ? "fill-current" : ""} />
-                    {session.user.role === 'VERIFIED_TUTOR' ? 'Verified Tutor' : 'Standard Tutor'}
-                  </p>
-                </div>
+          {/* Logo / Identity Section */}
+          <div className="p-8 border-b border-gray-200/50 dark:border-gray-800/50">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 bg-linear-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-black shadow-xl shadow-indigo-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                S
               </div>
-            </div>
-          )}
+              <div>
+                <span className="text-xl font-black bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent tracking-tighter">
+                  SkillBridge
+                </span>
+                <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest -mt-1">Tutor Hub</p>
+              </div>
+            </Link>
+          </div>
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar pt-8">
@@ -138,6 +144,26 @@ export default function TutorDashboardLayout({
             </p>
             {sidebarItems.map((item) => {
               const active = isActive(item.href);
+              const isLocked = (item as any).roles && !(item as any).roles.includes(session?.user?.role);
+              
+              if (isLocked) {
+                return (
+                  <div
+                    key={item.href}
+                    className="relative flex items-center gap-3 px-4 py-4 rounded-[1.5rem] text-sm font-bold text-gray-300 dark:text-gray-600 cursor-not-allowed border border-dashed border-gray-200 dark:border-gray-800/50 opacity-60"
+                  >
+                    <div className="grayscale">
+                      {item.icon}
+                    </div>
+                    <span className="tracking-tight">{item.label}</span>
+                    <div className="absolute right-4 px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-md text-[8px] font-black text-gray-400 uppercase tracking-tighter flex items-center gap-1 shadow-sm">
+                      <Lock size={8} />
+                      Verified
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
@@ -161,6 +187,19 @@ export default function TutorDashboardLayout({
                 </Link>
               );
             })}
+
+            {!isVerified && (
+               <Link
+                 href="/tutor/dashboard/verification"
+                 className="relative group flex items-center justify-between gap-3 px-4 py-4 rounded-[1.5rem] text-sm font-bold text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900/40 border border-dashed border-gray-200 dark:border-gray-800 transition-all"
+               >
+                 <div className="flex items-center gap-3">
+                   <Lock size={20} className="text-gray-300" />
+                   <span className="tracking-tight">Authority Analytics</span>
+                 </div>
+                 <Sparkles size={14} className="text-amber-500 animate-pulse" />
+               </Link>
+            )}
           </nav>
 
           {/* Bottom Actions */}
@@ -196,29 +235,69 @@ export default function TutorDashboardLayout({
 
       {/* Main content */}
       <div className="lg:ml-72 transition-all duration-500">
-        {/* Mobile Header Bar */}
-        <div className="sticky top-0 z-30 lg:hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50 px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-black text-xl tracking-tighter bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">SB</Link>
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white transition-all active:scale-95 shadow-sm"
-          >
-            <Menu size={20} />
-          </button>
-        </div>
+        
+        {/* Modern Application Header */}
+        <header className="sticky top-0 z-30 bg-white/50 dark:bg-gray-950/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
+          <div className="px-6 md:px-10 h-20 flex items-center justify-between">
+            {/* Context Left */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white transition-all active:scale-95 shadow-sm"
+              >
+                <Menu size={20} />
+              </button>
+              
+              <div className="hidden sm:block">
+                <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
+                  <span>Workspace</span>
+                  <ChevronRight size={10} />
+                  <span className="text-indigo-500">Tutor Management</span>
+                </nav>
+                <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+                  {sidebarItems.find(item => item.href === pathname)?.label || 'Console Overview'}
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                </h1>
+              </div>
+            </div>
 
-        {/* Dashboard Content Header - Desktop Only Info */}
-        <div className="hidden lg:flex sticky top-0 z-20 bg-white/50 dark:bg-gray-950/50 backdrop-blur-md px-10 py-6 border-b border-gray-200/30 dark:border-gray-800/30 items-center justify-between">
-          <div className="flex flex-col">
-            <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
-              {sidebarItems.find(item => item.href === pathname)?.label || 'Tutor Console'}
-            </h1>
-            <p className="text-xs font-bold text-gray-400 tracking-wide">Manage your teaching business and earnings</p>
+            {/* Actions Right */}
+            <div className="flex items-center gap-3 md:gap-6">
+              {/* Refined Search */}
+              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all w-64 group">
+                <Search size={16} className="text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="Universal search..." 
+                  className="bg-transparent border-none outline-none text-xs font-bold text-gray-600 dark:text-gray-300 w-full placeholder:text-gray-400"
+                />
+              </div>
+
+              {/* User Identity */}
+              {session && (
+                <div className="flex items-center gap-4 pl-4 md:pl-6 border-l border-gray-200/50 dark:border-gray-800/50">
+                  <div className="hidden md:block text-right">
+                    <p className="text-xs font-black text-gray-900 dark:text-white tracking-tight">{session.user.name}</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-tighter ${session.user.role === 'VERIFIED_TUTOR' ? 'text-indigo-500' : 'text-gray-400'}`}>
+                      {session.user.role === 'VERIFIED_TUTOR' ? 'Elite Partner' : 'Rising Star'}
+                    </p>
+                  </div>
+                  <div className={`relative group p-0.5 rounded-2xl ${session.user.role === 'VERIFIED_TUTOR' ? 'bg-linear-to-tr from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/20' : 'bg-gray-200 dark:bg-gray-800'}`}>
+                    <div className="w-10 h-10 rounded-[14px] overflow-hidden bg-white dark:bg-gray-900 p-0.5">
+                      {session.user.image ? (
+                        <img src={session.user.image} alt={session.user.name || ''} className="w-full h-full object-cover rounded-[12px]" />
+                      ) : (
+                        <div className="w-full h-full bg-linear-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 flex items-center justify-center font-black text-indigo-600 dark:text-indigo-400">
+                          {session.user.name?.[0]?.toUpperCase() || 'T'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-             {/* Dynamic slots if needed */}
-          </div>
-        </div>
+        </header>
 
         {/* Page content */}
         <main className="p-6 md:p-10 animate-fade-in min-h-[calc(100vh-180px)]">

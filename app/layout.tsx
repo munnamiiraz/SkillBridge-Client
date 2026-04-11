@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Geist_Mono, Inter, Outfit, Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import ChatBot from "@/components/chat/ChatBot";
@@ -7,6 +6,22 @@ import ChatBot from "@/components/chat/ChatBot";
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 const geistMono = Geist_Mono({
@@ -27,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${jakarta.variable} ${geistMono.variable} antialiased`}
+        className={`${jakarta.variable} ${inter.variable} ${outfit.variable} ${poppins.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
           {children}

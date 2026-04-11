@@ -32,16 +32,21 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isAuthenticated && role) {
+    // SUPER_ADMIN (Unrestricted Access)
+    if (role === UserRole.SUPER_ADMIN) {
+      return NextResponse.next();
+    }
+
     // ADMIN
-    if (role === UserRole.ADMIN) {
+    if (role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN) {
       if (isStudentRoute || isTutorRoute) {
-        return NextResponse.redirect(new URL("/admin", request.url));
+        return NextResponse.redirect(new URL("/admin/dashboard", request.url));
       }
       return NextResponse.next();
     }
 
-    // TUTOR
-    if (role === UserRole.TUTOR) {
+    // TUTOR & VERIFIED_TUTOR
+    if (role === UserRole.TUTOR || role === UserRole.VERIFIED_TUTOR) {
       if (isAdminRoute || isStudentRoute) {
          // Note: Tutors have their own dashboard at /tutor/dashboard or /tutor
          return NextResponse.redirect(new URL("/tutor/dashboard", request.url));

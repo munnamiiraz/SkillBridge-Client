@@ -19,14 +19,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ student }) => {
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden mb-8">
-      {/* Cover Background */}
-      <div className="h-32 bg-linear-to-br from-indigo-500 to-purple-500 relative">
-        <div className="absolute inset-0 bg-black/10"></div>
-      </div>
-
       {/* Profile Content */}
-      <div className="px-6 sm:px-8 lg:px-10 pb-8">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-20 sm:-mt-16 gap-6">
+      <div className="px-6 sm:px-8 lg:px-10 py-8">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
           
           {/* Avatar and Basic Info */}
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
@@ -51,8 +46,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ student }) => {
 
             {/* Name and Info */}
             <div className="text-center sm:text-left space-y-2">
-              <div className='mt-[100px] sm:mt-0'>
-                <h1 className="text-3xl lg:text-4xl mt-[85px] font-bold text-gray-900 dark:text-white">
+              <div>
+                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
                   {student.name || 'Student'}
                 </h1>
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-2">

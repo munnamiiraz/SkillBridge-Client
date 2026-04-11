@@ -94,6 +94,30 @@ export async function getStudentBookings(limit = 10, providedCookies?: string) {
   }
 }
 
+export async function getStudentStats(providedCookies?: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = providedCookies || cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/student/stats`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      cache: 'no-store',
+    });
+
+    const result = await res.json();
+    if (!result.success) {
+      return { data: null, error: { message: result.message || 'Failed to fetch statistics' } };
+    }
+
+    return { data: result.data as DashboardStats, error: null };
+  } catch (err) {
+    return { data: null, error: { message: 'Something Went Wrong' } };
+  }
+}
+
 export async function calculateDashboardStats(bookings: Booking[]): Promise<DashboardStats> {
   const reviews = bookings
     .filter(b => b.review)

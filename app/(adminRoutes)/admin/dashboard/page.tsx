@@ -65,12 +65,12 @@ export default function AdminDashboardPage() {
   if (!stats) return <div className="p-10 text-center font-bold text-red-500">Failed to load platform analytics.</div>;
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-6 pb-20">
       {/* Header Info */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Platform Intelligence</h2>
-          <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">Real-time oversight of SkillBridge ecosystem performance</p>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight font-outfit">Platform Intelligence</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">Real-time oversight of SkillBridge ecosystem performance</p>
         </div>
         <div className="flex items-center gap-3">
            <button className="px-5 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md transition-all active:scale-95">
@@ -83,11 +83,11 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard 
           title="Total Community" 
           value={stats.overview.totalUsers.toLocaleString()} 
-          icon={<Users size={20} />} 
+          icon={<Users size={18} />} 
           trend="+12% from last month"
           trendUp={true}
           color="indigo"
@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
         <KpiCard 
           title="Gross Revenue" 
           value={`$${stats.overview.totalRevenue.toLocaleString()}`} 
-          icon={<DollarSign size={20} />} 
+          icon={<DollarSign size={18} />} 
           trend="+8.4% growth"
           trendUp={true}
           color="emerald"
@@ -103,7 +103,7 @@ export default function AdminDashboardPage() {
         <KpiCard 
           title="Fulfilled Bookings" 
           value={stats.overview.totalBookings.toLocaleString()} 
-          icon={<Target size={20} />} 
+          icon={<Target size={18} />} 
           trend="-2.1% decrease"
           trendUp={false}
           color="purple"
@@ -111,7 +111,7 @@ export default function AdminDashboardPage() {
         <KpiCard 
           title="Platform Success" 
           value={`${stats.overview.successRate}%`} 
-          icon={<Activity size={20} />} 
+          icon={<Activity size={18} />} 
           trend="Requirement Met"
           trendUp={true}
           color="amber"
@@ -331,23 +331,23 @@ function KpiCard({ title, value, icon, trend, trendUp, color }: any) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-gray-900 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+    <div className="group relative bg-white dark:bg-gray-900 p-6 rounded-[1.5rem] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
       {/* Background Glow */}
       <div className={`absolute -right-10 -top-10 w-24 h-24 rounded-full blur-3xl opacity-20 ${color === 'indigo' ? 'bg-indigo-500' : color === 'emerald' ? 'bg-emerald-500' : color === 'purple' ? 'bg-purple-500' : 'bg-amber-500'}`}></div>
 
-      <div className="relative flex justify-between items-start mb-6">
-        <div className={`p-4 rounded-2xl ${colorMap[color]} transition-transform group-hover:scale-110 duration-500 shadow-sm`}>
+      <div className="relative flex justify-between items-start mb-4">
+        <div className={`p-3 rounded-xl ${colorMap[color]} transition-transform group-hover:scale-110 duration-500 shadow-sm`}>
           {icon}
         </div>
-        <div className={`flex items-center gap-1 text-[10px] font-black uppercase px-2 py-1 rounded-lg ${trendUp ? 'text-emerald-500 bg-emerald-50' : 'text-rose-500 bg-rose-50'}`}>
+        <div className={`flex items-center gap-1 text-[9px] font-black uppercase px-2 py-1 rounded-lg ${trendUp ? 'text-emerald-500 bg-emerald-50' : 'text-rose-500 bg-rose-50'}`}>
           {trendUp ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
           {trend}
         </div>
       </div>
       
       <div className="relative">
-        <h3 className="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-widest mb-1">{title}</h3>
-        <p className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{value}</p>
+        <h3 className="text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest mb-0.5">{title}</h3>
+        <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">{value}</p>
       </div>
     </div>
   );

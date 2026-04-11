@@ -11,7 +11,8 @@ import {
   ArrowUpRight,
   ShieldAlert,
   Globe,
-  Zap
+  Zap,
+  Award
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -41,9 +42,12 @@ export default function PlatformAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const { data: session } = authClient.useSession();
   const router = useRouter();
+  const hasFetched = React.useRef(false);
 
   useEffect(() => {
-    if (session && session.user.role !== 'SUPER_ADMIN') {
+    if (!session) return;
+
+    if (session.user.role !== 'SUPER_ADMIN') {
         router.push('/admin/dashboard');
         return;
     }
@@ -53,7 +57,11 @@ export default function PlatformAnalyticsPage() {
       if (data) setStats(data);
       setLoading(false);
     };
-    fetchStats();
+
+    if (!hasFetched.current) {
+        fetchStats();
+        hasFetched.current = true;
+    }
   }, [session, router]);
 
   if (loading) {
@@ -233,6 +241,67 @@ export default function PlatformAnalyticsPage() {
             </CardContent>
          </Card>
       </div>
+
+      {/* Revenue by Category (Super Admin Exclusive) */}
+      <Card className="rounded-[3rem] p-10 shadow-2xl border-none bg-white dark:bg-gray-950 overflow-hidden relative">
+         <div className="absolute top-0 right-0 p-8">
+            <Layers className="text-indigo-500/20" size={120} />
+         </div>
+         <CardHeader className="px-0 pt-0">
+            <div className="flex items-center gap-4 mb-4">
+               <div className="p-4 bg-purple-500/10 text-purple-500 rounded-[1.5rem]">
+                  <Database size={24} />
+               </div>
+               <div>
+                  <CardTitle className="text-2xl font-black uppercase tracking-tighter">Subject Yield Market</CardTitle>
+                  <CardDescription className="text-gray-400">Revenue distribution across pedagogical categories</CardDescription>
+               </div>
+            </div>
+         </CardHeader>
+         <CardContent className="px-0 pb-0">
+            <div className="h-[400px] w-full mt-8">
+               <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.charts.categoryRevenue} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                     <XAxis 
+                       dataKey="name" 
+                       axisLine={false} 
+                       tickLine={false} 
+                       tick={{ fill: '#6b7280', fontSize: 10, fontWeight: 800 }} 
+                       dy={10}
+                     />
+                     <YAxis 
+                       axisLine={false} 
+                       tickLine={false} 
+                       tick={{ fill: '#6b7280', fontSize: 10, fontWeight: 800 }}
+                       tickFormatter={(v: any) => `$${v}`}
+                     />
+                     <Tooltip 
+                       cursor={{ fill: 'rgba(79, 70, 229, 0.05)' }}
+                       contentStyle={{ 
+                         borderRadius: '20px', 
+                         border: 'none', 
+                         boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+                         padding: '12px 20px'
+                       }}
+                     />
+                     <Bar 
+                       dataKey="value" 
+                       fill="url(#barGradient)" 
+                       radius={[10, 10, 0, 0]} 
+                       barSize={60} 
+                     />
+                     <defs>
+                       <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                         <stop offset="0%" stopColor="#4f46e5" />
+                         <stop offset="100%" stopColor="#a855f7" />
+                       </linearGradient>
+                     </defs>
+                  </BarChart>
+               </ResponsiveContainer>
+            </div>
+         </CardContent>
+      </Card>
     </div>
   );
 }

@@ -14,7 +14,8 @@ import {
   ShieldCheck,
   Zap,
   BarChart3,
-  ShieldAlert
+  ShieldAlert,
+  Brain
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -53,9 +54,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
       icon: <ClipboardList size={20} />,
     },
     {
-      label: 'Platform Audit',
+      label: 'Operational Analytics',
       href: '/admin/analytics',
       icon: <BarChart3 size={20} />,
+      roles: ['SUPER_ADMIN']
+    },
+    {
+      label: 'AI Knowledge Base',
+      href: '/admin/knowledge-base',
+      icon: <Brain size={20} />,
       roles: ['SUPER_ADMIN']
     },
     {
@@ -82,16 +89,22 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-8 pb-4">
-        <div className="flex items-center gap-3 px-4 py-3 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-2xl border border-indigo-500/10 mb-8">
-           <Zap className="text-indigo-600 dark:text-indigo-400 fill-current" size={20} />
-           <span className="font-black text-lg tracking-tighter bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent uppercase">
-             Admin Panel
-           </span>
-        </div>
+      <div className="p-8 border-b border-gray-200/50 dark:border-gray-800/50">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 bg-linear-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-black shadow-xl shadow-indigo-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+            S
+          </div>
+          <div>
+            <span className="text-xl font-black bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent tracking-tighter uppercase font-outfit">
+              SkillBridge
+            </span>
+            <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest -mt-1">Command</p>
+          </div>
+        </Link>
+      </div>
 
-        <nav className="space-y-1.5">
-          <p className="px-4 py-2 text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em] mb-2">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+          <p className="px-4 py-2 text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em] mb-1">
             Supervision 
           </p>
           {visibleItems.map((item) => {
@@ -102,7 +115,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative group flex items-center gap-3 px-4 py-4 rounded-[1.5rem] text-sm font-bold transition-all duration-300 ${
+                className={`relative group flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-300 ${
                   active
                     ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/30 translate-x-1'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-900 border border-transparent hover:border-gray-100 dark:hover:border-gray-800 hover:shadow-md hover:text-gray-900 dark:hover:text-white'
@@ -113,11 +126,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
                 </div>
                 <span className="tracking-tight flex items-center gap-2">
                   {item.label}
-                  {isSuperOnly && (
-                    <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-[8px] text-amber-500 border border-amber-500/20 uppercase">
-                      Pro
-                    </span>
-                  )}
                 </span>
                 {active ? (
                   <ChevronRight className="absolute right-4 w-4 h-4 text-white/50" />
@@ -127,10 +135,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
               </Link>
             );
           })}
-        </nav>
-      </div>
+        </div>
 
-      <div className="mt-auto p-6">
+        <div className="mt-auto p-6">
         <div className={`p-5 rounded-3xl border ${
           userRole === 'SUPER_ADMIN' 
             ? 'bg-linear-to-br from-indigo-600 to-purple-600 border-transparent text-white shadow-xl' 

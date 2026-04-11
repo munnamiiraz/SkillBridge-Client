@@ -10,10 +10,19 @@ const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
+  const demoProfiles = [
+    { name: 'Student', email: 'student@gmail.com', password: 'password123' },
+    { name: 'Tutor', email: 'tutor@gmail.com', password: 'password123' },
+    { name: 'Verified Tutor', email: 'verified@gmail.com', password: 'password123' },
+    { name: 'Admin', email: 'admin@gmail.com', password: 'password123' },
+    { name: 'SuperAdmin', email: 'superadmin@gmail.com', password: 'password123' },
+  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -22,6 +31,11 @@ const LoginPage: React.FC = () => {
     });
   };
 
+  const fillDemo = (email: string, pass: string) => {
+    setFormData({ email, password: pass });
+    setShowDemo(false);
+    toast.info(`Autofilled as ${email.split('@')[0]}`);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +49,15 @@ const LoginPage: React.FC = () => {
       }, {
         onSuccess: (ctx) => {
           toast.success('Login successful! Welcome back.');
-          if (!ctx.data.user.phone || ctx.data.user.phone === 'N/A') {
-            router.push('/');
+          
+          const role = ctx.data.user.role;
+          
+          if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
+            router.push('/admin/dashboard');
+          } else if (role === 'TUTOR' || role === 'VERIFIED_TUTOR') {
+            router.push('/tutor/dashboard');
+          } else if (role === 'STUDENT') {
+            router.push('/dashboard');
           } else {
             router.push('/');
           }
@@ -55,7 +76,30 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative">
+      {/* Demo Button at Top Right */}
+      <div className="absolute top-8 right-8 z-50">
+        <button 
+          onClick={() => setShowDemo(!showDemo)}
+          className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg shadow-lg hover:bg-indigo-700 transition-all"
+        >
+          Demo Login
+        </button>
+        {showDemo && (
+          <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 p-2 space-y-1">
+            {demoProfiles.map((p) => (
+              <button
+                key={p.name}
+                onClick={() => fillDemo(p.email, p.password)}
+                className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                {p.name} Account
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-3xl animate-pulse-slow"></div>
@@ -132,12 +176,12 @@ const LoginPage: React.FC = () => {
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268-2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                     </svg>
                   ) : (
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   )}
                 </button>

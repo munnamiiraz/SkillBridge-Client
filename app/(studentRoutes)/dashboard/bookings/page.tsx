@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { getStudentBookingsList } from '@/app/services/booking.service';
+import { getStudentStats } from '@/app/services/student-dashboard.service';
 import { StatsOverview } from './components/StatsOverview';
 import { BookingTabs } from './components/BookingTabs';
 import { BookingFilters } from './components/BookingFilters';
@@ -23,9 +24,17 @@ const StudentBookingsPage = async ({ searchParams }: PageProps) => {
   const activeTab = (resolvedParams.tab || 'upcoming') as 'upcoming' | 'ongoing' | 'past' | 'needs-review';
   const searchQuery = resolvedParams.search || '';
 
-  const { data: bookings, error } = await getStudentBookingsList(100, cookieString);
+  const [bookingsRes, statsRes] = await Promise.all([
+    getStudentBookingsList(100, cookieString),
+    getStudentStats(cookieString)
+  ]);
 
-  if (error || !bookings) {
+  const { data: bookings, error: bookingsError } = bookingsRes;
+  const { data: statsData, error: statsError } = statsRes;
+
+  const error = bookingsError || statsError;
+
+  if (error || !bookings || !statsData) {
     return (
       <section className="relative w-full min-h-screen py-24 lg:py-32 bg-white dark:bg-gray-900 overflow-hidden flex items-center justify-center">
         <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl max-w-md mx-auto relative z-10">
@@ -46,15 +55,14 @@ const StudentBookingsPage = async ({ searchParams }: PageProps) => {
   const pastBookings = bookings.filter((b) => b.status === 'completed' || b.status === 'cancelled');
   const needsReviewBookings = bookings.filter((b) => b.status === 'completed' && !b.hasReview);
 
+  // Map backend stats to the frontend expected format
   const stats = {
-    totalBookings: bookings.length,
-    upcomingCount: upcomingBookings.length,
-    ongoingCount: ongoingBookings.length,
-    completedCount: bookings.filter((b) => b.status === 'completed').length,
-    needsReviewCount: needsReviewBookings.length,
-    totalSpent: bookings
-      .filter((b) => b.payment.status === 'paid')
-      .reduce((sum, b) => sum + b.payment.amount, 0),
+    totalBookings: statsData.totalBookings,
+    upcomingCount: statsData.upcomingSessions,
+    ongoingCount: bookings.filter((b) => b.status === 'ongoing').length, // Ongoing is time-based in frontend service
+    completedCount: statsData.completedSessions,
+    needsReviewCount: needsReviewBookings.length, // Complex logic, keep local if fine
+    totalSpent: statsData.totalSpent,
     hoursLearned: bookings
       .filter((b) => b.status === 'completed')
       .reduce((sum, b) => sum + b.session.duration, 0) / 60,

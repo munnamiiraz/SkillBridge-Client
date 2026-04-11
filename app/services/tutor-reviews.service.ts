@@ -16,6 +16,9 @@ export interface Review {
 export interface RatingStats {
   average: number;
   total: number;
+  responseRate: number;
+  avgResponseTime: string;
+  retentionRate: number;
   distribution: {
     5: number;
     4: number;
@@ -59,6 +62,9 @@ export async function getTutorRatingStats(providedCookies?: string) {
       const stats: RatingStats = {
         average: Number(data.averageRating) || 0,
         total: Number(data.totalReviews) || 0,
+        responseRate: data.responseRate || 100,
+        avgResponseTime: data.avgResponseTime || "15m",
+        retentionRate: data.retentionRate || 0,
         distribution: distMap
       };
       return { data: stats, error: null };

@@ -20,8 +20,11 @@ import {
   Zap,
   TrendingUp,
   Award,
-  ChevronRight
+  ChevronRight,
+  BarChart3,
+  Rocket
 } from 'lucide-react';
+import { authClient } from '@/lib/auth-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +36,17 @@ const TutorDashboardPage = async () => {
     getTutorSessions(cookieString),
     getEarningsStats()
   ]);
+
+  // We need to check role to show the teaser
+  const { data: sessionData } = await authClient.getSession({
+    fetchOptions: {
+      headers: {
+        cookie: cookieString
+      }
+    }
+  });
+
+  const isVerified = sessionData?.user?.role === 'VERIFIED_TUTOR';
 
   const sessions = sessionsRes.data;
   const earningsData = earningsRes.data || [];
@@ -194,6 +208,23 @@ const TutorDashboardPage = async () => {
 
         {/* Quick Actions & Tips */}
         <div className="space-y-6">
+          {!isVerified && (
+             <div className="bg-linear-to-br from-gray-900 to-gray-800 p-8 rounded-[2.5rem] text-white border border-white/5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-700">
+                  <BarChart3 size={100} />
+                </div>
+                <div className="relative z-10">
+                  <span className="px-2 py-1 bg-indigo-500/20 text-indigo-300 text-[8px] font-black uppercase tracking-widest rounded-md border border-indigo-500/20 mb-4 inline-block">Pro Insight</span>
+                  <h4 className="text-xl font-black mb-2 tracking-tight font-outfit">Authority Analytics Locked</h4>
+                  <p className="text-gray-400 text-xs leading-relaxed font-medium mb-6">Gain structural insights into student retention and subject profitability. Verify your profile to unlock.</p>
+                  <Link href="/tutor/dashboard/verification" className="flex items-center justify-center gap-2 py-3 bg-white text-gray-900 rounded-2xl text-xs font-black hover:scale-[1.02] active:scale-95 transition-all shadow-xl">
+                    <Rocket size={14} />
+                    Upgrade Dashboard
+                  </Link>
+                </div>
+             </div>
+          )}
+
           <div className="relative bg-linear-to-br from-indigo-600 via-indigo-700 to-purple-700 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-indigo-500/30 overflow-hidden group">
             {/* Abstract Background Design */}
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mb-32 pointer-events-none" />

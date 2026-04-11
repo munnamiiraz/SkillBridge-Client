@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { getStudentBookings, calculateDashboardStats } from '@/app/services/student-dashboard.service';
+import { getStudentBookings, getStudentStats } from '@/app/services/student-dashboard.service';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,9 +8,17 @@ const StudentDashboard = async () => {
   const cookieStore = await cookies();
   const cookieString = cookieStore.toString();
 
-  const { data: bookings, error } = await getStudentBookings(10, cookieString);
+  const [bookingsRes, statsRes] = await Promise.all([
+    getStudentBookings(10, cookieString),
+    getStudentStats(cookieString)
+  ]);
 
-  if (error || !bookings) {
+  const { data: bookings, error: bookingsError } = bookingsRes;
+  const { data: stats, error: statsError } = statsRes;
+
+  const error = bookingsError || statsError;
+
+  if (error || !bookings || !stats) {
     return (
       <div className="p-6 lg:p-8 text-center min-h-[50vh] flex flex-col items-center justify-center">
         <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800 text-red-600 mb-4">
@@ -21,7 +29,6 @@ const StudentDashboard = async () => {
     );
   }
 
-  const stats = calculateDashboardStats(bookings);
   const recentBookings = bookings.slice(0, 5);
 
   const formatDate = (dateString: string) => {
@@ -73,7 +80,7 @@ const StudentDashboard = async () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {(await stats).totalBookings}
+                {stats.totalBookings}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Total Bookings
@@ -91,7 +98,7 @@ const StudentDashboard = async () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {(await stats).upcomingSessions}
+                {stats.upcomingSessions}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Upcoming Sessions
@@ -109,7 +116,7 @@ const StudentDashboard = async () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {(await stats).completedSessions}
+                {stats.completedSessions}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Completed Sessions
@@ -127,7 +134,7 @@ const StudentDashboard = async () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${(await stats).totalSpent.toFixed(0)}
+                ${stats.totalSpent.toFixed(0)}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Total Spent
@@ -145,7 +152,7 @@ const StudentDashboard = async () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {(await stats).averageRating}
+                {stats.averageRating}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Avg. Rating Given

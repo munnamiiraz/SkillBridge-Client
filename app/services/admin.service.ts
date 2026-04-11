@@ -14,6 +14,7 @@ export interface DashboardStats {
     revenueGrowth: Array<{ month: string; amount: number }>;
     roleDistribution: Array<{ name: string; value: number }>;
     bookingDistribution: Array<{ name: string; value: number }>;
+    categoryRevenue: Array<{ name: string; value: number }>;
   };
   byRole: Record<string, number>;
   byStatus: Record<string, number>;
@@ -24,11 +25,13 @@ export const adminService = {
     try {
       // Note: In client components we use axios or fetch with credentials
       // Since this is likely a client component calling this, we use the standard fetch
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/stats`, {
+      // Use relative path to leverage Next.js rewrites and automatic cookie forwarding
+      const response = await fetch('/api/admin/stats', {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('better-auth.session_token')}` // Or handled by cookies
-        }
+        },
+        // Ensure cookies are sent with the request
+        credentials: 'include'
       });
       const result = await response.json();
       if (result.success) return result.data as DashboardStats;
@@ -41,11 +44,11 @@ export const adminService = {
 
   getProfile: async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/profile`, {
+      const response = await fetch('/api/admin/profile', {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('better-auth.session_token')}`
-        }
+        },
+        credentials: 'include'
       });
       const result = await response.json();
       if (result.success) return result.data;
@@ -65,11 +68,11 @@ export const adminService = {
         role,
         status
       });
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users?${query}`, {
+      const response = await fetch(`/api/admin/users?${query}`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('better-auth.session_token')}`
-        }
+        },
+        credentials: 'include'
       });
       const result = await response.json();
       if (result.success) return result;
@@ -82,12 +85,12 @@ export const adminService = {
 
   updateUserStatus: async (userId: string, data: { status: string, banReason?: string }) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${userId}/status`, {
+      const response = await fetch(`/api/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('better-auth.session_token')}`
         },
+        credentials: 'include',
         body: JSON.stringify(data)
       });
       const result = await response.json();
@@ -102,12 +105,12 @@ export const adminService = {
 
   verifyTutor: async (tutorProfileId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/verify-tutor/${tutorProfileId}`, {
+      const response = await fetch(`/api/admin/verify-tutor/${tutorProfileId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('better-auth.session_token')}`
-        }
+        },
+        credentials: 'include'
       });
       const result = await response.json();
       if (result.success) return result.data;
@@ -127,11 +130,11 @@ export const adminService = {
         search,
         status
       });
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/bookings?${query}`, {
+      const response = await fetch(`/api/admin/bookings?${query}`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('better-auth.session_token')}`
-        }
+        },
+        credentials: 'include'
       });
       const result = await response.json();
       if (result.success) return result;
@@ -144,12 +147,12 @@ export const adminService = {
 
   cancelBooking: async (bookingId: string, reason: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/bookings/${bookingId}/cancel`, {
+      const response = await fetch(`/api/admin/bookings/${bookingId}/cancel`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('better-auth.session_token')}`
         },
+        credentials: 'include',
         body: JSON.stringify({ reason })
       });
       const result = await response.json();

@@ -61,11 +61,11 @@ export const RatingOverview: React.FC<RatingOverviewProps> = ({ stats }) => {
         </div>
       </div>
 
-      {/* Quick Stats Grid - Using static data for now as per original design or placeholders */}
+      {/* Quick Stats Grid - Using real data from backend stats */}
       <div className="grid grid-cols-2 gap-4">
         <StatsTile 
           label="Response Rate" 
-          value="98%" 
+          value={`${stats.responseRate}%`} 
           gradientFrom="from-indigo-50 dark:from-indigo-900/20" 
           gradientTo="to-purple-50 dark:to-purple-900/20"
           iconBg="bg-linear-to-br from-indigo-500 to-purple-500"
@@ -73,7 +73,7 @@ export const RatingOverview: React.FC<RatingOverviewProps> = ({ stats }) => {
         />
         <StatsTile 
           label="Avg Response" 
-          value="2.3h" 
+          value={stats.avgResponseTime} 
           gradientFrom="from-purple-50 dark:from-purple-900/20" 
           gradientTo="to-pink-50 dark:to-pink-900/20"
           iconBg="bg-linear-to-br from-purple-500 to-pink-500"
@@ -81,15 +81,15 @@ export const RatingOverview: React.FC<RatingOverviewProps> = ({ stats }) => {
         />
         <StatsTile 
           label="Return Rate" 
-          value="87%" 
+          value={`${stats.retentionRate}%`} 
           gradientFrom="from-indigo-50 dark:from-indigo-900/20" 
           gradientTo="to-blue-50 dark:to-blue-900/20"
           iconBg="bg-linear-to-br from-indigo-500 to-blue-500"
           iconPath="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
         />
         <StatsTile 
-          label="This Month" 
-          value="+23" 
+          label="Total Reviews" 
+          value={stats.total.toString()} 
           gradientFrom="from-purple-50 dark:from-purple-900/20" 
           gradientTo="to-indigo-50 dark:to-indigo-900/20"
           iconBg="bg-linear-to-br from-purple-500 to-indigo-500"

@@ -6,7 +6,7 @@ import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
-import { ShieldCheck, Award } from 'lucide-react';
+import { ShieldCheck, Award, LayoutDashboard, Grid } from 'lucide-react';
 
 interface NavLink {
   label: string;
@@ -218,10 +218,11 @@ const Navbar: React.FC = () => {
                         Quick Links
                       </p>
                     </div>
+
                     <Link
                       href={
-                        (session.user as any).role === 'ADMIN' 
-                          ? '/admin' 
+                        ['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role) 
+                          ? '/admin/dashboard' 
                           : ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
                             ? '/tutor/dashboard' 
                             : '/dashboard'
@@ -229,19 +230,11 @@ const Navbar: React.FC = () => {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
+                      <LayoutDashboard className="w-4 h-4 text-indigo-500" />
                       Dashboard
                     </Link>
-                    {(session.user as any).role === 'ADMIN' && (
-                       <Link
-                        href="/admin/verifications"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <ShieldCheck className="w-4 h-4" />
-                        Tutor Verifications
-                      </Link>
-                    )}
-                    {(session.user as any).role !== 'ADMIN' && (
+
+                    {!['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role) && (
                       <>
                         <Link
                           href={
@@ -491,98 +484,94 @@ const Navbar: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <Link
                       href={
-                        (session.user as any).role === 'ADMIN' 
-                          ? '/admin' 
+                        ['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role) 
+                          ? '/admin/dashboard' 
                           : ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
                             ? '/tutor/dashboard' 
                             : '/dashboard'
                       }
-                      className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      className={`flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role) ? 'col-span-2' : ''}`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
+                      <LayoutDashboard className="w-4 h-4 text-indigo-500" />
                       Dashboard
                     </Link>
-                    {(session.user as any).role === 'ADMIN' && (
-                        <Link
-                         href="/admin/verifications"
-                         className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                         onClick={() => setIsMobileMenuOpen(false)}
-                       >
-                         <ShieldCheck className="w-4 h-4" />
-                         Verifications
-                       </Link>
-                    )}
-                    {(session.user as any).role !== 'ADMIN' && (
+
+                    {!['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role) && (
                       <>
-                        <Link
-                          href={
-                            ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
-                              ? '/tutor/dashboard/profile' 
-                              : '/dashboard/profile'
-                          }
-                          className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          My Profile
-                        </Link>
-                        <Link
-                          href={
-                            ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
-                              ? '/tutor/dashboard/manage-profile' 
-                              : '/dashboard/manage-profile'
-                          }
-                          className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          Manage Profile
-                        </Link>
+                        {(session.user as any).role !== 'ADMIN' && (
+                          <>
+                            <Link
+                              href={
+                                ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
+                                  ? '/tutor/dashboard/profile' 
+                                  : '/dashboard/profile'
+                              }
+                              className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              My Profile
+                            </Link>
+                            <Link
+                              href={
+                                ['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role)
+                                  ? '/tutor/dashboard/manage-profile' 
+                                  : '/dashboard/manage-profile'
+                              }
+                              className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              Manage Profile
+                            </Link>
+                          </>
+                        )}
+                        
+                        {/* Tutor-specific mobile menu items */}
+                        {['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role) && (
+                          <>
+                            <Link
+                              href="/tutor/dashboard/availability"
+                              className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              Availability
+                            </Link>
+                            <Link
+                              href="/tutor/dashboard/sessions"
+                              className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              Sessions
+                            </Link>
+                            <Link
+                              href="/tutor/dashboard/reviews"
+                              className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              Reviews
+                            </Link>
+                            <Link
+                              href="/tutor/dashboard/verification"
+                              className="flex items-center justify-center gap-2 p-3 text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/10 rounded-lg transition-colors col-span-2"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <Award className="w-4 h-4" />
+                              Get Verified
+                            </Link>
+                          </>
+                        )}
+                        
+                        {/* Student-specific mobile menu items */}
+                        {(session.user as any).role === 'STUDENT' && (
+                          <Link
+                            href="/dashboard/bookings"
+                            className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            Bookings
+                          </Link>
+                        )}
                       </>
-                    )}
-                    
-                    {/* Tutor-specific mobile menu items */}
-                    {['TUTOR', 'VERIFIED_TUTOR'].includes((session.user as any).role) && (
-                      <>
-                        <Link
-                          href="/tutor/dashboard/availability"
-                          className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          Availability
-                        </Link>
-                        <Link
-                          href="/tutor/dashboard/sessions"
-                          className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          Sessions
-                        </Link>
-                        <Link
-                          href="/tutor/dashboard/reviews"
-                          className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          Reviews
-                        </Link>
-                        <Link
-                          href="/tutor/dashboard/verification"
-                          className="flex items-center justify-center gap-2 p-3 text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/10 rounded-lg transition-colors col-span-2"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <Award className="w-4 h-4" />
-                          Get Verified
-                        </Link>
-                      </>
-                    )}
-                    
-                    {/* Student-specific mobile menu items */}
-                    {(session.user as any).role === 'STUDENT' && (
-                      <Link
-                        href="/dashboard/bookings"
-                        className="flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Bookings
-                      </Link>
                     )}
                   </div>
                   <button
