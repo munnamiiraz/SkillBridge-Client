@@ -1,37 +1,37 @@
 "use client";
 
 import React from 'react';
-import { Compass, Code, Database, Languages, Globe, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Compass, Code, Database, Languages, Globe, ArrowRight, CheckCircle2, Target } from 'lucide-react';
 import Link from 'next/link';
 
 const LearningPathsSection: React.FC = () => {
   const paths = [
     {
-      title: "Software Architecture",
-      description: "Architect high-performance systems with Next.js, Distributed Databases, and Cloud Orchestration.",
-      icon: <Code className="w-8 h-8 text-indigo-600" />,
-      subjects: ["T3 Stack Excellence", "System Design Patterns", "Vector DBs & AI RAG", "Terraform & AWS Deploy"],
-      color: "indigo",
-      level: "Advanced",
-      duration: "6 Months"
-    },
-    {
-      title: "Quant Finance & Data",
-      description: "Master the mathematics of algorithmic trading and financial risk modeling through data science.",
+      title: "Quant Business Architect",
+      description: "Master the intersection of Economics and Web Development to build the next generation of fintech platforms.",
       icon: <Database className="w-8 h-8 text-emerald-600" />,
-      subjects: ["Stochastic Calculus", "Algo-Trading Strategies", "Statistical Arbitrage", "Machine Learning in Fin"],
+      subjects: ["Financial Economics", "Accounting Principles", "Full-Stack Development", "Market Analytics"],
       color: "emerald",
-      level: "Expert",
+      level: "Intermediate",
       duration: "9 Months"
     },
     {
-      title: "Advanced STEM Mastery",
-      description: "A comprehensive deep-dive into Theoretical Physics and Calculus for engineering and research.",
-      icon: <Globe className="w-8 h-8 text-amber-600" />,
-      subjects: ["Quantum Mechanics Basics", "Multivariable Calculus", "Linear Algebra for AI", "Physical Problem Solving"],
-      color: "amber",
-      level: "Hardcore",
+      title: "Engineering Foundation",
+      description: "The core academic path for future engineers—bridging theoretical Mathematics with experimental Science.",
+      icon: <Target className="w-8 h-8 text-indigo-600" />,
+      subjects: ["Advanced Calculus", "Classical Physics", "Linear Algebra", "Applied Chemistry"],
+      color: "indigo",
+      level: "Beginner",
       duration: "12 Months"
+    },
+    {
+      title: "Computational Science",
+      description: "Harness Programming to solve complex Scientific problems, from Bioinformatics to Quantum Computing.",
+      icon: <Globe className="w-8 h-8 text-purple-600" />,
+      subjects: ["Python for Science", "Biology & Genetics", "Stochastic Modeling", "Data Visualization"],
+      color: "purple",
+      level: "Advanced",
+      duration: "15 Months"
     }
   ];
 

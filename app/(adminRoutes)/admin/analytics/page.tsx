@@ -87,15 +87,15 @@ export default function PlatformAnalyticsPage() {
         <div>
            <div className="flex items-center gap-3 mb-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full w-fit">
               <ShieldAlert className="text-amber-500" size={14} />
-              <span className="text-[10px] font-black uppercase text-amber-500 tracking-[0.2em]">Super Admin Exclusive View</span>
+              <span className="text-[10px] font-bold uppercase text-amber-500 tracking-[0.2em]">Super Admin Exclusive View</span>
            </div>
-           <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-1">Structural Intelligence</h2>
+           <h2 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tighter uppercase mb-1">Structural Intelligence</h2>
            <p className="text-gray-500 dark:text-gray-400 font-medium tracking-tight">Financial forensics and platform growth trajectory analysis</p>
         </div>
         <div className="flex items-center gap-4">
            <div className="text-right hidden sm:block">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Platform Integrity</p>
-              <p className="text-xl font-black text-indigo-600">Stable (99.9%)</p>
+              <p className="text-xl font-bold text-indigo-600">Stable (99.9%)</p>
            </div>
            <Award className="text-indigo-600 animate-bounce" size={40} />
         </div>
@@ -109,17 +109,17 @@ export default function PlatformAnalyticsPage() {
             <div className="flex flex-col lg:flex-row gap-12 items-center">
                <div className="lg:w-1/3 space-y-8">
                   <div>
-                     <h3 className="text-3xl font-black text-white tracking-tighter mb-4 uppercase">Revenue Influx</h3>
+                     <h3 className="text-3xl font-bold text-white tracking-tighter mb-4 uppercase">Revenue Influx</h3>
                      <p className="text-indigo-200/70 text-sm font-medium leading-relaxed">System-wide earnings based on fulfilled pedagogical slots. This reflects the platform's ability to monetize educational demand.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                      <div className="p-6 rounded-4xl bg-white/5 border border-white/10 backdrop-blur-md">
-                        <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">YTD Earnings</p>
-                        <p className="text-2xl font-black text-white tracking-tight">${stats.overview.totalRevenue.toLocaleString()}</p>
+                        <p className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mb-1">YTD Earnings</p>
+                        <p className="text-2xl font-bold text-white tracking-tight">${stats.overview.totalRevenue.toLocaleString()}</p>
                      </div>
                      <div className="p-6 rounded-4xl bg-white/5 border border-white/10 backdrop-blur-md">
-                        <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">Avg Session</p>
-                        <p className="text-2xl font-black text-white tracking-tight">$42.50</p>
+                        <p className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mb-1">Avg Session</p>
+                        <p className="text-2xl font-bold text-white tracking-tight">$42.50</p>
                      </div>
                   </div>
                </div>
@@ -207,9 +207,9 @@ export default function PlatformAnalyticsPage() {
                             <div className="flex items-center justify-between group cursor-default">
                                <div className="flex items-center gap-2">
                                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
-                                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-tighter group-hover:text-gray-900 transition-colors">{item.name}</span>
+                                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter group-hover:text-gray-900 transition-colors">{item.name}</span>
                                </div>
-                               <span className="text-xs font-black text-gray-900 dark:text-white">{item.value}</span>
+                               <span className="text-xs font-bold text-gray-900 dark:text-white">{item.value}</span>
                             </div>
                             <div className="w-full bg-gray-50 dark:bg-gray-800 h-1.5 rounded-full mt-1 overflow-hidden">
                                <div 
@@ -256,7 +256,7 @@ export default function PlatformAnalyticsPage() {
                   <Database size={24} />
                </div>
                <div>
-                  <CardTitle className="text-2xl font-black uppercase tracking-tighter">Subject Yield Market</CardTitle>
+                  <CardTitle className="text-2xl font-bold uppercase tracking-tighter">Subject Yield Market</CardTitle>
                   <CardDescription className="text-gray-400">Revenue distribution across pedagogical categories</CardDescription>
                </div>
             </div>
@@ -317,12 +317,12 @@ function PredictiveKpi({ icon, title, value, trend }: any) {
                 {icon}
             </div>
             <div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{title}</p>
-               <p className="text-xl font-black text-gray-900 dark:text-white tracking-tight">{value}</p>
+               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{title}</p>
+               <p className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">{value}</p>
             </div>
          </div>
          <div className="text-right">
-            <p className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg uppercase tracking-tighter inline-flex items-center gap-1">
+            <p className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg uppercase tracking-tighter inline-flex items-center gap-1">
                <ArrowUpRight size={10} />
                {trend}
             </p>

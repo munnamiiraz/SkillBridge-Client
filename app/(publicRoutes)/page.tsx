@@ -4,7 +4,7 @@ import EarningCalculator from "@/components/layout/EarningCalculator";
 import HeroSection from "@/components/layout/Hero-section";
 import FindMatchQuiz from "@/components/layout/FindMatchQuiz";
 import HowItWorksSection from "@/components/layout/HowItWorks";
-import LearningPathsSection from "@/components/layout/LearningPathsSection";
+import NewsletterSection from "@/components/layout/NewsletterSection";
 import TrendingDisciplines from "@/components/layout/TrendingDisciplines";
 import PlatformStatsSection from "@/components/layout/PlatformStatsSection";
 import QualityShieldSection from "@/components/layout/QualityShieldSection";
@@ -22,7 +22,7 @@ export default function Home() {
       <FeaturedTeachersSection />
       <QualityShieldSection />
       <SuccessStoriesSection />
-      <LearningPathsSection />
+      <NewsletterSection />
       <WhySkillbrideSection />
       <EarningCalculator />
     </>

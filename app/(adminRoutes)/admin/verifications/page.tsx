@@ -57,7 +57,7 @@ const AdminVerificationsPage = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
             Tutor Verification Requests
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">
@@ -115,16 +115,16 @@ const AdminVerificationsPage = () => {
                 <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-6 py-4 lg:py-0 px-2 lg:px-8 border-y lg:border-y-0 lg:border-x border-gray-100 dark:border-gray-800">
                   <div className="text-center lg:text-left">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Sessions</p>
-                    <p className="text-xl font-black text-gray-900 dark:text-white">12+</p> 
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">12+</p> 
                     {/* Note: Ideally we'd pass sessions from backend in users list */}
                   </div>
                   <div className="text-center lg:text-left">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Rating</p>
-                    <p className="text-xl font-black text-gray-900 dark:text-white">4.9</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">4.9</p>
                   </div>
                   <div className="text-center lg:text-left hidden sm:block">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Impact</p>
-                    <p className="text-xl font-black text-indigo-600 dark:text-indigo-400">High</p>
+                    <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">High</p>
                   </div>
                 </div>
 

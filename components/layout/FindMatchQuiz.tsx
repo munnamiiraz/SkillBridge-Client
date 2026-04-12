@@ -5,8 +5,20 @@ import { Target, ArrowRight, Check, Loader2, Star, Users, Sparkles } from 'lucid
 import Link from 'next/link';
 
 const FindMatchQuiz: React.FC = () => {
+  const [step, setStep] = useState(1);
+  const [subject, setSubject] = useState('');
+  const [level, setLevel] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+
   const [categories, setCategories] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<string>('');
+
+  const levels = [
+    { id: 'beginner', name: 'Beginner', desc: 'Just starting out' },
+    { id: 'intermediate', name: 'Intermediate', desc: 'Have basic knowledge' },
+    { id: 'advanced', name: 'Advanced', desc: 'Looking for mastery' },
+  ];
 
   React.useEffect(() => {
     const fetchCategories = async () => {

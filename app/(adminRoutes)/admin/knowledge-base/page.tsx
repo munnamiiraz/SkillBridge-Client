@@ -88,9 +88,9 @@ export default function KnowledgeBasePage() {
         <div className="space-y-1">
           <div className="flex items-center gap-3 mb-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full w-fit">
             <Sparkles className="text-indigo-500" size={14} />
-            <span className="text-[10px] font-black uppercase text-indigo-500 tracking-[0.2em]">Platform Intelligence</span>
+            <span className="text-[10px] font-bold uppercase text-indigo-500 tracking-[0.2em]">Platform Intelligence</span>
           </div>
-          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase">AI Knowledge Repository</h2>
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tighter uppercase">AI Knowledge Repository</h2>
           <p className="text-gray-500 dark:text-gray-400 font-medium max-w-2xl">
             Governing the logical foundations of the platform's RAG system. 
             All entries here are vectorized and served to the AI assistants for high-fidelity reasoning.
@@ -101,8 +101,8 @@ export default function KnowledgeBasePage() {
               <Database size={24} />
            </div>
            <div>
-              <p className="text-2xl font-black text-gray-900 dark:text-white">{entries.length}</p>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Vectors</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{entries.length}</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Vectors</p>
            </div>
         </div>
       </div>
@@ -130,7 +130,7 @@ export default function KnowledgeBasePage() {
                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto text-gray-400">
                        <Brain size={32} />
                     </div>
-                    <p className="text-gray-500 font-black uppercase tracking-widest text-xs">No entries found in platform memory</p>
+                    <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">No entries found in platform memory</p>
                   </div>
                 ) : (
                   filteredEntries.map((entry) => (
@@ -144,7 +144,7 @@ export default function KnowledgeBasePage() {
                               <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 rounded-xl">
                                  <Layers size={14} />
                               </div>
-                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Entry ID: {entry.id.slice(0, 8)}...</span>
+                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Entry ID: {entry.id.slice(0, 8)}...</span>
                               <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold ml-auto">
                                  <Calendar size={12} />
                                  {new Date(entry.createdAt).toLocaleDateString()}
@@ -180,9 +180,9 @@ export default function KnowledgeBasePage() {
                  <div className="space-y-3">
                     <div className="flex items-center gap-3 text-indigo-200">
                        <Brain className="animate-pulse" size={18} />
-                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Core Intelligence</span>
+                       <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">Core Intelligence</span>
                     </div>
-                    <h3 className="text-3xl font-black uppercase tracking-tighter leading-tight">Knowledge Synthesis</h3>
+                    <h3 className="text-3xl font-bold uppercase tracking-tighter leading-tight">Knowledge Synthesis</h3>
                     <p className="text-indigo-100/60 text-[13px] font-medium leading-relaxed italic">
                       "Inject new logic into the platform's neural infrastructure."
                     </p>
@@ -191,7 +191,7 @@ export default function KnowledgeBasePage() {
                  <form onSubmit={handleAddKnowledge} className="space-y-8">
                     <div className="space-y-3">
                        <div className="flex items-center justify-between">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-indigo-200/80">Raw Context Data</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-indigo-200/80">Raw Context Data</label>
                           <span className="text-[9px] font-bold text-white/30">{newContent.length} characters</span>
                        </div>
                        <textarea 
@@ -204,7 +204,7 @@ export default function KnowledgeBasePage() {
 
                     <Button 
                       disabled={isAdding || !newContent.trim()}
-                      className="group w-full h-16 rounded-3xl bg-white text-indigo-700 hover:bg-white/90 font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-indigo-500/20 disabled:opacity-40 transition-all active:scale-[0.98] overflow-hidden relative"
+                      className="group w-full h-16 rounded-3xl bg-white text-indigo-700 hover:bg-white/90 font-bold uppercase tracking-widest text-[11px] shadow-2xl shadow-indigo-500/20 disabled:opacity-40 transition-all active:scale-[0.98] overflow-hidden relative"
                     >
                       <div className="relative z-10 flex items-center justify-center gap-2">
                         {isAdding ? (
@@ -227,7 +227,7 @@ export default function KnowledgeBasePage() {
                        <div className="p-1.5 rounded-lg bg-indigo-500/20">
                           <Info size={12} />
                        </div>
-                       <span className="text-[10px] font-black uppercase tracking-[0.15em]">System Protocol</span>
+                       <span className="text-[10px] font-bold uppercase tracking-[0.15em]">System Protocol</span>
                     </div>
                     <p className="text-[11px] font-bold text-indigo-100/40 leading-relaxed italic">
                        Synthesis operations trigger a high-priority vectorization sequence. Ensure objective clarity for optimal AI retrieval.
@@ -242,7 +242,7 @@ export default function KnowledgeBasePage() {
                     <ShieldAlert size={20} />
                  </div>
                  <div className="space-y-2">
-                    <h4 className="text-sm font-black uppercase tracking-tight text-gray-900 dark:text-white">Strict Governance</h4>
+                    <h4 className="text-sm font-bold uppercase tracking-tight text-gray-900 dark:text-white">Strict Governance</h4>
                     <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
                        Only users with <span className="text-amber-500 font-bold">Structural Authority (Super Admin)</span> can modify the knowledge repository. All deletions are final and purge associated vector embeddings.
                     </p>

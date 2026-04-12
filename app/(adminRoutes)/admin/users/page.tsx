@@ -73,26 +73,26 @@ export default function UserManagementPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-           <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Identity Governance</h2>
+           <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Identity Governance</h2>
            <p className="text-gray-500 dark:text-gray-400 font-medium">Manage and monitor all platform stakeholders</p>
         </div>
         <div className="flex items-center gap-3">
            <div className="flex bg-white dark:bg-gray-900 rounded-2xl p-1 border border-gray-100 dark:border-gray-800 shadow-sm">
               <button 
                 onClick={() => setRoleFilter('')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${roleFilter === '' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
+                className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${roleFilter === '' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
               >All</button>
               <button 
                 onClick={() => setRoleFilter('STUDENT')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${roleFilter === 'STUDENT' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
+                className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${roleFilter === 'STUDENT' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
               >Students</button>
               <button 
                 onClick={() => setRoleFilter('TUTOR')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${roleFilter === 'TUTOR' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
+                className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${roleFilter === 'TUTOR' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
               >Tutors</button>
               <button 
                 onClick={() => setRoleFilter('ADMIN')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${roleFilter === 'ADMIN' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
+                className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${roleFilter === 'ADMIN' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400'}`}
               >Admins</button>
            </div>
         </div>
@@ -120,11 +120,11 @@ export default function UserManagementPage() {
                <table className="w-full text-left">
                   <thead>
                      <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800">
-                        <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Full Identity</th>
-                        <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Authority Role</th>
-                        <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Account Status</th>
-                        <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Analytics</th>
-                        <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] text-right">Actions</th>
+                        <th className="px-8 py-6 text-[10px] font-bold uppercase text-gray-400 tracking-[0.2em]">Full Identity</th>
+                        <th className="px-8 py-6 text-[10px] font-bold uppercase text-gray-400 tracking-[0.2em]">Authority Role</th>
+                        <th className="px-8 py-6 text-[10px] font-bold uppercase text-gray-400 tracking-[0.2em]">Account Status</th>
+                        <th className="px-8 py-6 text-[10px] font-bold uppercase text-gray-400 tracking-[0.2em]">Analytics</th>
+                        <th className="px-8 py-6 text-[10px] font-bold uppercase text-gray-400 tracking-[0.2em] text-right">Actions</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
@@ -141,12 +141,12 @@ export default function UserManagementPage() {
                                  <div className="flex items-center gap-4">
                                     <div className="relative">
                                        <div className="absolute -inset-1 bg-linear-to-tr from-indigo-500 to-purple-500 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity blur-sm" />
-                                       <div className="relative w-11 h-11 rounded-2xl bg-linear-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-black shadow-sm overflow-hidden">
+                                       <div className="relative w-11 h-11 rounded-2xl bg-linear-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shadow-sm overflow-hidden">
                                           {user.image ? <img src={user.image} alt={user.name} className="w-full h-full object-cover" /> : user.name[0]}
                                        </div>
                                     </div>
                                     <div>
-                                       <p className="text-sm font-black text-gray-900 dark:text-white mb-0.5">{user.name}</p>
+                                       <p className="text-sm font-bold text-gray-900 dark:text-white mb-0.5">{user.name}</p>
                                        <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-bold">
                                           <Mail size={10} /> {user.email}
                                        </div>
@@ -154,7 +154,7 @@ export default function UserManagementPage() {
                                  </div>
                               </td>
                               <td className="px-8 py-6 align-middle">
-                                 <span className={`inline-flex items-center px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-tighter border ${
+                                 <span className={`inline-flex items-center px-3 py-1 rounded-xl text-[9px] font-bold uppercase tracking-tighter border ${
                                     user.role === 'SUPER_ADMIN' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
                                     user.role === 'ADMIN' ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' :
                                     user.role === 'TUTOR' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' :
@@ -167,22 +167,22 @@ export default function UserManagementPage() {
                               <td className="px-8 py-6 align-middle">
                                  <div className="flex items-center gap-2">
                                     <div className={`w-2 h-2 rounded-full ${user.status === 'ACTIVE' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : user.status === 'BANNED' ? 'bg-rose-500' : 'bg-amber-500'}`} />
-                                    <span className="text-xs font-black text-gray-700 dark:text-gray-300 trekking-tight uppercase">{user.status}</span>
+                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300 trekking-tight uppercase">{user.status}</span>
                                  </div>
                               </td>
                               <td className="px-8 py-6 align-middle">
                                  {user.tutor_profile ? (
                                     <div className="flex items-center gap-6">
                                        <div>
-                                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Rating</p>
-                                          <p className="text-xs font-black text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Rating</p>
+                                          <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
                                             <span className="text-[10px]">★</span>
                                             {Number(user.tutor_profile.averageRating || 0).toFixed(1)}
                                           </p>
                                        </div>
                                        <div>
-                                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Reviews</p>
-                                          <p className="text-xs font-black text-gray-900 dark:text-white">{user.tutor_profile.totalReviews}</p>
+                                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Reviews</p>
+                                          <p className="text-xs font-bold text-gray-900 dark:text-white">{user.tutor_profile.totalReviews}</p>
                                        </div>
                                     </div>
                                  ) : (
@@ -243,7 +243,7 @@ export default function UserManagementPage() {
                            <button 
                              key={i} 
                              onClick={() => setPage(i + 1)}
-                             className={`w-8 h-8 rounded-lg text-xs font-black transition-all ${page === i + 1 ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-500 hover:bg-gray-100'}`}
+                             className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === i + 1 ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-500 hover:bg-gray-100'}`}
                            >
                               {i + 1}
                            </button>
@@ -269,8 +269,8 @@ export default function UserManagementPage() {
                <AlertCircle size={24} />
             </div>
             <div>
-               <h4 className="text-lg font-black text-amber-500 uppercase tracking-tight mb-2">Restricted Operational Authority</h4>
-               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">As a standard Administrator, you have read-access to the user database but lack the structural authority to ban or unban accounts. Access revocation is strictly reserved for the <span className="font-black text-amber-600">Super Admin</span> role. Contact site leadership for account-level overrides.</p>
+               <h4 className="text-lg font-bold text-amber-500 uppercase tracking-tight mb-2">Restricted Operational Authority</h4>
+               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">As a standard Administrator, you have read-access to the user database but lack the structural authority to ban or unban accounts. Access revocation is strictly reserved for the <span className="font-bold text-amber-600">Super Admin</span> role. Contact site leadership for account-level overrides.</p>
             </div>
          </div>
       )}

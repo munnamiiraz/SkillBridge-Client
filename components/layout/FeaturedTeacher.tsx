@@ -139,16 +139,16 @@ const FeaturedTeachersSection: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 auto-rows-fr">
               {teachers.map((teacher, index) => (
                 <Link
                   key={teacher.id}
                   href={`/tutors/${teacher.id}`}
-                  className={`group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-2 animate-fade-in-up ${index >= 4 ? 'hidden xl:block' : 'block'}`}
+                  className={`group relative bg-white dark:bg-gray-900 rounded-[2rem] border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-2 animate-fade-in-up flex flex-col ${index >= 4 ? 'hidden xl:flex' : 'flex'}`}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {/* Card Header with Banner or Gradient */}
-                  <div className="relative h-32 overflow-hidden">
+                  <div className="relative h-32 shrink-0 overflow-hidden">
                     {teacher.banner ? (
                       <img 
                         src={teacher.banner} 
@@ -159,90 +159,95 @@ const FeaturedTeachersSection: React.FC = () => {
                       <div className={`absolute inset-0 bg-linear-to-br ${teacher.bgGradient} opacity-20 group-hover:opacity-30 transition-opacity duration-300`} />
                     )}
                     <div className="absolute inset-0 bg-linear-to-b from-black/10 to-transparent" />
-                    
                     <div className={`absolute -bottom-10 -right-10 w-40 h-40 bg-linear-to-br ${teacher.bgGradient} rounded-full blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`}></div>
                     
-                    {/* Avatar */}
-                    <div className="absolute -bottom-10 left-6">
-                      <div className={`w-24 h-24 rounded-2xl bg-linear-to-br ${teacher.bgGradient} flex items-center justify-center text-white font-bold text-2xl shadow-xl border-4 border-white dark:border-gray-900 overflow-hidden`}>
-                        {teacher.avatar.length > 2 ? (
-                          <img src={teacher.avatar} alt={teacher.name} className="w-full h-full object-cover" />
-                        ) : (
-                          teacher.avatar
-                        )}
-                      </div>
-                    </div>
-
                     {/* Availability Badge */}
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-4 right-4 z-20">
                       {teacher.available ? (
-                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full">
-                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span className="flex items-center gap-1.5 px-3 py-1 bg-green-100/90 dark:bg-green-900/40 backdrop-blur-md text-green-700 dark:text-green-400 text-[10px] font-bold uppercase tracking-wider rounded-full">
+                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
                           Available
                         </span>
                       ) : (
-                        <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 text-xs font-semibold rounded-full">
+                        <span className="px-3 py-1 bg-gray-100/90 dark:bg-gray-800/40 backdrop-blur-md text-gray-700 dark:text-gray-400 text-[10px] font-bold uppercase tracking-wider rounded-full">
                           Busy
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Card Content */}
-                  <div className="pt-14 p-6 space-y-4">
+                  <div className="flex-1 flex flex-col px-6 pb-6 pt-12 relative h-full">
+                    {/* Avatar - Fixed position and visibility */}
+                    <div className="absolute -top-12 left-6 z-10">
+                      <div className={`w-20 h-20 rounded-2xl bg-linear-to-br ${teacher.bgGradient} p-1 shadow-2xl`}>
+                        <div className="w-full h-full rounded-[0.8rem] bg-white dark:bg-gray-800 overflow-hidden">
+                          {teacher.avatar.length > 2 ? (
+                            <img src={teacher.avatar} alt={teacher.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xl font-black bg-gray-50 dark:bg-gray-800 text-gray-400">
+                              {teacher.avatar}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Name & Specialty */}
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                    <div className="mb-4">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 transition-colors">
                         {teacher.name}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      <p className="text-gray-500 dark:text-gray-400 text-sm font-medium line-clamp-1">
                         {teacher.specialty}
                       </p>
                     </div>
 
                     {/* Rating & Stats */}
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                    <div className="flex items-center gap-4 text-xs font-bold mb-5">
+                      <div className="flex items-center gap-1.5 text-amber-500">
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                           <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                         </svg>
-                        <span className="font-semibold text-gray-900 dark:text-white">{teacher.rating}</span>
-                        <span className="text-gray-500 dark:text-gray-500">({teacher.reviews})</span>
+                        <span className="text-gray-900 dark:text-white">{Number(teacher.rating).toFixed(1)}</span>
+                        <span className="text-gray-400 dark:text-gray-500">({teacher.reviews})</span>
                       </div>
-                      <div className="w-px h-4 bg-gray-300 dark:bg-gray-700"></div>
-                      <div className="text-gray-600 dark:text-gray-400">
+                      <div className="w-px h-3 bg-gray-200 dark:bg-gray-700"></div>
+                      <div className="text-gray-500 dark:text-gray-400">
                         {teacher.students} students
                       </div>
                     </div>
 
                     {/* Skills */}
-                    <div className="flex flex-wrap gap-2">
-                      {teacher.skills.map((skill, idx) => (
+                    <div className="flex flex-wrap gap-1.5 mb-6">
+                      {teacher.skills.slice(0, 3).map((skill, idx) => (
                         <span
                           key={idx}
-                          className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 text-xs font-medium rounded-full"
+                          className="px-2.5 py-1 bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 text-[10px] font-bold rounded-lg uppercase tracking-tight border border-gray-200/50 dark:border-gray-700/50"
                         >
                           {skill}
                         </span>
                       ))}
                     </div>
 
+                    {/* Spacer to push content down */}
+                    <div className="flex-1" />
+
                     {/* Experience & Rate */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-800">
-                      <div className="text-sm">
-                        <span className="text-gray-500 dark:text-gray-500">Experience:</span>
-                        <span className="ml-1 font-semibold text-gray-900 dark:text-white">{teacher.experience}</span>
+                    <div className="flex items-center justify-between pt-5 border-t border-gray-100 dark:border-gray-800 mb-6">
+                      <div className="text-xs font-bold">
+                        <span className="text-gray-400 uppercase tracking-tighter">Exp:</span>
+                        <span className="ml-1.5 text-gray-900 dark:text-white">{teacher.experience}</span>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold bg-linear-to-br from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white leading-none">
                           ${teacher.hourlyRate}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-500">per hour</div>
+                        <div className="text-[9px] text-gray-400 uppercase font-black tracking-widest mt-1">per hour</div>
                       </div>
                     </div>
 
                     {/* CTA Button */}
-                    <div className="block w-full py-3 bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-center font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/30 dark:hover:shadow-indigo-500/50">
+                    <div className="w-full py-3.5 bg-linear-to-br from-indigo-600 to-purple-600 text-white text-center text-sm font-bold rounded-2xl transition-all duration-300 shadow-xl shadow-indigo-500/20 group-hover:scale-[1.02] active:scale-[0.98]">
                       View Profile
                     </div>
                   </div>

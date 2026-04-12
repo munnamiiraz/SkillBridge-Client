@@ -82,12 +82,12 @@ export default function AdminLayout({
               </button>
               
               <div className="hidden sm:block">
-                <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
+                <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
                   <span>System Root</span>
                   <ChevronRight size={10} className="text-gray-300" />
                   <span className="text-indigo-500">Command Center</span>
                 </nav>
-                <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
                   {pathname.split('/').pop()?.replace('-', ' ') || 'Overview'}
                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
                 </h1>
@@ -108,7 +108,7 @@ export default function AdminLayout({
               {session && (
                 <div className="flex items-center gap-4">
                   <div className="hidden md:block text-right">
-                    <p className="text-xs font-black text-gray-900 dark:text-white tracking-tight">{session.user.name}</p>
+                    <p className="text-xs font-bold text-gray-900 dark:text-white tracking-tight">{session.user.name}</p>
                     <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">Verified {(session.user as any).role.replace('_', ' ')}</p>
                   </div>
                   

@@ -72,7 +72,7 @@ export default function BookingManagementPage() {
       ONGOING: "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20"
     };
     return (
-      <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${styles[status] || styles.PENDING}`}>
+      <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest border ${styles[status] || styles.PENDING}`}>
         {status}
       </span>
     );
@@ -83,7 +83,7 @@ export default function BookingManagementPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-           <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Pedagogical Logistics</h2>
+           <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Pedagogical Logistics</h2>
            <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">Global oversight of educational sessions and fulfillment cycles</p>
         </div>
         <div className="flex bg-white dark:bg-gray-900 rounded-3xl p-1.5 border border-gray-100 dark:border-gray-800 shadow-sm">
@@ -91,7 +91,7 @@ export default function BookingManagementPage() {
               <button 
                 key={s}
                 onClick={() => { setStatusFilter(s); setPage(1); }}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === s ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${statusFilter === s ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 {s || 'All Sessions'}
               </button>
@@ -119,7 +119,7 @@ export default function BookingManagementPage() {
          {loading ? (
             [1,2,3].map(i => <Skeleton key={i} className="h-32 rounded-4xl" />)
          ) : bookings.length === 0 ? (
-            <div className="p-20 text-center font-black uppercase text-gray-400 tracking-widest bg-white dark:bg-gray-900 rounded-[3rem]">No sessions match your search criteria</div>
+            <div className="p-20 text-center font-bold uppercase text-gray-400 tracking-widest bg-white dark:bg-gray-900 rounded-[3rem]">No sessions match your search criteria</div>
          ) : (
             bookings.map((booking) => (
                <div key={booking.id} className="group relative bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all duration-300">
@@ -127,7 +127,7 @@ export default function BookingManagementPage() {
                      {/* Status & ID */}
                      <div className="flex flex-row lg:flex-col items-center lg:items-start gap-4 lg:w-32 shrink-0">
                         {getStatusBadge(booking.status)}
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter flex items-center gap-1">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter flex items-center gap-1">
                            <Hash size={10} /> {booking.id.slice(0, 8)}
                         </p>
                      </div>
@@ -135,7 +135,7 @@ export default function BookingManagementPage() {
                      {/* Participants Info */}
                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
                         <div>
-                           <h4 className="text-lg font-black text-gray-900 dark:text-white tracking-tight mb-2 truncate">{booking.subject}</h4>
+                           <h4 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight mb-2 truncate">{booking.subject}</h4>
                            <div className="flex items-center gap-3">
                               <Calendar size={14} className="text-gray-400" />
                               <span className="text-xs font-bold text-gray-500">{new Date(booking.scheduledAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
@@ -146,30 +146,30 @@ export default function BookingManagementPage() {
 
                         <div className="flex items-center gap-6">
                            <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center font-black text-xs text-indigo-600">
+                              <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center font-bold text-xs text-indigo-600">
                                  {booking.user.name[0]}
                               </div>
                               <div className="min-w-0">
-                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Student</p>
-                                 <p className="text-xs font-black text-gray-900 dark:text-white truncate">{booking.user.name}</p>
+                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Student</p>
+                                 <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{booking.user.name}</p>
                               </div>
                            </div>
                            <ArrowRight className="text-gray-300 hidden md:block" size={16} />
                            <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-500 to-purple-500 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center font-black text-xs text-white">
+                              <div className="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-500 to-purple-500 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center font-bold text-xs text-white">
                                  {booking.tutor_profile.user.name[0]}
                               </div>
                               <div className="min-w-0">
-                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Expert</p>
-                                 <p className="text-xs font-black text-gray-900 dark:text-white truncate">{booking.tutor_profile.user.name}</p>
+                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Expert</p>
+                                 <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{booking.tutor_profile.user.name}</p>
                               </div>
                            </div>
                         </div>
 
                         <div className="flex items-center justify-between lg:justify-end gap-8">
                            <div className="text-right">
-                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Investment</p>
-                              <p className="text-lg font-black text-gray-900 dark:text-white tracking-tighter">${booking.price.toFixed(2)}</p>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Investment</p>
+                              <p className="text-lg font-bold text-gray-900 dark:text-white tracking-tighter">${booking.price.toFixed(2)}</p>
                            </div>
                            
                            {isSuper && booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
@@ -195,14 +195,14 @@ export default function BookingManagementPage() {
             <button 
               disabled={page === 1}
               onClick={() => setPage(p => Math.max(1, p - 1))}
-              className="px-5 py-2.5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-xs font-black uppercase text-gray-500 hover:text-indigo-600 disabled:opacity-50 transition-all shadow-sm active:scale-95"
+              className="px-5 py-2.5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-xs font-bold uppercase text-gray-500 hover:text-indigo-600 disabled:opacity-50 transition-all shadow-sm active:scale-95"
             >Previous Page</button>
             <div className="flex items-center gap-1.5">
                {[...Array(meta.totalPages)].map((_, i) => (
                   <button 
                     key={i} 
                     onClick={() => setPage(i + 1)}
-                    className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${page === i + 1 ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                    className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${page === i + 1 ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                   >
                      {i + 1}
                   </button>
@@ -211,7 +211,7 @@ export default function BookingManagementPage() {
             <button 
               disabled={page === meta.totalPages}
               onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
-              className="px-5 py-2.5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-xs font-black uppercase text-gray-500 hover:text-indigo-600 disabled:opacity-50 transition-all shadow-sm active:scale-95"
+              className="px-5 py-2.5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-xs font-bold uppercase text-gray-500 hover:text-indigo-600 disabled:opacity-50 transition-all shadow-sm active:scale-95"
             >Next Page</button>
          </div>
       )}
@@ -221,8 +221,8 @@ export default function BookingManagementPage() {
             <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 text-indigo-500 mx-auto flex items-center justify-center">
                <AlertCircle size={32} />
             </div>
-            <h4 className="text-xl font-black text-indigo-600 uppercase tracking-tighter">Limited Logistical Control</h4>
-            <p className="text-sm text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed">Standard Administrative users can monitor global session flows but are restricted from forceful logistical cancellations. This safeguard prevents accidental disruption of established learning paths. Direct session overrides are exclusive to the <span className="font-black text-indigo-700">Super Admin</span> portal.</p>
+            <h4 className="text-xl font-bold text-indigo-600 uppercase tracking-tighter">Limited Logistical Control</h4>
+            <p className="text-sm text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed">Standard Administrative users can monitor global session flows but are restricted from forceful logistical cancellations. This safeguard prevents accidental disruption of established learning paths. Direct session overrides are exclusive to the <span className="font-bold text-indigo-700">Super Admin</span> portal.</p>
          </div>
       )}
     </div>

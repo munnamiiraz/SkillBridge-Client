@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
 import { ShieldCheck, Award, LayoutDashboard, Grid } from 'lucide-react';
 import { Skeleton } from '@/components/ui/Skeleton';
+import Logo from '@/components/ui/Logo';
 
 interface NavLink {
   label: string;
@@ -90,15 +91,9 @@ const Navbar: React.FC = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
           <div className="shrink-0">
-            <Link href="/" className="inline-flex items-center group">
-              <div className="w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 dark:shadow-indigo-500/40 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
-              <span className="ml-3 text-xl font-bold bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                SkillBridge
-              </span>
+            <Link href="/" className="inline-flex items-center">
+              <Logo />
             </Link>
           </div>
 
