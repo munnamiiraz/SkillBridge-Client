@@ -236,10 +236,11 @@ const LoginPage: React.FC = () => {
             {/* Social Login Button */}
             <button
               type="button"
-              onClick={() => {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://skillbridge-server-9.onrender.com';
-                const callbackURL = typeof window !== 'undefined' ? window.location.origin + '/' : '/';
-                window.location.href = `${apiUrl}/api/auth/sign-in/social/google?callbackURL=${encodeURIComponent(callbackURL)}`;
+              onClick={async () => {
+                await authClient.signIn.social({
+                  provider: 'google',
+                  callbackURL: '/',
+                });
               }}
               className="w-full py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-200 font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-3 group"
             >

@@ -1,7 +1,13 @@
 import { createAuthClient } from "better-auth/react";
 
 const getAuthBaseURL = () => {
-  return (process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000") + "/api/auth";
+  // SSR: call the server directly
+  if (typeof window === "undefined") {
+    return (process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000") + "/api/auth";
+  }
+  // Browser: go through the Next.js proxy (/api/* → Render server)
+  // This keeps the state cookie first-party (same domain) so OAuth works
+  return window.location.origin + "/api/auth";
 };
 
 export const authClient = createAuthClient({
