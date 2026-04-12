@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { getUnverifiedTutors, verifyTutor } from '@/app/admin/tutors.service';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle, ShieldCheck, User, Clock, Award, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 
 const AdminVerificationsPage = () => {
@@ -103,7 +103,7 @@ const AdminVerificationsPage = () => {
                       }`}>
                         {tutor.role === 'VERIFIED_TUTOR' ? 'Verified' : 'Standard'}
                       </span>
-                      <span className="text-xs text-xs text-gray-400 flex items-center gap-1 font-bold">
+                      <span className="text-xs text-gray-400 flex items-center gap-1 font-bold">
                         <Clock className="w-3 h-3" />
                          Joined {new Date(tutor.createdAt).toLocaleDateString()}
                       </span>

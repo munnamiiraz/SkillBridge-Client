@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
 import { ShieldCheck, Award, LayoutDashboard, Grid } from 'lucide-react';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface NavLink {
   label: string;
@@ -181,7 +182,7 @@ const Navbar: React.FC = () => {
                 >
                   <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md overflow-hidden">
                     {sessionResponse.isPending ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      <Skeleton className="w-full h-full bg-white/20" />
                     ) : session?.user.image ? (
                       <img 
                         src={session.user.image} 
@@ -192,13 +193,22 @@ const Navbar: React.FC = () => {
                       (session?.user.name?.trim() || 'User')[0].toUpperCase()
                     )}
                   </div>
-                  <div className="hidden md:block text-left">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
-                      {sessionResponse.isPending ? 'Loading...' : (session?.user.name?.trim() || 'SkillBridge User')}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {sessionResponse.isPending ? 'Please wait' : ((session?.user as any).role || 'Student').replace('_', ' ')}
-                    </p>
+                  <div className="hidden md:flex flex-col gap-1 text-left">
+                    {sessionResponse.isPending ? (
+                      <>
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-3 w-16" />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
+                          {session?.user.name?.trim() || 'SkillBridge User'}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {((session?.user as any).role || 'Student').replace('_', ' ')}
+                        </p>
+                      </>
+                    )}
                   </div>
                   <svg 
                     className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} 

@@ -19,6 +19,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(defaultValue || null);
+  const uniqueId = React.useId();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -109,14 +110,14 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         <div className="flex-1">
           <input
             type="file"
-            id="profile-upload"
+            id={uniqueId}
             className="hidden"
             accept="image/*"
             onChange={handleFileChange}
             disabled={uploading}
           />
           <label
-            htmlFor="profile-upload"
+            htmlFor={uniqueId}
             className={`inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-500 text-gray-700 dark:text-white font-bold rounded-xl cursor-pointer transition-all active:scale-95 ${
               uploading ? 'opacity-50 cursor-not-allowed' : ''
             }`}

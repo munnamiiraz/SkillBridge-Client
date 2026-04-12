@@ -151,7 +151,7 @@ const ChatBot: React.FC = () => {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="Ask anything..."
-                  className="w-full pl-6 pr-14 py-4 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[1.5rem] text-sm font-bold text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                  className="w-full pl-6 pr-14 py-4 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl text-sm font-bold text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
                 />
                 <button
                   onClick={handleSend}
@@ -169,7 +169,7 @@ const ChatBot: React.FC = () => {
       {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl transition-all duration-500 active:scale-90 relative overflow-hidden group ${
+        className={`w-16 h-16 rounded-3xl flex items-center justify-center text-white shadow-2xl transition-all duration-500 active:scale-90 relative overflow-hidden group ${
           isOpen ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 rotate-90' : 'bg-linear-to-br from-indigo-600 to-purple-600'
         }`}
       >

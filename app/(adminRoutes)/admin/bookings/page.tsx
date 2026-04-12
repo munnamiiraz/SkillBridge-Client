@@ -61,7 +61,7 @@ export default function BookingManagementPage() {
     }
   };
 
-  const isSuper = session?.user.role === 'SUPER_ADMIN';
+  const isSuper = (session?.user as any).role === 'SUPER_ADMIN';
 
   const getStatusBadge = (status: string) => {
     const styles: any = {
@@ -86,7 +86,7 @@ export default function BookingManagementPage() {
            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Pedagogical Logistics</h2>
            <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">Global oversight of educational sessions and fulfillment cycles</p>
         </div>
-        <div className="flex bg-white dark:bg-gray-900 rounded-[1.5rem] p-1.5 border border-gray-100 dark:border-gray-800 shadow-sm">
+        <div className="flex bg-white dark:bg-gray-900 rounded-3xl p-1.5 border border-gray-100 dark:border-gray-800 shadow-sm">
            {['', 'PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'].map((s) => (
               <button 
                 key={s}
@@ -117,7 +117,7 @@ export default function BookingManagementPage() {
       {/* Bookings List */}
       <div className="space-y-4">
          {loading ? (
-            [1,2,3].map(i => <Skeleton key={i} className="h-32 rounded-[2rem]" />)
+            [1,2,3].map(i => <Skeleton key={i} className="h-32 rounded-4xl" />)
          ) : bookings.length === 0 ? (
             <div className="p-20 text-center font-black uppercase text-gray-400 tracking-widest bg-white dark:bg-gray-900 rounded-[3rem]">No sessions match your search criteria</div>
          ) : (

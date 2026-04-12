@@ -35,7 +35,7 @@ export default function KnowledgeBasePage() {
   useEffect(() => {
     if (!session) return;
 
-    if (session.user.role !== 'SUPER_ADMIN') {
+    if ((session.user as any).role !== 'SUPER_ADMIN') {
         router.push('/admin/dashboard');
         return;
     }
@@ -118,7 +118,7 @@ export default function KnowledgeBasePage() {
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Query knowledge repository..."
-                  className="pl-14 h-16 rounded-[1.5rem] bg-gray-50 dark:bg-gray-950 border-gray-100 dark:border-gray-800 text-lg shadow-inner"
+                  className="pl-14 h-16 rounded-3xl bg-gray-50 dark:bg-gray-950 border-gray-100 dark:border-gray-800 text-lg shadow-inner"
                 />
               </div>
 
@@ -136,7 +136,7 @@ export default function KnowledgeBasePage() {
                   filteredEntries.map((entry) => (
                     <div 
                       key={entry.id} 
-                      className="group relative bg-white dark:bg-gray-950 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 hover:border-indigo-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/5"
+                      className="group relative bg-white dark:bg-gray-950 p-8 rounded-4xl border border-gray-100 dark:border-gray-800 hover:border-indigo-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/5"
                     >
                       <div className="flex justify-between items-start gap-6">
                         <div className="space-y-4 flex-1">
@@ -144,7 +144,7 @@ export default function KnowledgeBasePage() {
                               <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 rounded-xl">
                                  <Layers size={14} />
                               </div>
-                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Entry ID: {entry.id.slice(0, 8)}...</span>
+                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Entry ID: {entry.id.slice(0, 8)}...</span>
                               <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold ml-auto">
                                  <Calendar size={12} />
                                  {new Date(entry.createdAt).toLocaleDateString()}
@@ -197,14 +197,14 @@ export default function KnowledgeBasePage() {
                        <textarea 
                          value={newContent}
                          onChange={e => setNewContent(e.target.value)}
-                         className="w-full h-56 bg-white/5 border border-white/10 rounded-[2rem] p-8 text-[13px] font-bold leading-relaxed focus:bg-white/10 focus:border-white/30 focus:shadow-2xl focus:shadow-white/5 transition-all outline-hidden resize-none placeholder:text-white/20 shadow-inner"
+                         className="w-full h-56 bg-white/5 border border-white/10 rounded-4xl p-8 text-[13px] font-bold leading-relaxed focus:bg-white/10 focus:border-white/30 focus:shadow-2xl focus:shadow-white/5 transition-all outline-hidden resize-none placeholder:text-white/20 shadow-inner"
                          placeholder="Synthesize new platform logic, strategic parameters, or high-fidelity context..."
                        />
                     </div>
 
                     <Button 
                       disabled={isAdding || !newContent.trim()}
-                      className="group w-full h-16 rounded-[1.5rem] bg-white text-indigo-700 hover:bg-white/90 font-black uppercase tracking-[0.1em] text-[11px] shadow-2xl shadow-indigo-500/20 disabled:opacity-40 transition-all active:scale-[0.98] overflow-hidden relative"
+                      className="group w-full h-16 rounded-3xl bg-white text-indigo-700 hover:bg-white/90 font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-indigo-500/20 disabled:opacity-40 transition-all active:scale-[0.98] overflow-hidden relative"
                     >
                       <div className="relative z-10 flex items-center justify-center gap-2">
                         {isAdding ? (
@@ -222,7 +222,7 @@ export default function KnowledgeBasePage() {
                     </Button>
                  </form>
 
-                 <div className="p-8 rounded-[2rem] bg-black/30 border border-white/5 backdrop-blur-md space-y-4">
+                 <div className="p-8 rounded-4xl bg-black/30 border border-white/5 backdrop-blur-md space-y-4">
                     <div className="flex items-center gap-3 text-indigo-300">
                        <div className="p-1.5 rounded-lg bg-indigo-500/20">
                           <Info size={12} />

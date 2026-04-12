@@ -371,7 +371,7 @@ const MatchAssistantPage = () => {
                           className={`relative flex flex-col md:flex-row items-center gap-10 ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}
                         >
                           {/* Week Bubble */}
-                          <div className="absolute left-0 md:left-1/2 -translate-x-1/2 w-18 h-18 rounded-[2rem] bg-white dark:bg-gray-900 border-4 border-gray-50 dark:border-gray-800 shadow-2xl flex items-center justify-center z-10">
+                          <div className="absolute left-0 md:left-1/2 -translate-x-1/2 w-18 h-18 rounded-4xl bg-white dark:bg-gray-900 border-4 border-gray-50 dark:border-gray-800 shadow-2xl flex items-center justify-center z-10">
                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black shadow-lg ${
                               i === 0 ? 'bg-indigo-600' : i === 1 ? 'bg-purple-600' : i === 2 ? 'bg-pink-600' : 'bg-orange-600'
                             }`}>
@@ -456,7 +456,7 @@ const MatchAssistantPage = () => {
                           </h5>
                           <div className="space-y-3">
                             {roadmap.recommendedResources.map((res: string, i: number) => (
-                              <div key={i} className="flex items-center gap-3 p-4 bg-white/5 backdrop-blur-md rounded-[1.5rem] border border-white/10 text-sm text-indigo-50">
+                              <div key={i} className="flex items-center gap-3 p-4 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 text-sm text-indigo-50">
                                 <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
                                   <Star size={14} className="text-amber-300" />
                                 </div>

@@ -17,6 +17,7 @@ import {
   ShieldAlert,
   Brain
 } from 'lucide-react';
+import Logo from '@/components/ui/Logo';
 
 interface SidebarItem {
   label: string;
@@ -90,16 +91,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
   return (
     <div className="flex flex-col h-full">
       <div className="p-8 border-b border-gray-200/50 dark:border-gray-800/50">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 bg-linear-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-black shadow-xl shadow-indigo-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-            S
-          </div>
-          <div>
-            <span className="text-xl font-black bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent tracking-tighter uppercase font-outfit">
-              SkillBridge
-            </span>
-            <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest -mt-1">Command</p>
-          </div>
+        <Link href="/" className="hover:opacity-90 transition-opacity">
+          <Logo />
         </Link>
       </div>
 

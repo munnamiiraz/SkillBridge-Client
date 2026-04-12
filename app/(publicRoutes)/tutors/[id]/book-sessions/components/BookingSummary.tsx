@@ -88,8 +88,12 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
         )}
 
         <div className="flex items-center gap-3 pb-6 mb-6 border-b border-gray-200 dark:border-gray-800">
-          <div className={`w-12 h-12 rounded-xl bg-linear-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold`}>
-            {tutor.avatar}
+          <div className={`w-12 h-12 rounded-xl bg-linear-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold overflow-hidden`}>
+            {tutor.avatar.length > 1 ? (
+              <img src={tutor.avatar} alt={tutor.name} className="w-full h-full object-cover" />
+            ) : (
+              tutor.avatar
+            )}
           </div>
           <div>
             <p className="font-semibold text-gray-900 dark:text-white">{tutor.name}</p>

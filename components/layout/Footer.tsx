@@ -10,6 +10,7 @@ import {
   Linkedin, 
   Instagram, 
 } from 'lucide-react';
+import Logo from '@/components/ui/Logo';
 
 const Footer: React.FC = () => {
   const quickLinks = [
@@ -46,13 +47,8 @@ const Footer: React.FC = () => {
           
           {/* Brand & Mission */}
           <div className="lg:col-span-5 space-y-8">
-            <Link href="/" className="inline-flex items-center group">
-              <div className="w-12 h-12 bg-linear-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                <span className="text-white font-black text-xl tracking-tighter">SB</span>
-              </div>
-              <span className="ml-4 text-2xl font-black text-gray-900 dark:text-white leading-tight">
-                SkillBridge
-              </span>
+            <Link href="/" className="hover:opacity-90 transition-opacity">
+              <Logo />
             </Link>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-sm leading-relaxed">
               Empowering global learning through authentic 1-on-1 connections. Where passion meets expertise.

@@ -51,7 +51,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       </button>
 
       {/* Page Numbers */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-white/50 dark:bg-gray-950/50 backdrop-blur-md border border-gray-100 dark:border-gray-800 rounded-[1.5rem] shadow-sm">
+      <div className="flex items-center gap-2 px-3 py-2 bg-white/50 dark:bg-gray-950/50 backdrop-blur-md border border-gray-100 dark:border-gray-800 rounded-3xl shadow-sm">
         {visiblePages.map((page, index) => (
           <React.Fragment key={index}>
             {page === '...' ? (

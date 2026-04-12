@@ -240,8 +240,12 @@ const TutorAvailabilityReviewsCTA: React.FC<TutorAvailabilityReviewsCTAProps> = 
               >
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                    {""}
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold overflow-hidden">
+                    {review.avatar?.length > 1 ? (
+                      <img src={review.avatar} alt={review.name} className="w-full h-full object-cover" />
+                    ) : (
+                      review.avatar || '?'
+                    )}
                   </div>
 
                   <div className="flex-1 space-y-3">

@@ -50,7 +50,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor }) => {
           {/* Profile Section */}
           <div className="flex justify-between items-end mb-6">
             <div className="relative">
-              <div className={`p-1 w-28 h-28 rounded-[2rem] bg-linear-to-br ${tutor.bgGradient} shadow-2xl transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-3`}>
+              <div className={`p-1 w-28 h-28 rounded-4xl bg-linear-to-br ${tutor.bgGradient} shadow-2xl transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-3`}>
                 <div className="relative w-full h-full rounded-[1.75rem] bg-white dark:bg-gray-900 border-4 border-white dark:border-gray-950 overflow-hidden flex items-center justify-center">
                   {tutor.avatar.length > 2 ? (
                     <img src={tutor.avatar} alt={tutor.name} className="w-full h-full object-cover" />

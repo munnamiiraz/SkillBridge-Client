@@ -19,7 +19,7 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isPending && (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN'))) {
+    if (!isPending && (!session || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'SUPER_ADMIN'))) {
       router.push('/login');
     }
   }, [session, isPending, router]);
@@ -49,7 +49,7 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 font-inter selection:bg-indigo-500/30" style={{ zoom: 0.8 }}>
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 font-outfit selection:bg-indigo-500/30" style={{ zoom: 0.8 }}>
       {/* Mobile Backdrop */}
       {sidebarOpen && (
         <div
@@ -64,7 +64,7 @@ export default function AdminLayout({
           sidebarOpen ? 'translate-x-0 shadow-2xl shadow-indigo-500/10' : '-translate-x-full'
         }`}
       >
-        <AdminSidebar userRole={session.user.role} />
+        <AdminSidebar userRole={(session.user as any).role} />
       </aside>
 
       {/* Main Content Area */}
@@ -96,16 +96,6 @@ export default function AdminLayout({
 
             {/* System Actions Right */}
             <div className="flex items-center gap-4 md:gap-6">
-              {/* Universal Search */}
-              <div className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all w-72 group">
-                <Search size={16} className="text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-                <input 
-                  type="text" 
-                  placeholder="Universal search..." 
-                  className="bg-transparent border-none outline-none text-xs font-bold text-gray-600 dark:text-gray-300 w-full placeholder:text-gray-400"
-                />
-              </div>
-
               {/* Status Indicators */}
               <div className="hidden lg:flex items-center gap-3 pr-4 border-r border-gray-200/50 dark:border-gray-800/50">
                 <button className="relative p-2.5 rounded-xl bg-gray-100/50 dark:bg-gray-900/50 text-gray-500 hover:text-indigo-500 transition-all group">
@@ -119,7 +109,7 @@ export default function AdminLayout({
                 <div className="flex items-center gap-4">
                   <div className="hidden md:block text-right">
                     <p className="text-xs font-black text-gray-900 dark:text-white tracking-tight">{session.user.name}</p>
-                    <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">Verified {session.user.role.replace('_', ' ')}</p>
+                    <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">Verified {(session.user as any).role.replace('_', ' ')}</p>
                   </div>
                   
                   <button 

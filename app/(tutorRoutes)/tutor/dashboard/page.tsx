@@ -46,7 +46,7 @@ const TutorDashboardPage = async () => {
     }
   });
 
-  const isVerified = sessionData?.user?.role === 'VERIFIED_TUTOR';
+  const isVerified = (sessionData?.user as any)?.role === 'VERIFIED_TUTOR';
 
   const sessions = sessionsRes.data;
   const earningsData = earningsRes.data || [];
@@ -122,7 +122,7 @@ const TutorDashboardPage = async () => {
           { label: 'Total Earnings', value: `$${stats.totalEarnings}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-500/5', trend: 'Gross' },
           { label: 'Avg Rating', value: stats.avgRating.toFixed(1), icon: Star, color: 'text-yellow-600', bg: 'bg-yellow-500/5', trend: 'Top 5%' },
         ].map((stat, i) => (
-          <div key={i} className="group relative overflow-hidden bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl p-8 rounded-[2rem] border border-gray-200/50 dark:border-gray-800/50 shadow-lg shadow-gray-200/20 dark:shadow-none hover:-translate-y-1 transition-all duration-300">
+          <div key={i} className="group relative overflow-hidden bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl p-8 rounded-4xl border border-gray-200/50 dark:border-gray-800/50 shadow-lg shadow-gray-200/20 dark:shadow-none hover:-translate-y-1 transition-all duration-300">
             <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} w-fit mb-6 transition-transform group-hover:scale-110`}>
               <stat.icon size={26} />
             </div>

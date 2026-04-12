@@ -54,7 +54,7 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen w-full bg-linear-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-3xl animate-pulse-slow"></div>
@@ -68,7 +68,7 @@ const RegisterPage: React.FC = () => {
           {/* Header */}
           <div className="p-8 sm:p-10 text-center border-b border-gray-200 dark:border-gray-800">
             {/* Logo/Brand */}
-            <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-linear-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
               SB
             </div>
             
@@ -162,7 +162,7 @@ const RegisterPage: React.FC = () => {
               disabled={isLoading}
               className={`w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 ${
                 !isLoading
-                  ? 'bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40'
+                  ? 'bg-linear-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/50 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40'
                   : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
               } flex items-center justify-center gap-2`}
             >

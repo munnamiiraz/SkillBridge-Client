@@ -46,7 +46,7 @@ export default function VerifiedTutorAnalyticsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (session && session.user.role !== 'VERIFIED_TUTOR') {
+    if (session && (session.user as any).role !== 'VERIFIED_TUTOR') {
         router.push('/tutor/dashboard');
         return;
     }
@@ -120,7 +120,7 @@ export default function VerifiedTutorAnalyticsPage() {
                      <p className="text-indigo-200/70 text-sm font-medium leading-relaxed">System-wide earnings trajectory over the last 6 months. This reflects your monetary authority on the platform.</p>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
-                     <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-between">
+                     <div className="p-8 rounded-4xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-between">
                         <div>
                            <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-2">Platform Revenue</p>
                            <p className="text-4xl font-black text-white tracking-tighter">${analytics.overview.totalRevenue.toLocaleString()}</p>
@@ -289,9 +289,9 @@ export default function VerifiedTutorAnalyticsPage() {
          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
             <div className="lg:w-1/2 space-y-6">
                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl">
-                     <AreaChart size={20} />
-                  </div>
+                   <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl">
+                      <TrendingUp size={20} />
+                   </div>
                   <h4 className="text-lg font-black uppercase tracking-tighter">Market Position Insight</h4>
                </div>
                <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
@@ -321,7 +321,7 @@ export default function VerifiedTutorAnalyticsPage() {
 
 function InsightGridItem({ label, value, icon }: any) {
   return (
-    <div className="p-8 rounded-[2rem] bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all text-center">
+    <div className="p-8 rounded-4xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all text-center">
        <div className="flex justify-center mb-4">{icon}</div>
        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</p>
        <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">{value}</p>

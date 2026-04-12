@@ -107,3 +107,28 @@ export async function createCheckoutSession(bookingData: {
     return { data: null, error: { message: 'Something Went Wrong' } };
   }
 }
+
+export async function getSessionDetails(sessionId: string) {
+  try {
+    const cookieStore = await cookies();
+    const cookieString = cookieStore.toString();
+
+    const res = await fetch(`${env.API_URL}/api/payment/session/${sessionId}`, {
+      headers: {
+        ...(cookieString ? { 'Cookie': cookieString } : {}),
+      },
+      cache: 'no-store',
+    });
+
+    const result = await res.json();
+
+    if (!result.success) {
+      return { data: null, error: { message: result.message || 'Failed to fetch session details' } };
+    }
+
+    return { data: result.data, error: null };
+  } catch (err) {
+    console.error('Fetch error:', err);
+    return { data: null, error: { message: 'Something Went Wrong' } };
+  }
+}

@@ -12,4 +12,24 @@ export const authClient = createAuthClient({
   fetchOptions: {
     credentials: 'include',
   },
+  plugins: [],
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 24 * 7,
+    },
+  },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+      },
+      phone: {
+        type: "string",
+      },
+      status: {
+        type: "string",
+      },
+    },
+  },
 });

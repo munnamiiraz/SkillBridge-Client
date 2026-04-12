@@ -1,6 +1,7 @@
 'use client';
 
 import { env } from '@/env';
+import { toast } from 'sonner';
 
 export interface DashboardStats {
   overview: {
@@ -161,6 +162,25 @@ export const adminService = {
     } catch (error) {
        console.error('Failed to cancel booking:', error);
        toast.error(error instanceof Error ? error.message : 'Unknown error');
+       return null;
+    }
+  },
+
+  updateProfile: async (data: any) => {
+    try {
+      const response = await fetch('/api/admin/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (result.success) return result.data;
+      throw new Error(result.message);
+    } catch (error) {
+       console.error('Failed to update admin profile:', error);
        return null;
     }
   }

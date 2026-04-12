@@ -52,7 +52,7 @@ export default function TutorHubPage() {
     }
   };
 
-  const isSuper = session?.user.role === 'SUPER_ADMIN';
+  const isSuper = (session?.user as any).role === 'SUPER_ADMIN';
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-20">
@@ -179,8 +179,8 @@ export default function TutorHubPage() {
 
       {/* Super Admin Warning */}
       {!isSuper && (
-         <div className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-md rounded-[2.5rem] p-10 border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-8 items-center text-center md:text-left">
-            <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+         <div className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-md rounded-3xl p-10 border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-8 items-center text-center md:text-left">
+            <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
                <ShieldAlert size={32} />
             </div>
             <div>

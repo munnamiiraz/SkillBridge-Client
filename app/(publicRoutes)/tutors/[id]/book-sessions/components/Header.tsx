@@ -25,8 +25,12 @@ export const Header: React.FC<HeaderProps> = ({ tutorId, tutor }) => {
       </Link>
 
       <div className="flex items-center gap-6">
-        <div className={`w-20 h-20 rounded-2xl bg-linear-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
-          {tutor.avatar}
+        <div className={`w-20 h-20 rounded-2xl bg-linear-to-br ${tutor.bgGradient} flex items-center justify-center text-white font-bold text-2xl shadow-lg overflow-hidden`}>
+          {tutor.avatar.length > 1 ? (
+            <img src={tutor.avatar} alt={tutor.name} className="w-full h-full object-cover" />
+          ) : (
+            tutor.avatar
+          )}
         </div>
         <div className="flex-1">
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">

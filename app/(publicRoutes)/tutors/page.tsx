@@ -325,7 +325,7 @@ const TutorDiscoveryPageContent: React.FC = () => {
 
             {/* Tutor Grid */}
             {loading ? (
-              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 lg:gap-8">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 overflow-hidden h-full">
                     <Skeleton className="h-24 w-full rounded-none" />
@@ -352,7 +352,7 @@ const TutorDiscoveryPageContent: React.FC = () => {
               </div>
             ) : tutors.length > 0 ? (
               <>
-                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 lg:gap-8">
                   {tutors.map((tutor, index) => (
                     <TutorCard key={index} tutor={tutor} />
                   ))}
@@ -693,7 +693,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor }) => {
                 <svg className="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20">
                   <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                 </svg>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">{tutor.rating}</span>
+                <span className="text-sm text-gray-900 dark:text-white">{Number(tutor.rating).toFixed(1)}</span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">({tutor.reviewCount})</span>
               </div>
             </div>

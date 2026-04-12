@@ -5,56 +5,48 @@ import { Sparkles, Brain, Monitor, Globe, BarChart, Mic2, Palette, Terminal, Arr
 import Link from 'next/link';
 
 const TrendingDisciplines: React.FC = () => {
-  const disciplines = [
-    { 
-      name: "AI Engineering", 
-      icon: <Brain className="w-6 h-6" />, 
-      color: "blue", 
-      growth: "+145%", 
-      tutors: "128 Active",
-      desc: "LLMs, PyTorch, Neural Networks"
-    },
-    { 
-      name: "IELTS Mastery", 
-      icon: <Globe className="w-6 h-6" />, 
-      color: "indigo", 
-      growth: "+82%", 
-      tutors: "340 Active",
-      desc: "Speaking, Writing, Academic Prep"
-    },
-    { 
-      name: "UI/UX Design", 
-      icon: <Palette className="w-6 h-6" />, 
-      color: "pink", 
-      growth: "+65%", 
-      tutors: "215 Active",
-      desc: "Figma, Design Systems, Prototypes"
-    },
-    { 
-      name: "Digital Marketing", 
-      icon: <BarChart className="w-6 h-6" />, 
-      color: "emerald", 
-      growth: "+95%", 
-      tutors: "189 Active",
-      desc: "SEO, Meta Ads, Growth Hacking"
-    },
-    { 
-      name: "Full-Stack Dev", 
-      icon: <Terminal className="w-6 h-6" />, 
-      color: "orange", 
-      growth: "+110%", 
-      tutors: "420 Active",
-      desc: "Next.js, Node.js, Prisma"
-    },
-    { 
-      name: "Public Speaking", 
-      icon: <Mic2 className="w-6 h-6" />, 
-      color: "purple", 
-      growth: "+40%", 
-      tutors: "95 Active",
-      desc: "Confidence, Storytelling, Pitching"
-    }
-  ];
+  const [categories, setCategories] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/categories`);
+        const result = await res.json();
+        if (result.success) {
+          // Map to match the UI structure
+          const mapped = result.data.map((cat: any, i: number) => ({
+            name: cat.name,
+            icon: cat.name === 'Mathematics' ? <BarChart className="w-6 h-6" /> : 
+                  cat.name === 'Science' ? <Brain className="w-6 h-6" /> :
+                  cat.name === 'Programming' ? <Terminal className="w-6 h-6" /> :
+                  cat.name === 'Business' ? <Globe className="w-6 h-6" /> : <Monitor className="w-6 h-6" />,
+            color: cat.name === 'Mathematics' ? 'blue' : 
+                   cat.name === 'Science' ? 'indigo' :
+                   cat.name === 'Programming' ? 'pink' :
+                   cat.name === 'Business' ? 'emerald' : 'orange',
+            growth: i % 2 === 0 ? '+145%' : '+82%', // Mock growth for flair
+            tutors: `${cat.subject?.reduce((acc: number, s: any) => acc + (s._count?.tutor_subject || 0), 0) || 0} Tutors`,
+            desc: cat.subject?.slice(0, 3).map((s: any) => s.name).join(', ') || 'Various subjects'
+          }));
+          setCategories(mapped);
+        }
+      } catch (err) {
+        console.error('Error fetching trending disciplines:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="py-24 max-w-7xl mx-auto px-6 lg:px-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => <div key={i} className="h-64 bg-gray-100 dark:bg-gray-800 rounded-[2.5rem] animate-pulse" />)}
+      </div>
+    );
+  }
 
   return (
     <section className="relative w-full py-24 bg-white dark:bg-gray-950 overflow-hidden">
@@ -78,11 +70,11 @@ const TrendingDisciplines: React.FC = () => {
         </div>
 
         {/* Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {disciplines.map((item, i) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {categories.map((item, i) => (
             <Link 
               key={i} 
-              href={`/tutors?query=${encodeURIComponent(item.name)}`}
+              href={`/tutors?category=${encodeURIComponent(item.name)}`}
               className="group relative p-8 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 transition-all duration-300 hover:bg-white dark:hover:bg-gray-800 hover:shadow-2xl hover:shadow-indigo-500/5 hover:-translate-y-1 block overflow-hidden"
             >
               {/* Card Aura */}
@@ -106,7 +98,7 @@ const TrendingDisciplines: React.FC = () => {
                   <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-indigo-500 transition-colors">
                     {item.name}
                   </h3>
-                  <p className="text-sm text-gray-500 mt-1">{item.desc}</p>
+                  <p className="text-sm text-gray-500 mt-1 line-clamp-1">{item.desc}</p>
                 </div>
 
                 <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
@@ -123,7 +115,7 @@ const TrendingDisciplines: React.FC = () => {
         {/* Bottom Explorer CTA */}
         <div className="mt-12 text-center">
           <Link href="/tutors" className="text-sm font-black uppercase tracking-[0.2em] text-gray-400 hover:text-indigo-500 transition-colors flex items-center justify-center gap-2 group">
-            Explore All 50+ Disciplines
+            Explore All Disciplines
             <div className="w-6 h-px bg-gray-300 dark:bg-gray-700 group-hover:w-12 group-hover:bg-indigo-500 transition-all" />
           </Link>
         </div>

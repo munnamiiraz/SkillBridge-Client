@@ -132,7 +132,7 @@ export default function DashboardLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative group flex items-center gap-3 px-4 py-4 rounded-[1.5rem] text-sm font-bold transition-all duration-300 ${
+                  className={`relative group flex items-center gap-3 px-4 py-4 rounded-3xl text-sm font-bold transition-all duration-300 ${
                     active
                       ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/30 translate-x-1'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-900 hover:shadow-md hover:text-gray-900 dark:hover:text-white'

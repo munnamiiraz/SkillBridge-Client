@@ -12,7 +12,9 @@ import {
   ShieldAlert,
   Globe,
   Zap,
-  Award
+  Award,
+  Layers,
+  Database
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -47,7 +49,7 @@ export default function PlatformAnalyticsPage() {
   useEffect(() => {
     if (!session) return;
 
-    if (session.user.role !== 'SUPER_ADMIN') {
+    if ((session.user as any).role !== 'SUPER_ADMIN') {
         router.push('/admin/dashboard');
         return;
     }
@@ -111,11 +113,11 @@ export default function PlatformAnalyticsPage() {
                      <p className="text-indigo-200/70 text-sm font-medium leading-relaxed">System-wide earnings based on fulfilled pedagogical slots. This reflects the platform's ability to monetize educational demand.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-6">
-                     <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md">
+                     <div className="p-6 rounded-4xl bg-white/5 border border-white/10 backdrop-blur-md">
                         <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">YTD Earnings</p>
                         <p className="text-2xl font-black text-white tracking-tight">${stats.overview.totalRevenue.toLocaleString()}</p>
                      </div>
-                     <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md">
+                     <div className="p-6 rounded-4xl bg-white/5 border border-white/10 backdrop-blur-md">
                         <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">Avg Session</p>
                         <p className="text-2xl font-black text-white tracking-tight">$42.50</p>
                      </div>
@@ -143,7 +145,8 @@ export default function PlatformAnalyticsPage() {
                             backgroundColor: 'rgba(0,0,0,0.8)', 
                             borderRadius: '24px', 
                             border: '1px solid rgba(255,255,255,0.1)',
-                            backdropBlur: '10px'
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
                           }}
                           itemStyle={{ color: '#fff', fontWeight: 'bold' }}
                           labelStyle={{ color: '#818cf8' }}
@@ -249,7 +252,7 @@ export default function PlatformAnalyticsPage() {
          </div>
          <CardHeader className="px-0 pt-0">
             <div className="flex items-center gap-4 mb-4">
-               <div className="p-4 bg-purple-500/10 text-purple-500 rounded-[1.5rem]">
+               <div className="p-4 bg-purple-500/10 text-purple-500 rounded-3xl">
                   <Database size={24} />
                </div>
                <div>
@@ -308,7 +311,7 @@ export default function PlatformAnalyticsPage() {
 
 function PredictiveKpi({ icon, title, value, trend }: any) {
    return (
-      <div className="p-6 rounded-[2rem] bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex items-center justify-between group">
+      <div className="p-6 rounded-4xl bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex items-center justify-between group">
          <div className="flex items-center gap-4">
             <div className="p-3 rounded-2xl bg-indigo-500/5 text-indigo-500 group-hover:scale-110 transition-transform duration-500 border border-indigo-500/5">
                 {icon}

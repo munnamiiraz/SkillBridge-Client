@@ -25,11 +25,13 @@ import {
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 import Navbar from '@/components/layout/Navbar';
+import Logo from '@/components/ui/Logo';
 
 interface SidebarItem {
   label: string;
   href: string;
   icon: React.ReactNode;
+  roles?: string[];
 }
 
 export default function TutorDashboardLayout({
@@ -88,10 +90,10 @@ export default function TutorDashboardLayout({
   ];
 
   const visibleSidebarItems = sidebarItems.filter(item => 
-    !(item as any).roles || (item as any).roles.includes(session?.user?.role)
+    !item.roles || item.roles.includes((session?.user as any)?.role)
   );
 
-  const isVerified = session?.user?.role === 'VERIFIED_TUTOR';
+  const isVerified = (session?.user as any)?.role === 'VERIFIED_TUTOR';
 
   const isActive = (href: string) => {
     if (href === '/tutor/dashboard') return pathname === href;
@@ -99,7 +101,7 @@ export default function TutorDashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 font-poppins selection:bg-indigo-500/30" style={{ zoom: 0.75 }}>
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 font-outfit selection:bg-indigo-500/30" style={{ zoom: 0.75 }}>
       
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
@@ -124,16 +126,8 @@ export default function TutorDashboardLayout({
         <div className="relative flex flex-col h-full z-10">
           {/* Logo / Identity Section */}
           <div className="p-8 border-b border-gray-200/50 dark:border-gray-800/50">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-linear-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-black shadow-xl shadow-indigo-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                S
-              </div>
-              <div>
-                <span className="text-xl font-black bg-linear-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent tracking-tighter">
-                  SkillBridge
-                </span>
-                <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest -mt-1">Tutor Hub</p>
-              </div>
+            <Link href="/" className="hover:opacity-90 transition-opacity">
+              <Logo />
             </Link>
           </div>
 
@@ -144,13 +138,13 @@ export default function TutorDashboardLayout({
             </p>
             {sidebarItems.map((item) => {
               const active = isActive(item.href);
-              const isLocked = (item as any).roles && !(item as any).roles.includes(session?.user?.role);
+              const isLocked = item.roles && !item.roles.includes((session?.user as any)?.role);
               
               if (isLocked) {
                 return (
                   <div
                     key={item.href}
-                    className="relative flex items-center gap-3 px-4 py-4 rounded-[1.5rem] text-sm font-bold text-gray-300 dark:text-gray-600 cursor-not-allowed border border-dashed border-gray-200 dark:border-gray-800/50 opacity-60"
+                    className="relative flex items-center gap-3 px-4 py-4 rounded-3xl text-sm font-bold text-gray-300 dark:text-gray-600 cursor-not-allowed border border-dashed border-gray-200 dark:border-gray-800/50 opacity-60"
                   >
                     <div className="grayscale">
                       {item.icon}
@@ -168,7 +162,7 @@ export default function TutorDashboardLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative group flex items-center gap-3 px-4 py-4 rounded-[1.5rem] text-sm font-bold transition-all duration-300 ${
+                  className={`relative group flex items-center gap-3 px-4 py-4 rounded-3xl text-sm font-bold transition-all duration-300 ${
                     active
                       ? 'bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/30 translate-x-1'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-900 hover:shadow-md hover:text-gray-900 dark:hover:text-white'
@@ -191,7 +185,7 @@ export default function TutorDashboardLayout({
             {!isVerified && (
                <Link
                  href="/tutor/dashboard/verification"
-                 className="relative group flex items-center justify-between gap-3 px-4 py-4 rounded-[1.5rem] text-sm font-bold text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900/40 border border-dashed border-gray-200 dark:border-gray-800 transition-all"
+                 className="relative group flex items-center justify-between gap-3 px-4 py-4 rounded-3xl text-sm font-bold text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900/40 border border-dashed border-gray-200 dark:border-gray-800 transition-all"
                >
                  <div className="flex items-center gap-3">
                    <Lock size={20} className="text-gray-300" />
@@ -263,26 +257,16 @@ export default function TutorDashboardLayout({
 
             {/* Actions Right */}
             <div className="flex items-center gap-3 md:gap-6">
-              {/* Refined Search */}
-              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all w-64 group">
-                <Search size={16} className="text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-                <input 
-                  type="text" 
-                  placeholder="Universal search..." 
-                  className="bg-transparent border-none outline-none text-xs font-bold text-gray-600 dark:text-gray-300 w-full placeholder:text-gray-400"
-                />
-              </div>
-
               {/* User Identity */}
               {session && (
                 <div className="flex items-center gap-4 pl-4 md:pl-6 border-l border-gray-200/50 dark:border-gray-800/50">
                   <div className="hidden md:block text-right">
                     <p className="text-xs font-black text-gray-900 dark:text-white tracking-tight">{session.user.name}</p>
-                    <p className={`text-[10px] font-bold uppercase tracking-tighter ${session.user.role === 'VERIFIED_TUTOR' ? 'text-indigo-500' : 'text-gray-400'}`}>
-                      {session.user.role === 'VERIFIED_TUTOR' ? 'Elite Partner' : 'Rising Star'}
+                    <p className={`text-[10px] font-bold uppercase tracking-tighter ${(session.user as any).role === 'VERIFIED_TUTOR' ? 'text-indigo-500' : 'text-gray-400'}`}>
+                      {(session.user as any).role === 'VERIFIED_TUTOR' ? 'Elite Partner' : 'Rising Star'}
                     </p>
                   </div>
-                  <div className={`relative group p-0.5 rounded-2xl ${session.user.role === 'VERIFIED_TUTOR' ? 'bg-linear-to-tr from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/20' : 'bg-gray-200 dark:bg-gray-800'}`}>
+                  <div className={`relative group p-0.5 rounded-2xl ${(session.user as any).role === 'VERIFIED_TUTOR' ? 'bg-linear-to-tr from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/20' : 'bg-gray-200 dark:bg-gray-800'}`}>
                     <div className="w-10 h-10 rounded-[14px] overflow-hidden bg-white dark:bg-gray-900 p-0.5">
                       {session.user.image ? (
                         <img src={session.user.image} alt={session.user.name || ''} className="w-full h-full object-cover rounded-[12px]" />

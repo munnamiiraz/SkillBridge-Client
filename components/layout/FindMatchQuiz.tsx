@@ -5,40 +5,61 @@ import { Target, ArrowRight, Check, Loader2, Star, Users, Sparkles } from 'lucid
 import Link from 'next/link';
 
 const FindMatchQuiz: React.FC = () => {
-  const [step, setStep] = useState(1);
-  const [subject, setSubject] = useState('');
-  const [level, setLevel] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showResults, setShowResults] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [recommendations, setRecommendations] = useState<string>('');
 
-  const subjects = [
-    { id: 'coding', name: 'Programming', icon: '💻' },
-    { id: 'languages', name: 'Languages', icon: '🌍' },
-    { id: 'marketing', name: 'Marketing', icon: '📈' },
-    { id: 'design', name: 'Design', icon: '🎨' },
-  ];
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/public/categories`);
+        const result = await res.json();
+        if (result.success) {
+          setCategories(result.data.map((c: any) => ({
+            id: c.name,
+            name: c.name,
+            icon: c.name === 'Mathematics' ? '📊' : 
+                  c.name === 'Science' ? '🧪' :
+                  c.name === 'Programming' ? '💻' :
+                  c.name === 'Business' ? '💼' : '📚'
+          })));
+        }
+      } catch (err) {
+        console.error('Error fetching categories for quiz:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-  const levels = [
-    { id: 'beginner', name: 'Beginner', desc: 'Just starting out' },
-    { id: 'intermediate', name: 'Intermediate', desc: 'Have basic knowledge' },
-    { id: 'advanced', name: 'Advanced', desc: 'Looking for mastery' },
-  ];
-
-  // Simulated top tutors for the result
-  const featuredTutors = [
-    { name: 'Dr. Sarah Wilson', rating: 4.9, students: '1.2k', specialty: 'Advanced Algorithms', avatar: 'S' },
-    { name: 'Marcus Chen', rating: 5.0, students: '850', specialty: 'Language Mastery', avatar: 'M' },
-    { name: 'Jessica Lee', rating: 4.8, students: '2.1k', specialty: 'UX Design Systems', avatar: 'J' },
-  ];
-
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1 && subject) setStep(2);
     if (step === 2 && level) {
       setLoading(true);
-      setTimeout(() => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/ai/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [{
+              role: "user",
+              content: `I am looking for a tutor in ${subject}. My current level is ${level}. 
+              Please suggest the top 3 tutors from your database and explain why they are a good match. 
+              Be brief and focus on expertise and results.`
+            }]
+          })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          setRecommendations(result.data.content);
+          setShowResults(true);
+        } else {
+          throw new Error('Matching failed');
+        }
+      } catch (error) {
+        console.error("AI MATCH ERROR:", error);
+      } finally {
         setLoading(false);
-        setShowResults(true);
-      }, 1500);
+      }
     }
   };
 
@@ -47,6 +68,7 @@ const FindMatchQuiz: React.FC = () => {
     setSubject('');
     setLevel('');
     setShowResults(false);
+    setRecommendations('');
   };
 
   return (
@@ -58,25 +80,26 @@ const FindMatchQuiz: React.FC = () => {
             <div className="space-y-8">
               {/* Header */}
               <div className="text-center space-y-2">
-                <Target className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
+                <div className="relative inline-block mb-4">
+                  <Target className="w-12 h-12 text-indigo-600 mx-auto" />
+                  <div className="absolute -top-1 -right-1">
+                    <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+                  </div>
+                </div>
                 <h2 className="text-3xl font-black text-gray-900 dark:text-white">Find Your Perfect Match</h2>
-                <p className="text-gray-500 dark:text-gray-400">Answer 2 quick questions to find the top mentors for your goals.</p>
-                <Link href="/match-assistant" className="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors group">
-                  <Sparkles size={14} className="group-hover:rotate-12 transition-transform" />
-                  Try our specialized AI Smart Matcher
-                </Link>
+                <p className="text-gray-500 dark:text-gray-400">Our AI analyzes 50+ experts to find your ideal mentor in seconds.</p>
               </div>
 
               {/* Step Progress */}
               <div className="flex items-center justify-center gap-4">
-                <div className={`h-2 w-16 rounded-full transition-colors ${step >= 1 ? 'bg-indigo-600' : 'bg-gray-200'}`} />
-                <div className={`h-2 w-16 rounded-full transition-colors ${step >= 2 ? 'bg-indigo-600' : 'bg-gray-200'}`} />
+                <div className={`h-2 w-16 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-indigo-600' : 'bg-gray-200'}`} />
+                <div className={`h-2 w-16 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-indigo-600' : 'bg-gray-200'}`} />
               </div>
 
               {/* Step 1: Subject Selection */}
               {step === 1 && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  {subjects.map((s) => (
+                  {categories.length > 0 ? categories.map((s) => (
                     <button
                       key={s.id}
                       onClick={() => setSubject(s.id)}
@@ -89,7 +112,9 @@ const FindMatchQuiz: React.FC = () => {
                       <span className="text-4xl">{s.icon}</span>
                       <span className="text-sm font-bold text-gray-900 dark:text-white">{s.name}</span>
                     </button>
-                  ))}
+                  )) : (
+                    [...Array(4)].map((_, i) => <div key={i} className="h-32 bg-gray-50 dark:bg-gray-800 rounded-2xl animate-pulse" />)
+                  )}
                 </div>
               )}
 
@@ -124,10 +149,10 @@ const FindMatchQuiz: React.FC = () => {
                   className="w-full py-4 bg-linear-to-br from-indigo-600 to-purple-600 text-white font-bold rounded-2xl shadow-xl shadow-indigo-500/20 flex items-center justify-center gap-2 hover:shadow-2xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:translate-y-0"
                 >
                   {loading ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Matching you with experts...</>
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Analyzing 50+ Profiles...</>
                   ) : (
                     <>
-                      {step === 1 ? 'Next Step' : 'Find My Tutors'}
+                      {step === 1 ? 'Next Step' : 'Get AI Recommendations'}
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
@@ -137,40 +162,41 @@ const FindMatchQuiz: React.FC = () => {
           ) : (
             <div className="space-y-8 animate-in zoom-in duration-500">
               <div className="text-center">
-                <Check className="w-12 h-12 text-emerald-500 mx-auto mb-4 border-2 border-emerald-500 rounded-full p-1" />
-                <h2 className="text-3xl font-black text-gray-900 dark:text-white italic">Your Top Matches!</h2>
-                <p className="text-gray-500">Based on your goals, these 3 experts are your best fit.</p>
+                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-500">
+                  <Check className="w-8 h-8" />
+                </div>
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white">AI Analysis Complete!</h2>
+                <p className="text-gray-500 italic">Here are your context-aware matches for {subject}:</p>
               </div>
 
-              <div className="grid gap-4">
-                {featuredTutors.map((t, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-                    <div className="w-16 h-16 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-2xl text-white shadow-lg shrink-0">
-                      {t.avatar}
-                    </div>
-                    <div className="flex-1 text-center sm:text-left">
-                      <h4 className="font-bold text-gray-900 dark:text-white">{t.name}</h4>
-                      <div className="text-sm text-gray-500 flex items-center justify-center sm:justify-start gap-3 mt-1">
-                        <span className="flex items-center gap-1"><Star className="w-3 h-3 text-yellow-500 fill-yellow-500" /> {t.rating}</span>
-                        <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {t.students} students</span>
-                        <span className="hidden sm:inline-block w-1 h-1 bg-gray-300 rounded-full" />
-                        <span className="font-medium text-indigo-600 dark:text-indigo-400">{t.specialty}</span>
-                      </div>
-                    </div>
-                    <Link href="/tutors" className="px-6 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 transition-all">
-                      View Profile
-                    </Link>
-                  </div>
-                ))}
+              <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700">
+                <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
+                  {recommendations.split(/(\s+)/).map((part, i) => {
+                    const urlPattern = /(https?:\/\/[^\s]+)/g;
+                    if (part.match(urlPattern)) {
+                      return (
+                        <Link 
+                          key={i} 
+                          href={part} 
+                          target="_blank" 
+                          className="text-indigo-600 dark:text-indigo-400 font-black underline decoration-2 underline-offset-4 hover:text-indigo-500 transition-colors"
+                        >
+                          {part}
+                        </Link>
+                      );
+                    }
+                    return part;
+                  })}
+                </div>
               </div>
 
               <div className="flex flex-col gap-4 mt-8">
-                <button onClick={handleReset} className="w-full text-sm font-semibold text-gray-500 hover:text-indigo-600 transition-colors">
-                  ← Start Over
+                <button onClick={handleReset} className="w-full py-4 border-2 border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-400 font-bold rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                  ← Need something else? Try again
                 </button>
                 <div className="pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
                    <Link href="/match-assistant" className="text-sm font-bold text-indigo-600 group inline-flex items-center gap-2">
-                     Want a deeper AI analysis? Try the Match Assistant
+                     Want a 4-week learning roadmap? Try the Match Assistant
                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                    </Link>
                 </div>

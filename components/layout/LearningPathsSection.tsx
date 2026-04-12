@@ -7,31 +7,31 @@ import Link from 'next/link';
 const LearningPathsSection: React.FC = () => {
   const paths = [
     {
-      title: "The Full-Stack Blueprint",
-      description: "Master everything from modern UI design to scalable backend architecture.",
+      title: "Software Architecture",
+      description: "Architect high-performance systems with Next.js, Distributed Databases, and Cloud Orchestration.",
       icon: <Code className="w-8 h-8 text-indigo-600" />,
-      subjects: ["React & Next.js", "Node.js & Express", "PostgreSQL", "Cloud Deployment"],
+      subjects: ["T3 Stack Excellence", "System Design Patterns", "Vector DBs & AI RAG", "Terraform & AWS Deploy"],
       color: "indigo",
-      level: "Intermediate",
-      duration: "6-8 Months"
-    },
-    {
-      title: "Data Science Journey",
-      description: "Harness the power of data through statistical analysis and machine learning.",
-      icon: <Database className="w-8 h-8 text-emerald-600" />,
-      subjects: ["Python for Data", "Statistical Models", "Machine Learning", "Neural Networks"],
-      color: "emerald",
       level: "Advanced",
-      duration: "10-12 Months"
+      duration: "6 Months"
     },
     {
-      title: "Global Language Mastery",
-      description: "Go beyond basic vocabulary to achieve native-level fluency and cultural depth.",
-      icon: <Languages className="w-8 h-8 text-purple-600" />,
-      subjects: ["Conversational Flow", "Business Etiquette", "Advanced Grammar", "Literature"],
-      color: "purple",
-      level: "Beginner to Pro",
-      duration: "Flexible"
+      title: "Quant Finance & Data",
+      description: "Master the mathematics of algorithmic trading and financial risk modeling through data science.",
+      icon: <Database className="w-8 h-8 text-emerald-600" />,
+      subjects: ["Stochastic Calculus", "Algo-Trading Strategies", "Statistical Arbitrage", "Machine Learning in Fin"],
+      color: "emerald",
+      level: "Expert",
+      duration: "9 Months"
+    },
+    {
+      title: "Advanced STEM Mastery",
+      description: "A comprehensive deep-dive into Theoretical Physics and Calculus for engineering and research.",
+      icon: <Globe className="w-8 h-8 text-amber-600" />,
+      subjects: ["Quantum Mechanics Basics", "Multivariable Calculus", "Linear Algebra for AI", "Physical Problem Solving"],
+      color: "amber",
+      level: "Hardcore",
+      duration: "12 Months"
     }
   ];
 

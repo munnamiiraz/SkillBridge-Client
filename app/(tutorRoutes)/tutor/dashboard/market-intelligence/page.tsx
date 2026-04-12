@@ -49,7 +49,7 @@ export default function MarketIntelligencePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (session && session.user.role !== 'VERIFIED_TUTOR') {
+    if (session && (session.user as any).role !== 'VERIFIED_TUTOR') {
         router.push('/tutor/dashboard');
         return;
     }
@@ -66,9 +66,9 @@ export default function MarketIntelligencePage() {
     return (
       <div className="space-y-10 animate-pulse">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <Skeleton className="h-40 rounded-[2rem]" />
-           <Skeleton className="h-40 rounded-[2rem]" />
-           <Skeleton className="h-40 rounded-[2rem]" />
+           <Skeleton className="h-40 rounded-4xl" />
+           <Skeleton className="h-40 rounded-4xl" />
+           <Skeleton className="h-40 rounded-4xl" />
         </div>
         <Skeleton className="h-[500px] rounded-[3rem]" />
       </div>
@@ -95,7 +95,7 @@ export default function MarketIntelligencePage() {
               Platform-wide strategic data providing Verified Tutors with a competitive edge in pricing and subject demand.
            </p>
         </div>
-        <div className="flex items-center gap-4 p-5 bg-indigo-600 rounded-[2rem] text-white shadow-2xl shadow-indigo-600/30">
+        <div className="flex items-center gap-4 p-5 bg-indigo-600 rounded-4xl text-white shadow-2xl shadow-indigo-600/30">
            <div className="p-3 bg-white/10 rounded-xl">
               <Target size={24} />
            </div>

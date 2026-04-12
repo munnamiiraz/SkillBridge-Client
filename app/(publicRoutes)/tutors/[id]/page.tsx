@@ -8,6 +8,8 @@ import { TutorProfileInfo, TutorBookingCard } from '@/components/tutor-profile/T
 import { TutorAboutContent, TutorQuickStatsSidebar } from '@/components/tutor-profile/TutorAboutAndSubjects';
 import TutorAvailabilityReviewsCTA from '@/components/tutor-profile/TutorAvailabilityReviewsCTA';
 import { Loader2 } from 'lucide-react';
+import { formatDateString } from '@/app/services/tutor-availability.helpers';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 const TutorProfilePage: React.FC = () => {
     const params = useParams();
@@ -22,10 +24,13 @@ const TutorProfilePage: React.FC = () => {
         const fetchTutorProfile = async () => {
             try {
                 const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+                const dhakaNow = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
+                const weekStartDate = formatDateString(dhakaNow);
+
                 // Fetch public tutor profile info and availability in parallel
                 const [response, availabilityRes] = await Promise.all([
                     axios.get(`${baseUrl}/api/public/tutors/${tutorId}`),
-                    axios.get(`${baseUrl}/api/public/tutors/${tutorId}/availability`)
+                    axios.get(`${baseUrl}/api/public/tutors/${tutorId}/availability?weekStartDate=${weekStartDate}`)
                 ]);
 
                 if (response.data.success) {
@@ -155,7 +160,7 @@ const TutorProfilePage: React.FC = () => {
                                     const date = new Date(dhakaToday);
                                     date.setDate(dhakaToday.getDate() + i);
                                     
-                                    const dateKey = date.toISOString().split('T')[0];
+                                    const dateKey = formatDateString(date);
                                     const dayIdx = date.getDay();
                                     
                                     // Filter slots from the availability endpoint for this specific date
@@ -208,8 +213,42 @@ const TutorProfilePage: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <div className="min-h-screen bg-white dark:bg-gray-950">
+                {/* Banner Skeleton */}
+                <Skeleton className="h-[250px] lg:h-[350px] w-full rounded-none opacity-50" />
+                
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 -mt-20 lg:-mt-28 relative z-10">
+                    <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+                        {/* Left Column Skeletons */}
+                        <div className="lg:col-span-2 space-y-12">
+                            {/* Profile Header Skeleton */}
+                            <div className="flex flex-col md:flex-row gap-6 items-end">
+                                <Skeleton className="w-40 h-40 rounded-3xl shrink-0" />
+                                <div className="flex-1 space-y-4 pb-4">
+                                    <Skeleton className="h-10 w-64" />
+                                    <Skeleton className="h-6 w-48" />
+                                    <div className="flex gap-4">
+                                        <Skeleton className="h-8 w-24 rounded-full" />
+                                        <Skeleton className="h-8 w-24 rounded-full" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Multi-section Skeletons */}
+                            <div className="space-y-8">
+                                <Skeleton className="h-40 w-full rounded-3xl" />
+                                <Skeleton className="h-64 w-full rounded-3xl" />
+                                <Skeleton className="h-96 w-full rounded-3xl" />
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar Skeleton */}
+                        <div className="lg:col-span-1 space-y-6">
+                            <Skeleton className="h-[500px] w-full rounded-3xl" />
+                            <Skeleton className="h-40 w-full rounded-3xl" />
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

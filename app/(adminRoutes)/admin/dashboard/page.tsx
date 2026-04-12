@@ -138,13 +138,7 @@ export default function AdminDashboardPage() {
            
            <div className="h-[350px] w-full mt-4">
              <ResponsiveContainer width="100%" height="100%">
-               <AreaChart data={stats.charts.userGrowth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                 <defs>
-                   <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
-                     <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.15}/>
-                     <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
-                   </linearGradient>
-                 </defs>
+               <BarChart data={stats.charts.userGrowth} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.5} />
                  <XAxis 
                    dataKey="month" 
@@ -159,6 +153,7 @@ export default function AdminDashboardPage() {
                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
                  />
                  <Tooltip 
+                   cursor={{ fill: '#f1f5f9' }}
                    contentStyle={{ 
                      backgroundColor: '#ffffff', 
                      borderRadius: '24px', 
@@ -169,16 +164,14 @@ export default function AdminDashboardPage() {
                    itemStyle={{ color: '#4f46e5', fontWeight: '900', fontSize: '14px' }}
                    labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontWeight: 'bold' }}
                  />
-                 <Area 
-                   type="monotone" 
+                 <Bar 
                    dataKey="count" 
-                   stroke="#4f46e5" 
-                   strokeWidth={4}
-                   fillOpacity={1} 
-                   fill="url(#colorGrowth)" 
+                   fill="#4f46e5" 
+                   radius={[8, 8, 0, 0]} 
+                   barSize={40}
                    animationDuration={2000}
                  />
-               </AreaChart>
+               </BarChart>
              </ResponsiveContainer>
            </div>
         </div>
@@ -200,9 +193,9 @@ export default function AdminDashboardPage() {
                    data={stats.charts.roleDistribution}
                    cx="50%"
                    cy="50%"
-                   innerRadius={60}
+                   innerRadius={70}
                    outerRadius={100}
-                   paddingAngle={8}
+                   paddingAngle={2}
                    dataKey="value"
                  >
                    {stats.charts.roleDistribution.map((entry, index) => (
@@ -288,33 +281,38 @@ export default function AdminDashboardPage() {
                 <p className="text-sm text-gray-500 font-medium">Completed session earnings analysis</p>
              </div>
              <div className="h-[250px] w-full mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                   <BarChart data={stats.charts.revenueGrowth}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.5} />
-                      <XAxis 
-                        dataKey="month" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }}
-                      />
-                      <YAxis hide />
-                      <Tooltip 
-                        cursor={{ fill: '#f1f5f9' }}
-                        contentStyle={{ 
-                          backgroundColor: '#ffffff', 
-                          borderRadius: '16px', 
-                          border: 'none', 
-                          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                        }}
-                      />
-                      <Bar 
-                        dataKey="amount" 
-                        fill="#10b981" 
-                        radius={[6, 6, 0, 0]} 
-                        barSize={32}
-                      />
-                   </BarChart>
-                </ResponsiveContainer>
+                 <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={stats.charts.revenueGrowth} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.5} />
+                       <XAxis 
+                         dataKey="month" 
+                         axisLine={false} 
+                         tickLine={false} 
+                         tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }}
+                         dy={10}
+                       />
+                       <YAxis 
+                         axisLine={false} 
+                         tickLine={false} 
+                         tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }}
+                       />
+                       <Tooltip 
+                         cursor={{ fill: '#f1f5f9' }}
+                         contentStyle={{ 
+                           backgroundColor: '#ffffff', 
+                           borderRadius: '16px', 
+                           border: 'none', 
+                           boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                         }}
+                       />
+                       <Bar 
+                         dataKey="amount" 
+                         fill="#10b981" 
+                         radius={[6, 6, 0, 0]} 
+                         barSize={32}
+                       />
+                    </BarChart>
+                 </ResponsiveContainer>
              </div>
           </div>
       </div>
@@ -331,7 +329,7 @@ function KpiCard({ title, value, icon, trend, trendUp, color }: any) {
   };
 
   return (
-    <div className="group relative bg-white dark:bg-gray-900 p-6 rounded-[1.5rem] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+    <div className="group relative bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
       {/* Background Glow */}
       <div className={`absolute -right-10 -top-10 w-24 h-24 rounded-full blur-3xl opacity-20 ${color === 'indigo' ? 'bg-indigo-500' : color === 'emerald' ? 'bg-emerald-500' : color === 'purple' ? 'bg-purple-500' : 'bg-amber-500'}`}></div>
 

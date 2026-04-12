@@ -66,7 +66,7 @@ export default function UserManagementPage() {
     }
   };
 
-  const isSuper = session?.user.role === 'SUPER_ADMIN';
+  const isSuper = (session?.user as any).role === 'SUPER_ADMIN';
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
@@ -153,36 +153,42 @@ export default function UserManagementPage() {
                                     </div>
                                  </div>
                               </td>
-                              <td className="px-8 py-6">
-                                 <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-tighter border ${
+                              <td className="px-8 py-6 align-middle">
+                                 <span className={`inline-flex items-center px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-tighter border ${
                                     user.role === 'SUPER_ADMIN' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
                                     user.role === 'ADMIN' ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' :
                                     user.role === 'TUTOR' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' :
+                                    user.role === 'VERIFIED_TUTOR' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                                     'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
                                  }`}>
                                     {user.role}
                                  </span>
                               </td>
-                              <td className="px-8 py-6">
+                              <td className="px-8 py-6 align-middle">
                                  <div className="flex items-center gap-2">
-                                    <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : user.status === 'BANNED' ? 'bg-rose-500' : 'bg-amber-500'}`} />
+                                    <div className={`w-2 h-2 rounded-full ${user.status === 'ACTIVE' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : user.status === 'BANNED' ? 'bg-rose-500' : 'bg-amber-500'}`} />
                                     <span className="text-xs font-black text-gray-700 dark:text-gray-300 trekking-tight uppercase">{user.status}</span>
                                  </div>
                               </td>
-                              <td className="px-8 py-6">
+                              <td className="px-8 py-6 align-middle">
                                  {user.tutor_profile ? (
-                                    <div className="flex items-center gap-4">
-                                       <div className="text-center">
-                                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Rating</p>
-                                          <p className="text-xs font-black text-indigo-600 dark:text-indigo-400">★ {user.tutor_profile.averageRating || 'N/A'}</p>
+                                    <div className="flex items-center gap-6">
+                                       <div>
+                                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Rating</p>
+                                          <p className="text-xs font-black text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                                            <span className="text-[10px]">★</span>
+                                            {Number(user.tutor_profile.averageRating || 0).toFixed(1)}
+                                          </p>
                                        </div>
-                                       <div className="text-center">
-                                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Reviews</p>
+                                       <div>
+                                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Reviews</p>
                                           <p className="text-xs font-black text-gray-900 dark:text-white">{user.tutor_profile.totalReviews}</p>
                                        </div>
                                     </div>
                                  ) : (
-                                    <span className="text-[10px] text-gray-400 font-bold italic tracking-tight">N/A</span>
+                                    <div className="flex items-center h-full">
+                                       <span className="text-[10px] text-gray-400 font-bold italic opacity-60">N/A</span>
+                                    </div>
                                  )}
                               </td>
                               <td className="px-8 py-6 text-right">
@@ -258,7 +264,7 @@ export default function UserManagementPage() {
 
       {/* Warning Area for Admins */}
       {!isSuper && (
-         <div className="bg-amber-500/5 border border-amber-500/20 rounded-[2rem] p-8 flex gap-6 items-start">
+         <div className="bg-amber-500/5 border border-amber-500/20 rounded-4xl p-8 flex gap-6 items-start">
             <div className="p-4 rounded-2xl bg-amber-500/10 text-amber-500">
                <AlertCircle size={24} />
             </div>

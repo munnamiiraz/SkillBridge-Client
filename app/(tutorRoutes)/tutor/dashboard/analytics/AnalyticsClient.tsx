@@ -190,7 +190,7 @@ function StatCard({ icon, label, value, color }: any) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-950 p-8 rounded-[2rem] border border-gray-200/50 dark:border-gray-800/50 shadow-sm transition-all hover:shadow-md">
+    <div className="bg-white dark:bg-gray-950 p-8 rounded-4xl border border-gray-200/50 dark:border-gray-800/50 shadow-sm transition-all hover:shadow-md">
       <div className={`w-12 h-12 rounded-2xl ${colorMap[color]} flex items-center justify-center mb-6 border`}>
         {icon}
       </div>
